@@ -1,0 +1,146 @@
+const GROK_API_BASE = "https://api.x.ai";
+const API_KEY = process.env.GROK_API_KEY;
+
+interface NicheResearchRequest {
+  niche: string;
+  targetAudience?: string;
+  geography?: string;
+  competitorAnalysis?: boolean;
+}
+
+interface KeywordSuggestion {
+  keyword: string;
+  searchVolume: number;
+  competition: 'high' | 'medium' | 'low';
+  cpc: number;
+  trending: boolean;
+}
+
+interface NicheResearchResponse {
+  niche: string;
+  keywords: KeywordSuggestion[];
+  trendingTopics: string[];
+  contentOpportunities: string[];
+  competitorInsights?: string[];
+}
+
+/**
+ * Perform niche research using Grok AI
+ * @param request Niche research parameters
+ * @returns Comprehensive niche research data
+ */
+export async function performNicheResearch(request: NicheResearchRequest): Promise<NicheResearchResponse> {
+  if (!API_KEY) {
+    throw new Error("GROK_API_KEY is not configured");
+  }
+
+  const systemPrompt = `You are an expert SEO strategist and content marketer. Given a niche and optional parameters, provide comprehensive keyword research and niche analysis in JSON format with the following structure:
+  {
+    "niche": "the original niche provided",
+    "keywords": [
+      {"keyword": "string", "searchVolume": number, "competition": "high|medium|low", "cpc": number, "trending": boolean}
+    ],
+    "trendingTopics": ["array of 5-7 trending topics"],
+    "contentOpportunities": ["array of 5-10 content ideas"],
+    "competitorInsights": ["optional array of competitor analysis points"]
+  }
+
+  Focus on relevant, high-value keywords with real search volumes. Include both short-tail and long-tail keywords. Mark true for trending if the keyword shows growth potential.`;
+
+  const userPrompt = `Analyze the following niche for keyword research:
+  - Niche: ${request.niche}
+  ${request.targetAudience ? `- Target Audience: ${request.targetAudience}` : ''}
+  ${request.geography ? `- Geography: ${request.geography}` : ''}
+  ${request.competitorAnalysis ? '- Include competitor analysis' : ''}
+
+  Provide detailed keyword research and market insights.`;
+
+  try {
+    const response = await fetch(`${GROK_API_BASE}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "grok-2",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+        max_tokens: 2048,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Grok API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("No response from Grok API");
+    }
+
+    // Parse the JSON response
+    const parsed = JSON.parse(content);
+    return parsed;
+  } catch (error) {
+    console.error("Grok API error:", error);
+    throw new Error(`Failed to perform niche research: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}
+
+/**
+ * Generate content ideas for a specific keyword or topic
+ * @param keyword The keyword to generate content for
+ * @param contentType Type of content (blog, landing-page, etc.)
+ * @returns Array of content ideas
+ */
+export async function generateContentIdeas(keyword: string, contentType: string = 'blog'): Promise<string[]> {
+  if (!API_KEY) {
+    throw new Error("GROK_API_KEY is not configured");
+  }
+
+  const systemPrompt = "You are a content strategist. Generate 5-10 creative and engaging content ideas for the given keyword and content type. Return as a JSON array of strings.";
+
+  const userPrompt = `Generate ${contentType} content ideas for the keyword "${keyword}". Focus on value-driven, SEO-optimized content that would rank well and convert visitors.`;
+
+  try {
+    const response = await fetch(`${GROK_API_BASE}/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: "grok-2",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.8,
+        max_tokens: 1024,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Grok API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices[0]?.message?.content;
+
+    if (!content) {
+      throw new Error("No response from Grok API");
+    }
+
+    const parsed = JSON.parse(content);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.error("Grok content ideas error:", error);
+    throw new Error(`Failed to generate content ideas: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+}

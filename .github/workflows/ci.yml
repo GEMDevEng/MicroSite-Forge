@@ -6,7 +6,25 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: read
+  security-events: write
+
 jobs:
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
   test:
     runs-on: ubuntu-latest
 
@@ -36,12 +54,28 @@ jobs:
       - name: Run unit tests
         run: npm run test -- --coverage --watchAll=false
 
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
+      - name: Check code coverage threshold
+        run: |
+          COVERAGE=$(node -p "require('./coverage/coverage-summary.json').total.lines.pct")
+          if [ $(echo "$COVERAGE < 80" | bc -l) -eq 1 ]; then
+            echo "Code coverage is $COVERAGE%, minimum required is 80%"
+            exit 1
+          fi
+
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: ./coverage/lcov.info
-          fail_ci_if_error: false
+          fail_ci_if_error: true
+          verbose: true
 
       - name: Build application
         run: npm run build

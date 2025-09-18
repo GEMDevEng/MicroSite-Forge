@@ -1,9 +1,12 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth'
 import { Button } from '@/components/ui/button'
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
+import NicheResearch from '@/components/research/niche-research'
+import { Search, FileText, Cloud, TrendingUp } from 'lucide-react'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -45,6 +48,15 @@ export default function DashboardPage() {
     return null // Will redirect to login
   }
 
+  const [activeTab, setActiveTab] = useState('overview')
+
+  const tabs = [
+    { id: 'overview', label: 'Overview', icon: TrendingUp },
+    { id: 'research', label: 'Niche Research', icon: Search },
+    { id: 'content', label: 'Content Gen', icon: FileText },
+    { id: 'sites', label: 'My Sites', icon: Cloud },
+  ]
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow">
@@ -68,36 +80,102 @@ export default function DashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div className="px-4 py-6 sm:px-0">
-          <div className="border-4 border-dashed border-gray-200 rounded-lg h-96 flex items-center justify-center">
-            <div className="text-center">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Welcome to MicroSite Forge Dashboard
-              </h2>
-              <p className="text-gray-600 mb-6">
-                Your AI-powered microsite factory is ready to go!
-              </p>
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="font-semibold text-gray-900">Sites Created</h3>
+        {/* Tabs */}
+        <div className="border-b border-gray-200 mb-8">
+          <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+            {tabs.map((tab) => {
+              const Icon = tab.icon
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {tab.label}
+                </button>
+              )
+            })}
+          </nav>
+        </div>
+
+        {/* Tab Content */}
+        <div className="space-y-6">
+          {activeTab === 'overview' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Cloud className="w-5 h-5" />
+                    Sites Created
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <p className="text-2xl font-bold text-blue-600">0</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="font-semibold text-gray-900">Leads Generated</h3>
+                  <p className="text-sm text-gray-600">Ready to create your first microsite</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5" />
+                    Leads Generated
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <p className="text-2xl font-bold text-green-600">0</p>
-                </div>
-                <div className="bg-white p-6 rounded-lg shadow">
-                  <h3 className="font-semibold text-gray-900">Revenue</h3>
+                  <p className="text-sm text-gray-600">Start with niche research</p>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="w-5 h-5" />
+                    Revenue
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
                   <p className="text-2xl font-bold text-purple-600">$0</p>
-                </div>
-              </div>
-              <div className="mt-6">
-                <Button size="lg">
-                  Create Your First Microsite
-                </Button>
-              </div>
+                  <p className="text-sm text-gray-600">Get started with Phase 2</p>
+                </CardContent>
+              </Card>
             </div>
-          </div>
+          )}
+
+          {activeTab === 'research' && (
+            <NicheResearch
+              onResearchComplete={(data) => {
+                // Handle research completion - could store results, navigate to next tab, etc.
+                console.log('Research completed:', data)
+              }}
+            />
+          )}
+
+          {activeTab === 'content' && (
+            <div className="text-center py-16">
+              <FileText className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">Content Generation</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Generate AI-powered content for your microsites. Coming soon in Phase 2 completion.
+              </p>
+            </div>
+          )}
+
+          {activeTab === 'sites' && (
+            <div className="text-center py-16">
+              <Cloud className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-semibold text-gray-900">Your Sites</h3>
+              <p className="mt-1 text-sm text-gray-500">
+                All your published microsites will appear here. Complete the research and content steps first.
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
