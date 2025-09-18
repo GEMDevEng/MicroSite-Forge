@@ -12,6 +12,8 @@ Contains project planning, requirements, and implementation documentation.
 - **[Software Requirements Specification](planning/requirements/SRS%20for%20MicroSite%20Forge%20MVP.md)** - Detailed functional and non-functional requirements
 
 #### Implementation (`/planning/implementation`)
+- **[Implementation Plan](planning/implementation/Implementation-Plan.md)** - Comprehensive development roadmap and timeline
+- **[Phase 1 Detailed Plan](planning/implementation/Phase-1-Detailed-Plan.md)** - Detailed breakdown of Foundation & Core Infrastructure phase
 - **[Features & Results Document](planning/implementation/MicroSite%20Forge%20MVP-%20Features%20&%20Results%20Document.md)** - Core features and expected outcomes
 
 #### Roadmap (`/planning/roadmap`)
@@ -19,6 +21,9 @@ Contains project planning, requirements, and implementation documentation.
 
 ### 🏗️ Technical (`/technical`)
 Contains technical architecture, API documentation, and deployment guides.
+
+#### Core Technical Documentation
+- **[Tech Stack Specification](technical/Tech-Stack-Specification.md)** - Complete technology stack overview and requirements
 
 #### Architecture (`/technical/architecture`)
 - **[Backend Structure](technical/architecture/MicroSite%20Forge%20MVP-%20Backend%20Structure%20.md)** - Comprehensive backend architecture documentation
