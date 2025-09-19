@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { performNicheResearch } from '@/lib/grok';
 import { findAvailableDomains, checkKeywordDomainVariations } from '@/lib/porkbun';
+import { researchRateLimit, domainCheckRateLimit } from '@/lib/rate-limit';
 import { z } from 'zod';
 
 // Validation schema for niche research request
@@ -28,6 +29,12 @@ interface ResearchResponse {
 
 // POST /api/research - Perform comprehensive market research
 export async function POST(request: NextRequest) {
+  // Apply rate limiting
+  const rateLimitResponse = researchRateLimit(request as any);
+  if (rateLimitResponse) {
+    return rateLimitResponse;
+  }
+
   try {
     const body = await request.json();
 
