@@ -21,6 +21,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
+    // Validate status parameter
+    const validStatuses = ['new', 'contacted', 'qualified', 'converted'] as const
+    type LeadStatus = typeof validStatuses[number]
+    const validatedStatus = status && validStatuses.includes(status as any) ? status as LeadStatus : null
+
     // Get sites owned by user for validation
     const { data: userSites } = await supabase
       .from('sites')
@@ -52,8 +57,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('site_id', siteId)
     }
 
-    if (status) {
-      query = query.eq('status', status)
+    if (validatedStatus) {
+      query = query.eq('status', validatedStatus)
     }
 
     const { data: leads, error: leadsError, count } = await query

@@ -62,7 +62,7 @@ describe('Grok API Integration', () => {
       process.env.GROK_API_KEY = ''
       await expect(
         performNicheResearch({ niche: 'test' })
-      ).toReject(new Error('GROK_API_KEY is not configured'))
+      ).rejects.toThrow('GROK_API_KEY is not configured')
     })
 
     it('should handle API errors gracefully', async () => {
@@ -72,10 +72,10 @@ describe('Grok API Integration', () => {
         statusText: 'Internal Server Error',
       } as Response)
 
-      await process.env.GROK_API_KEY = 'test-key'
+      process.env.GROK_API_KEY = 'test-key'
       await expect(
         performNicheResearch({ niche: 'test' })
-      ).toReject()
+      ).rejects.toThrow()
     })
   })
 

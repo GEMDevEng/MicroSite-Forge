@@ -148,6 +148,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
    - Check if secrets are set at repository level
    - Ensure secrets have no leading/trailing whitespace
 
+2. **Build Errors Due to Missing Dependencies:**
+   - **Issue**: Module not found errors (e.g., @radix-ui/react-label)
+   - **Solution**: Run `npm install` to install all dependencies from package.json
+   - **Prevention**: Always commit package-lock.json after installing new packages
+   - **Common missing packages**: @radix-ui/react-label for form components
+
 2. **Vercel Deployment Fails:**
    - Verify `VERCEL_TOKEN` has correct permissions
    - Check `VERCEL_ORG_ID` and `VERCEL_PROJECT_ID` are correct

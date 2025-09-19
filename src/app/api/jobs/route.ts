@@ -21,6 +21,11 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '50')
     const offset = parseInt(searchParams.get('offset') || '0')
 
+    // Validate status parameter
+    const validStatuses = ['pending', 'processing', 'completed', 'failed'] as const
+    type JobStatus = typeof validStatuses[number]
+    const validatedStatus = status && validStatuses.includes(status as any) ? status as JobStatus : null
+
     let query = supabase
       .from('jobs')
       .select('*')
@@ -32,8 +37,8 @@ export async function GET(request: NextRequest) {
       query = query.eq('type', type)
     }
 
-    if (status) {
-      query = query.eq('status', status)
+    if (validatedStatus) {
+      query = query.eq('status', validatedStatus)
     }
 
     const { data: jobs, error: jobsError, count } = await query

@@ -14,6 +14,13 @@ export default function DashboardPage() {
   const router = useRouter()
   const { user, signOut, loading, initialized, initialize } = useAuthStore()
 
+  // All hooks must be called before any early returns
+  const [activeTab, setActiveTab] = useState('overview')
+  const [researchData, setResearchData] = useState<any>(null)
+  const [generatedContent, setGeneratedContent] = useState<any[]>([])
+  const [sites, setSites] = useState<any[]>([])
+  const [isGeneratingSite, setIsGeneratingSite] = useState(false)
+
   useEffect(() => {
     if (!initialized) {
       initialize()
@@ -49,12 +56,6 @@ export default function DashboardPage() {
   if (!user) {
     return null // Will redirect to login
   }
-
-  const [activeTab, setActiveTab] = useState('overview')
-  const [researchData, setResearchData] = useState<any>(null)
-  const [generatedContent, setGeneratedContent] = useState<any[]>([])
-  const [sites, setSites] = useState<any[]>([])
-  const [isGeneratingSite, setIsGeneratingSite] = useState(false)
 
   const tabs = [
     { id: 'overview', label: 'Overview', icon: TrendingUp },

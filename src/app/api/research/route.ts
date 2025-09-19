@@ -88,8 +88,8 @@ export async function POST(request: NextRequest) {
     // Find best domain recommendation (shortest available domain with lowest cost)
     if (availableDomains.length > 0) {
       const bestDomain = availableDomains
-        .filter(domain => domain.price && domain.price > 0)
-        .sort((a, b) => a.domain.length - b.domain.length || a.price - b.price)[0];
+        .filter((domain: any) => domain.price && domain.price > 0)
+        .sort((a: any, b: any) => a.domain.length - b.domain.length || a.price - b.price)[0];
 
       if (bestDomain) {
         response.recommendedDomain = bestDomain.domain;

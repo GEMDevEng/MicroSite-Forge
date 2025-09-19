@@ -51,6 +51,8 @@ export function AuthForm({ mode, className }: AuthFormProps) {
     resolver: zodResolver(schema),
   })
 
+  const formErrors = errors as any // Type assertion for easier access
+
   const onSubmit = async (data: SignInFormData | SignUpFormData) => {
     try {
       setError(null)
@@ -131,11 +133,11 @@ export function AuthForm({ mode, className }: AuthFormProps) {
               type="password"
               placeholder="Confirm your password"
               {...register('confirmPassword')}
-              className={errors.confirmPassword ? 'border-destructive' : ''}
+              className={formErrors.confirmPassword ? 'border-destructive' : ''}
             />
-            {errors.confirmPassword && (
+            {formErrors.confirmPassword && (
               <p className="text-sm text-destructive">
-                {errors.confirmPassword.message}
+                {formErrors.confirmPassword.message}
               </p>
             )}
           </div>
