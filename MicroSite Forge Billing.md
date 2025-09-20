@@ -1,7 +1,3 @@
-You can copy-paste the following detailed prompt directly to your coding AI assistant (e.g., Grok, Claude, or similar). It incorporates references to the app's existing architecture (from the PRD, SRS, Backend Structure, and Frontend Guidelines) to ensure seamless integration. The prompt is self-contained, specifies requirements for multiple gateways, and emphasizes testing/security.
-
----
-
 **Prompt for Coding AI Assistant:**
 
 You are a senior full-stack developer tasked with integrating multiple payment gateways into the MicroSite Forge MVP web application. The app is built with Next.js 14 (frontend), Supabase (backend with Postgres, Auth, and Edge Functions), BullMQ for queuing, n8n for workflows, and currently uses Stripe for billing (subscriptions: $49–$499/month tiers, metered usage: $0.50/lead, automated invoicing via pdf-lib).
@@ -48,7 +44,3 @@ Provide the full code changes as diffs or files for:
 - Any config (e.g., tailwind for new buttons).
 
 Output in a structured format: 1. Backend Code, 2. Frontend Code, 3. Testing Scripts, 4. Deployment Steps. Ensure compatibility with existing features (e.g., batch launches unaffected). If needed, suggest minimal UI changes for a clean UX.
-
----
-
-This prompt is optimized for clarity and completeness—your AI should generate actionable code. If you need tweaks (e.g., focus on one gateway first), let me know!
