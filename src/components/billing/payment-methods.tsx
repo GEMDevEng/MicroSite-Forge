@@ -1,3 +1,5 @@
+'use client'
+
 import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -242,8 +244,8 @@ export function PaymentMethods() {
             <div>
               <h3 className="font-medium text-blue-900">Automatic Payments</h3>
               <p className="text-sm text-blue-700 mt-1">
-                We'll automatically charge your default payment method on your billing date.
-                You'll receive an email confirmation 24 hours before each charge.
+                We automatically charge your default payment method on your billing date.
+                You will receive an email confirmation 24 hours before each charge.
               </p>
             </div>
           </div>

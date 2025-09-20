@@ -10,6 +10,9 @@ interface AuthState {
   initialized: boolean
   signIn: (email: string, password: string) => Promise<void>
   signUp: (email: string, password: string) => Promise<void>
+  signInWithGoogle: () => Promise<void>
+  signInWithApple: () => Promise<void>
+  signInWithFacebook: () => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updateProfile: (data: { email?: string; password?: string }) => Promise<void>
@@ -166,12 +169,84 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      signInWithGoogle: async () => {
+        try {
+          set({ loading: true })
+
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
+          })
+
+          if (error) {
+            throw error
+          }
+
+          // OAuth popup will handle the auth flow
+        } catch (error) {
+          console.error('Google sign in error:', error)
+          throw error
+        } finally {
+          set({ loading: false })
+        }
+      },
+
+      signInWithApple: async () => {
+        try {
+          set({ loading: true })
+
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'apple',
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
+          })
+
+          if (error) {
+            throw error
+          }
+
+          // OAuth popup will handle the auth flow
+        } catch (error) {
+          console.error('Apple sign in error:', error)
+          throw error
+        } finally {
+          set({ loading: false })
+        }
+      },
+
+      signInWithFacebook: async () => {
+        try {
+          set({ loading: true })
+
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'facebook',
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
+          })
+
+          if (error) {
+            throw error
+          }
+
+          // OAuth popup will handle the auth flow
+        } catch (error) {
+          console.error('Facebook sign in error:', error)
+          throw error
+        } finally {
+          set({ loading: false })
+        }
+      },
+
       updateProfile: async (data: { email?: string; password?: string }) => {
         try {
           set({ loading: true })
-          
+
           const { error } = await supabase.auth.updateUser(data)
-          
+
           if (error) {
             throw error
           }
