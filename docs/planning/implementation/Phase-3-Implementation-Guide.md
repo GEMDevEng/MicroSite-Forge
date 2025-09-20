@@ -113,9 +113,42 @@ interface EmailCampaign {
 - **Chatbot Integration**: 24/7 lead qualification and support
 - **Social Media**: Automated posting and lead nurturing
 
-### 3. Billing & Subscription Management
+### 3. Multi-Gateway Billing & Subscription Management
 
-#### SaaS Pricing Tiers
+#### Payment Gateway Integration Overview
+MicroSite Forge supports multiple payment gateways to provide users with flexibility, cost optimization, and enhanced security. The integration leverages a unified abstraction layer for seamless switching between providers, with Stripe as the default (legacy compatibility).
+
+**Supported Gateways:**
+1. **Stripe** (Primary) - Subscriptions $49–$499/month, metered usage at $0.50/lead, automated invoicing via pdf-lib
+2. **PayPal (Braintree SDK)** - Digital wallets/recurring, 2.59% + $0.49/transaction fees
+3. **Adyen** - Global optimization using interchange++ pricing
+4. **Square** - US-focused invoicing, 2.9% + $0.30/online fees
+5. **Authorize.net** - Secure recurring with $25/month gateway fee
+
+#### Payment Abstraction Layer Architecture
+```typescript
+// Unified payment interface
+interface PaymentGateway {
+  createSubscription(params: SubscriptionParams): Promise<SubscriptionResult>
+  meterUsage(userId: string, amount: number): Promise<void>
+  generateInvoice(subscriptionId: string): Promise<InvoiceData>
+  handleWebhook(payload: any, signature: string): Promise<WebhookResult>
+  refund(paymentId: string, amount: number): Promise<RefundResult>
+}
+
+// Gateway registry
+const paymentGateways: Record<PaymentGatewayType, PaymentGateway> = {
+  stripe: new StripeGateway(),
+  paypal: new PayPalGateway(),
+  adyen: new AdyenGateway(),
+  square: new SquareGateway(),
+  authorize_net: new AuthorizeNetGateway()
+}
+
+type PaymentGatewayType = 'stripe' | 'paypal' | 'adyen' | 'square' | 'authorize_net'
+```
+
+#### Enhanced SaaS Pricing Tiers
 ```typescript
 interface SubscriptionTier {
   id: string
@@ -130,23 +163,50 @@ interface SubscriptionTier {
   price_monthly: number
   price_yearly: number
   stripe_price_id: string
+  // Multi-gateway support
+  gateway_prices: Record<PaymentGatewayType, {
+    monthly_id: string
+    yearly_id: string
+    currency: string
+  }>
 }
 
-interface Subscription {
+interface UserSubscription {
   tenant_id: string
+  preferred_gateway: PaymentGatewayType
   tier: SubscriptionTier
   status: 'active' | 'canceled' | 'past_due'
   current_period_start: Date
   current_period_end: Date
   cancel_at?: Date
+  gateway_specific_data: {
+    subscription_id: string
+    customer_id: string
+    metadata: Record<string, any>
+  }
 }
 ```
 
-#### Usage Tracking & Billing
-- Real-time usage monitoring
-- Predictable overage charges
-- Automated invoice generation
-- Revenue analytics dashboard
+#### SaaS Monetization Features
+- **Multi-Gateway Subscription Management**: Users can choose and switch gateways
+- **Dynamic Billing Routes**: API routes based on `preferred_gateway` in user profile
+- **Unified Webhook Handling**: Single endpoint that delegates to gateway-specific handlers
+- **Encrypted Credential Storage**: Gateway tokens/keys stored in Supabase Vault
+- **Proration & Migration**: Seamless switching between gateways with fee adjustments
+
+#### Advanced Billing Capabilities
+- **Metered Usage Tracking**: Per-lead billing with real-time gateway sync
+- **Automated Invoice Generation**: PDF creation via pdf-lib across all gateways
+- **Commercial Workflow Integration**: n8n automation for payment confirmations/notifications
+- **Currency Conversion**: Supports multiple currencies based on gateway capabilities
+- **Revenue Analytics**: Gateway-specific fee tracking and optimization insights
+
+#### Gateway-Specific Implementation Details
+See `docs/planning/implementation/Phase-3-Multi-Gateway-Billing-Integration.md` for complete technical specifications, including:
+- Backend edge function implementations
+- Frontend integration components
+- Testing strategies and deployment steps
+- Security compliance and error handling
 
 ### 4. Business Intelligence & Analytics
 

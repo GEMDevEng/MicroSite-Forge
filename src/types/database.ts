@@ -6,6 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type PaymentGatewayType = 'stripe' | 'paypal' | 'adyen' | 'square' | 'authorize_net'
+
 export interface Database {
   public: {
     Tables: {
@@ -15,6 +17,8 @@ export interface Database {
           email: string
           stripe_id: string | null
           twilio_sid: string | null
+          preferred_gateway: PaymentGatewayType
+          gateway_credentials: Json | null
           created_at: string
           updated_at: string
         }
@@ -23,6 +27,8 @@ export interface Database {
           email: string
           stripe_id?: string | null
           twilio_sid?: string | null
+          preferred_gateway?: PaymentGatewayType
+          gateway_credentials?: Json | null
           created_at?: string
           updated_at?: string
         }
@@ -31,6 +37,8 @@ export interface Database {
           email?: string
           stripe_id?: string | null
           twilio_sid?: string | null
+          preferred_gateway?: PaymentGatewayType
+          gateway_credentials?: Json | null
           created_at?: string
           updated_at?: string
         }
