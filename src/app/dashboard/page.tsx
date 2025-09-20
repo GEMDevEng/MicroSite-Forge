@@ -20,6 +20,8 @@ export default function DashboardPage() {
   const [generatedContent, setGeneratedContent] = useState<any[]>([])
   const [sites, setSites] = useState<any[]>([])
   const [isGeneratingSite, setIsGeneratingSite] = useState(false)
+  const [analyticsData, setAnalyticsData] = useState<any>(null)
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false)
 
   useEffect(() => {
     if (!initialized) {
@@ -32,6 +34,26 @@ export default function DashboardPage() {
       router.push('/auth/login')
     }
   }, [user, loading, initialized, router])
+
+  useEffect(() => {
+    if (user && initialized) {
+      const fetchAnalytics = async () => {
+        setLoadingAnalytics(true)
+        try {
+          const response = await fetch('/api/analytics')
+          if (response.ok) {
+            const data = await response.json()
+            setAnalyticsData(data)
+          }
+        } catch (error) {
+          console.error('Failed to fetch analytics:', error)
+        } finally {
+          setLoadingAnalytics(false)
+        }
+      }
+      fetchAnalytics()
+    }
+  }, [user, initialized])
 
   const handleSignOut = async () => {
     try {
@@ -200,45 +222,75 @@ export default function DashboardPage() {
         {/* Tab Content */}
         <div className="space-y-6">
           {activeTab === 'overview' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Cloud className="w-5 h-5" />
-                    Sites Created
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold text-blue-600">0</p>
-                  <p className="text-sm text-gray-600">Ready to create your first microsite</p>
-                </CardContent>
-              </Card>
+            <div className="space-y-6">
+              {loadingAnalytics ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  {[1, 2, 3].map((i) => (
+                    <Card key={i}>
+                      <CardContent className="pt-6">
+                        <div className="animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Cloud className="w-5 h-5" />
+                        Sites Created
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold text-blue-600">
+                        {analyticsData?.overview?.totalSites || 0}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {analyticsData?.overview?.totalSites === 0 ? 'Ready to create your first microsite' : 'Microsites deployed'}
+                      </p>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5" />
-                    Leads Generated
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold text-green-600">0</p>
-                  <p className="text-sm text-gray-600">Start with niche research</p>
-                </CardContent>
-              </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <TrendingUp className="w-5 h-5" />
+                        Leads Generated
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold text-green-600">
+                        {analyticsData?.overview?.totalLeads || 0}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {analyticsData?.overview?.qualifiedLeads ? `${analyticsData.overview.qualifiedLeads} qualified` : 'Start with niche research'}
+                      </p>
+                    </CardContent>
+                  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
-                    Revenue
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-2xl font-bold text-purple-600">$0</p>
-                  <p className="text-sm text-gray-600">Get started with Phase 2</p>
-                </CardContent>
-              </Card>
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        Revenue
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-2xl font-bold text-purple-600">
+                        ${analyticsData?.overview?.totalRevenue?.toLocaleString() || '0'}
+                      </p>
+                      <p className="text-sm text-gray-600">
+                        {analyticsData?.overview?.conversionRate ? `${analyticsData.overview.conversionRate.toFixed(1)}% conversion` : 'Get started with lead generation'}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
             </div>
           )}
 
