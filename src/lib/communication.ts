@@ -318,7 +318,7 @@ export class CommunicationManager {
           type,
           direction,
           content,
-          status,
+          status: status as 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked',
           message_id: messageId,
           metadata: metadata || null
         })

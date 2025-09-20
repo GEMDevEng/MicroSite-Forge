@@ -1,7 +1,8 @@
 import { supabase } from './supabase'
 import { logger } from './logger'
+import { PaymentGatewayType, Database } from '../types/database'
 
-export type PaymentGatewayType = 'stripe' | 'paypal' | 'adyen' | 'square' | 'authorize_net'
+type UserRow = Database['public']['Tables']['users']['Row']
 
 export interface PaymentGateway {
   type: PaymentGatewayType
