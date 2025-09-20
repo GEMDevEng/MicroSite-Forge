@@ -1,5 +1,7 @@
 import { createServerClient } from '@/lib/supabase'
 import { NextRequest, NextResponse } from 'next/server'
+import { LeadManager, IncomingLead } from '@/lib/lead-manager'
+import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
@@ -126,29 +128,32 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Create lead
-    const { data: lead, error: leadError } = await supabase
-      .from('leads')
-      .insert({
-        site_id,
-        name,
-        email,
-        phone,
-        message,
-        source: source || 'website'
-      })
-      .select()
-      .single()
+    // Create incoming lead object
+    const incomingLead: IncomingLead = {
+      site_id,
+      name,
+      email,
+      phone,
+      message,
+      source: source || 'website'
+    }
 
-    if (leadError) {
-      console.error('Lead creation error:', leadError)
+    // Use LeadManager to create lead with automatic scoring
+    try {
+      const leadManager = new LeadManager()
+      const leadData = await leadManager.createLead(incomingLead)
+
+      logger.info('Lead created via API', { leadId: leadData.id, siteId: site_id, userId: user.id })
+
+      return NextResponse.json({ lead: leadData }, { status: 201 })
+    } catch (error) {
+      logger.error('Failed to create lead via LeadManager', error instanceof Error ? error : new Error('Unknown error'), { siteId: site_id, userId: user.id })
+
       return NextResponse.json(
         { error: 'Failed to create lead' },
         { status: 500 }
       )
     }
-
-    return NextResponse.json({ lead }, { status: 201 })
   } catch (error) {
     console.error('Leads creation API error:', error)
     return NextResponse.json(

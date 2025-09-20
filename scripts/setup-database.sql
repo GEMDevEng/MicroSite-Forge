@@ -28,7 +28,7 @@ create table public.sites (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
--- Leads table
+-- Leads table (enhanced for Phase 3)
 create table public.leads (
   id uuid default uuid_generate_v4() primary key,
   site_id uuid references public.sites(id) on delete cascade not null,
@@ -37,7 +37,14 @@ create table public.leads (
   phone text,
   message text,
   source text default 'website',
-  status text check (status in ('new', 'contacted', 'qualified', 'converted')) default 'new',
+  status text check (status in ('new', 'qualified', 'contacted', 'converted')) default 'new',
+  score_data jsonb,
+  contact_info jsonb,
+  tags jsonb,
+  assigned_to uuid,
+  follow_up_date timestamp with time zone,
+  marketing_campaign text,
+  enriched_at timestamp with time zone,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );

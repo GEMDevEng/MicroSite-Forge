@@ -1,0 +1,254 @@
+import { useState } from 'react'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  CreditCard,
+  Plus,
+  Trash2,
+  Star,
+  AlertCircle,
+  CheckCircle,
+  Calendar
+} from 'lucide-react'
+
+// Mock payment methods data
+const mockPaymentMethods = [
+  {
+    id: '1',
+    type: 'card',
+    brand: 'visa',
+    last4: '4242',
+    expiryMonth: 12,
+    expiryYear: 2026,
+    isDefault: true,
+    addedAt: '2025-01-15'
+  },
+  {
+    id: '2',
+    type: 'card',
+    brand: 'mastercard',
+    last4: '8888',
+    expiryMonth: 8,
+    expiryYear: 2027,
+    isDefault: false,
+    addedAt: '2025-01-20'
+  }
+]
+
+export function PaymentMethods() {
+  const [paymentMethods, setPaymentMethods] = useState(mockPaymentMethods)
+  const [isAddingMethod, setIsAddingMethod] = useState(false)
+
+  const getCardBrandLogo = (brand: string) => {
+    if (brand === 'visa') return '💳'
+    if (brand === 'mastercard') return '🔴'
+    if (brand === 'amex') return '💙'
+    return '💳'
+  }
+
+  const formatExpiryDate = (month: number, year: number) => {
+    return `${month.toString().padStart(2, '0')}/${year.toString().slice(-2)}`
+  }
+
+  const handleSetDefault = (methodId: string) => {
+    setPaymentMethods(methods =>
+      methods.map(method => ({
+        ...method,
+        isDefault: method.id === methodId
+      }))
+    )
+  }
+
+  const handleRemoveMethod = (methodId: string) => {
+    setPaymentMethods(methods => methods.filter(method => method.id !== methodId))
+  }
+
+  const AddPaymentDialog = () => (
+    <Dialog open={isAddingMethod} onOpenChange={setIsAddingMethod}>
+      <DialogTrigger asChild>
+        <Button>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Payment Method
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Add Payment Method</DialogTitle>
+          <DialogDescription>
+            Add a new credit card or payment method for billing
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="card-number">Card Number</Label>
+            <Input
+              id="card-number"
+              placeholder="1234 5678 9012 3456"
+              className="mt-1"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="expiry">Expiry Date</Label>
+              <Input
+                id="expiry"
+                placeholder="MM/YY"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="cvc">CVC</Label>
+              <Input
+                id="cvc"
+                placeholder="123"
+                className="mt-1"
+              />
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="cardholder">Cardholder Name</Label>
+            <Input
+              id="cardholder"
+              placeholder="John Doe"
+              className="mt-1"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="billing-country">Billing Country</Label>
+            <Select>
+              <SelectTrigger className="mt-1">
+                <SelectValue placeholder="Select country" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="us">United States</SelectItem>
+                <SelectItem value="ca">Canada</SelectItem>
+                <SelectItem value="uk">United Kingdom</SelectItem>
+                <SelectItem value="au">Australia</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="flex space-x-3 pt-4">
+            <Button onClick={() => setIsAddingMethod(false)}>
+              Add Payment Method
+            </Button>
+            <Button variant="outline" onClick={() => setIsAddingMethod(false)}>
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className="text-lg font-semibold">Payment Methods</h3>
+          <p className="text-sm text-gray-500">
+            Manage your credit cards and payment methods
+          </p>
+        </div>
+        <AddPaymentDialog />
+      </div>
+
+      {/* Payment Methods List */}
+      <div className="space-y-4">
+        {paymentMethods.map((method) => (
+          <Card key={method.id}>
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="text-2xl">{getCardBrandLogo(method.brand)}</div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <span className="font-medium">
+                        •••• •••• •••• {method.last4}
+                      </span>
+                      {method.isDefault && (
+                        <Badge className="bg-green-100 text-green-800 border-0">
+                          Default
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-4 mt-1">
+                      <span className="text-sm text-gray-500 flex items-center">
+                        <Calendar className="h-4 w-4 mr-1" />
+                        Expires {formatExpiryDate(method.expiryMonth, method.expiryYear)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  {method.isDefault ? (
+                    <Button variant="ghost" size="sm" disabled>
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                      Default
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSetDefault(method.id)}
+                      >
+                        <Star className="h-4 w-4 mr-2" />
+                        Set as Default
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveMethod(method.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Security Notice */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-start space-x-3">
+            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-green-900">Secure & Protected</h3>
+              <p className="text-sm text-green-700 mt-1">
+                Your payment information is encrypted and securely stored according to PCI DSS standards.
+                We never store your full card details.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start space-x-3 mt-4">
+            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+            <div>
+              <h3 className="font-medium text-blue-900">Automatic Payments</h3>
+              <p className="text-sm text-blue-700 mt-1">
+                We'll automatically charge your default payment method on your billing date.
+                You'll receive an email confirmation 24 hours before each charge.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  )
+}

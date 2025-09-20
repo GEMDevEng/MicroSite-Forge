@@ -8,6 +8,50 @@ export type Json =
 
 export type PaymentGatewayType = 'stripe' | 'paypal' | 'adyen' | 'square' | 'authorize_net'
 
+export interface ContactInfo {
+  name: string
+  email: string
+  phone?: string
+  company?: string
+  title?: string
+  location?: string
+  website?: string
+  social_profiles?: {
+    linkedin?: string
+    twitter?: string
+    facebook?: string
+  }
+  enriched_data?: {
+    company_size?: string
+    industry?: string
+    revenue_range?: string
+    employee_count?: number
+  }
+}
+
+export interface LeadScore {
+  source: 'organic' | 'paid' | 'referral'
+  engagement: number        // 0-100 based on site interaction
+  intent_level: number      // 0-100 based on form completion depth
+  budget_indicators: number // 0-100 keywords suggesting budget
+  timeline_signals: number  // 0-100 urgency indicators
+  total_score: number       // 0-100 overall score
+}
+
+export interface LeadData {
+  id: string
+  contact: ContactInfo
+  score: LeadScore
+  tags: string[]
+  status: 'new' | 'qualified' | 'contacted' | 'converted'
+  assigned_to?: string
+  follow_up_date?: string
+  marketing_campaign?: string
+  enriched_at?: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -99,7 +143,14 @@ export interface Database {
           phone: string | null
           message: string | null
           source: string
-          status: 'new' | 'contacted' | 'qualified' | 'converted'
+          status: 'new' | 'qualified' | 'contacted' | 'converted'
+          score_data: Json | null  // LeadScore
+          contact_info: Json | null // ContactInfo
+          tags: Json | null  // string[]
+          assigned_to: string | null
+          follow_up_date: string | null
+          marketing_campaign: string | null
+          enriched_at: string | null
           created_at: string
           updated_at: string
         }
@@ -111,7 +162,14 @@ export interface Database {
           phone?: string | null
           message?: string | null
           source: string
-          status?: 'new' | 'contacted' | 'qualified' | 'converted'
+          status?: 'new' | 'qualified' | 'contacted' | 'converted'
+          score_data?: Json | null
+          contact_info?: Json | null
+          tags?: Json | null
+          assigned_to?: string | null
+          follow_up_date?: string | null
+          marketing_campaign?: string | null
+          enriched_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -123,7 +181,14 @@ export interface Database {
           phone?: string | null
           message?: string | null
           source?: string
-          status?: 'new' | 'contacted' | 'qualified' | 'converted'
+          status?: 'new' | 'qualified' | 'contacted' | 'converted'
+          score_data?: Json | null
+          contact_info?: Json | null
+          tags?: Json | null
+          assigned_to?: string | null
+          follow_up_date?: string | null
+          marketing_campaign?: string | null
+          enriched_at?: string | null
           created_at?: string
           updated_at?: string
         }
