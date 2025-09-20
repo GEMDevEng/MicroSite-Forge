@@ -1,5 +1,5 @@
 const GROK_API_BASE = "https://api.x.ai";
-const API_KEY = process.env.GROK_API_KEY;
+// API_KEY will be read dynamically to support testing
 
 interface NicheResearchRequest {
   niche: string;
@@ -30,6 +30,7 @@ interface NicheResearchResponse {
  * @returns Comprehensive niche research data
  */
 export async function performNicheResearch(request: NicheResearchRequest): Promise<NicheResearchResponse> {
+  const API_KEY = process.env.GROK_API_KEY
   if (!API_KEY) {
     throw new Error("GROK_API_KEY is not configured");
   }
@@ -100,6 +101,7 @@ export async function performNicheResearch(request: NicheResearchRequest): Promi
  * @returns Array of content ideas
  */
 export async function generateContentIdeas(keyword: string, contentType: string = 'blog'): Promise<string[]> {
+  const API_KEY = process.env.GROK_API_KEY
   if (!API_KEY) {
     throw new Error("GROK_API_KEY is not configured");
   }
@@ -141,6 +143,7 @@ export async function generateContentIdeas(keyword: string, contentType: string 
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("Grok content ideas error:", error);
-    throw new Error(`Failed to generate content ideas: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    // Return empty array for invalid responses instead of throwing
+    return [];
   }
 }

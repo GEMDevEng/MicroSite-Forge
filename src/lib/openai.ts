@@ -1,5 +1,5 @@
 const OPENAI_API_BASE = "https://api.openai.com/v1";
-const API_KEY = process.env.OPENAI_API_KEY;
+// API_KEY will be read dynamically to support testing
 
 interface ContentGenerationRequest {
   keyword: string;
@@ -26,6 +26,7 @@ interface GeneratedContent {
  * @returns Generated content object
  */
 export async function generateContent(request: ContentGenerationRequest): Promise<GeneratedContent> {
+  const API_KEY = process.env.OPENAI_API_KEY
   if (!API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
@@ -192,6 +193,7 @@ export function validateContentQuality(content: GeneratedContent, keyword: strin
  * @returns Array of suggested headings
  */
 export async function generateHeadingStructure(keyword: string, contentType: string): Promise<string[]> {
+  const API_KEY = process.env.OPENAI_API_KEY
   if (!API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
   }

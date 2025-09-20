@@ -78,21 +78,21 @@ export function AuthForm({ mode, className }: AuthFormProps) {
           {isSignUp ? 'Create your account' : 'Sign in to your account'}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          {isSignUp ? (
-            <>
-              Already have an account?{' '}
-              <Link href="/auth/login" className="text-primary hover:underline">
-                Sign in
-              </Link>
-            </>
-          ) : (
-            <>
-              Don't have an account?{' '}
-              <Link href="/auth/signup" className="text-primary hover:underline">
-                Sign up
-              </Link>
-            </>
-          )}
+        {isSignUp ? (
+          <>
+            Already have an account?{' '}
+            <Link href="/auth/login" className="text-primary hover:underline">
+              Sign in
+            </Link>
+          </>
+        ) : (
+          <>
+            Don&#39;t have an account?{' '}
+            <Link href="/auth/signup" className="text-primary hover:underline">
+              Sign up
+            </Link>
+          </>
+        )}
         </p>
       </div>
 

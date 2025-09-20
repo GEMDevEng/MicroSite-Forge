@@ -1,6 +1,9 @@
 /**
  * @jest-environment node
  */
+// Set test API key before imports
+process.env.OPENAI_API_KEY = 'test-key';
+
 import { generateContent, validateContentQuality } from '../openai'
 
 // Mock fetch
@@ -61,7 +64,7 @@ describe('OpenAI API Integration', () => {
           keyword: 'test',
           contentType: 'blog-post',
         })
-      ).toReject(new Error('OPENAI_API_KEY is not configured'))
+      ).rejects.toThrow('OPENAI_API_KEY is not configured')
     })
 
     it('should handle API response errors', async () => {
@@ -76,7 +79,7 @@ describe('OpenAI API Integration', () => {
           keyword: 'test',
           contentType: 'blog-post',
         })
-      ).toReject()
+      ).rejects.toThrow()
     })
 
     it('should validate required response fields', async () => {
@@ -92,7 +95,7 @@ describe('OpenAI API Integration', () => {
           keyword: 'test',
           contentType: 'blog-post',
         })
-      ).toReject(new Error('Invalid response format from OpenAI'))
+      ).rejects.toThrow('Invalid response format from OpenAI')
     })
   })
 
@@ -118,6 +121,8 @@ describe('OpenAI API Integration', () => {
         title: 'Home Repair Services',
         content: 'Complete Guide to Professional Plumbing Services\n\nPlumbing services are essential for maintaining your home.',
         metaDescription: 'Professional plumbing services.',
+        seoKeywords: [],
+        suggestedImages: [],
       }
 
       const result = validateContentQuality(content, 'plumbing services')
@@ -130,6 +135,9 @@ describe('OpenAI API Integration', () => {
       const content = {
         title: 'Plumbing Services',
         content: 'Short content about plumbing.',
+        metaDescription: 'Meta.',
+        seoKeywords: [],
+        suggestedImages: [],
       }
 
       const result = validateContentQuality(content, 'plumbing services')
@@ -143,6 +151,8 @@ describe('OpenAI API Integration', () => {
         title: 'Plumbing Services',
         content: 'Great content about plumbing services '.repeat(100),
         metaDescription: 'This meta description is way too long and exceeds the 160 character limit for SEO purposes which is not good for search engine optimization and can cause issues with how search engines display your page results.'.repeat(2),
+        seoKeywords: [],
+        suggestedImages: [],
       }
 
       const result = validateContentQuality(content, 'plumbing services')

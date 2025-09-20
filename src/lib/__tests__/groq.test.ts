@@ -11,6 +11,13 @@ const mockFetch = fetch as jest.MockedFunction<typeof fetch>
 describe('Grok API Integration', () => {
   beforeEach(() => {
     jest.clearAllMocks()
+    // Set mock API key for tests
+    process.env.GROK_API_KEY = 'test-api-key'
+  })
+
+  afterEach(() => {
+    // Clean up after tests
+    delete process.env.GROK_API_KEY
   })
 
   describe('performNicheResearch', () => {
