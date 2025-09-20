@@ -284,6 +284,49 @@ export interface Database {
           }
         ]
       }
+      communications: {
+        Row: {
+          id: string
+          lead_id: string
+          type: 'email' | 'sms' | 'call' | 'note'
+          direction: 'inbound' | 'outbound'
+          content: string
+          status: 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked'
+          message_id: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          lead_id: string
+          type: 'email' | 'sms' | 'call' | 'note'
+          direction: 'inbound' | 'outbound'
+          content: string
+          status?: 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked'
+          message_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          lead_id?: string
+          type?: 'email' | 'sms' | 'call' | 'note'
+          direction?: 'inbound' | 'outbound'
+          content?: string
+          status?: 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked'
+          message_id?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communications_lead_id_fkey"
+            columns: ["lead_id"]
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never

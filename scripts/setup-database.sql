@@ -10,9 +10,14 @@ create table public.users (
   email text not null unique,
   stripe_id text,
   twilio_sid text,
+  preferred_gateway text default 'stripe' check (preferred_gateway in ('stripe', 'paypal', 'adyen', 'square', 'authorize_net')),
+  gateway_credentials jsonb,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+
+alter table public.users add column preferred_gateway text default 'stripe' check (preferred_gateway in ('stripe', 'paypal', 'adyen', 'square', 'authorize_net'));
+alter table public.users add column gateway_credentials jsonb;
 
 -- Sites table
 create table public.sites (
@@ -49,6 +54,19 @@ create table public.leads (
   updated_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
+-- Communications log table (for Phase 3)
+create table public.communications (
+  id uuid default uuid_generate_v4() primary key,
+  lead_id uuid references public.leads(id) on delete cascade not null,
+  type text check (type in ('email', 'sms', 'call', 'note')) not null,
+  direction text check (direction in ('inbound', 'outbound')) not null,
+  content text not null,
+  status text default 'sent' check (status in ('sent', 'failed', 'delivered', 'opened', 'clicked')),
+  message_id text,
+  metadata jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
 -- Jobs table (for background processing)
 create table public.jobs (
   id uuid default uuid_generate_v4() primary key,
@@ -82,6 +100,9 @@ create index leads_site_id_idx on public.leads(site_id);
 create index leads_status_idx on public.leads(status);
 create index leads_created_at_idx on public.leads(created_at desc);
 create index leads_email_idx on public.leads(email);
+create index communications_lead_id_idx on public.communications(lead_id);
+create index communications_type_idx on public.communications(type);
+create index communications_created_at_idx on public.communications(created_at desc);
 create index jobs_user_id_idx on public.jobs(user_id);
 create index jobs_status_idx on public.jobs(status);
 create index jobs_type_idx on public.jobs(type);
@@ -119,6 +140,33 @@ create policy "Users can create leads for their sites" on public.leads for inser
 create policy "Users can update leads from their sites" on public.leads for update using (
   auth.uid() in (
     select user_id from public.sites where id = leads.site_id
+  )
+);
+
+-- Communications table policies
+alter table public.communications enable row level security;
+create policy "Users can view communications from their leads" on public.communications for select using (
+  auth.uid() in (
+    select s.user_id
+    from public.leads l
+    join public.sites s on l.site_id = s.id
+    where l.id = communications.lead_id
+  )
+);
+create policy "Users can create communications for their leads" on public.communications for insert with check (
+  auth.uid() in (
+    select s.user_id
+    from public.leads l
+    join public.sites s on l.site_id = s.id
+    where l.id = communications.lead_id
+  )
+);
+create policy "Users can update communications from their leads" on public.communications for update using (
+  auth.uid() in (
+    select s.user_id
+    from public.leads l
+    join public.sites s on l.site_id = s.id
+    where l.id = communications.lead_id
   )
 );
 
@@ -196,6 +244,7 @@ grant usage on schema public to anon, authenticated;
 grant all on public.users to anon, authenticated;
 grant all on public.sites to anon, authenticated;
 grant all on public.leads to anon, authenticated;
+grant all on public.communications to anon, authenticated;
 grant all on public.jobs to anon, authenticated;
 grant all on public.invoices to anon, authenticated;
 grant select on public.user_sites_stats to anon, authenticated;

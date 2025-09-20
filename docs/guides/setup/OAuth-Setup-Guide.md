@@ -1,6 +1,6 @@
 # OAuth Authentication Setup Guide
 
-This guide will help you configure OAuth authentication with Google, Apple, and Facebook using Supabase for MicroSite Forge.
+This guide will help you configure OAuth authentication with Google and Facebook using Supabase for MicroSite Forge.
 
 ## 📋 Prerequisites
 
@@ -39,56 +39,6 @@ This guide will help you configure OAuth authentication with Google, Apple, and 
 
 ### 3. Get Credentials
 - Copy the **Client ID** and **Client Secret**
-
-## 🍎 Apple Sign-In Setup
-
-### 1. Apple Developer Portal
-
-1. **Visit Apple Developer**: https://developer.apple.com/account/
-2. **Ensure you have a paid Apple Developer Program membership** ($99/year)
-3. **Navigate to "Certificates, Identifiers & Profiles"**
-
-### 2. Create App ID
-
-1. **Go to "Identifiers" → "+" button**
-2. **Select "App IDs"** → **Continue**
-3. **Choose your app type** (iOS, macOS, etc.) or create a Website app
-4. **Configure the App ID**:
-   - **Bundle ID**: Your app's bundle identifier
-   - **Description**: Description of your app
-   - **Enable "Sign In with Apple"** capability
-
-### 3. Create Service ID
-
-1. **In Identifiers section, click "+" again**
-2. **Select "Services IDs"** → **Continue**
-3. **Configure Service ID**:
-   - **Identifier**: Your service ID (e.g., `com.micrositeforge.app`)
-   - **Description**: "Sign In with Apple for MicroSite Forge"
-   - **Enable "Sign In with Apple"**
-
-### 4. Configure Sign In with Apple
-
-1. **Click on your Service ID** to edit
-2. **Configure domains** (your website domains)
-3. **Add return URLs**:
-   - `https://your-project.supabase.co/auth/v1/callback`
-
-### 5. Generate Private Key
-
-1. **Go to "Keys" section** → **"+" button**
-2. **Create a new key**:
-   - **Key Name**: "MicroSite Forge Sign In"
-   - **Enable "Sign In with Apple"**
-3. **Download the .p8 file** (keep this secure!)
-
-### 6. Get Required Values
-
-Copy these values for Supabase configuration:
-- **Team ID**: From your developer account
-- **Client ID**: Your Service ID
-- **Key ID**: Generated along with the key
-- **Private Key**: Contents of the downloaded .p8 file
 
 ## 📘 Facebook Login Setup
 
@@ -138,13 +88,6 @@ Copy these values for Supabase configuration:
 - **Provider**: Google
 - **Client ID**: Your Google OAuth client ID
 - **Client Secret**: Your Google OAuth client secret
-
-#### Apple Configuration
-- **Provider**: Apple
-- **Client ID**: Your Apple Service ID
-- **Team ID**: Your Apple Developer Team ID
-- **Key ID**: Your Apple private key ID
-- **Private Key**: Contents of your Apple .p8 key file
 
 #### Facebook Configuration
 - **Provider**: Facebook
@@ -269,7 +212,6 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 
 # Optional - for additional OAuth configuration
 GOOGLE_CLIENT_ID=your-google-client-id
-APPLE_CLIENT_ID=your-apple-service-id
 FACEBOOK_APP_ID=your-facebook-app-id
 ```
 
@@ -285,10 +227,9 @@ If you encounter issues:
 1. **Check Supabase documentation**: https://supabase.com/docs/guides/auth/social-login
 2. **Provider documentation**:
    - Google: https://developers.google.com/identity/protocols/oauth2
-   - Apple: https://developer.apple.com/sign-in-with-apple/
    - Facebook: https://developers.facebook.com/docs/facebook-login
 3. **Create an issue**: Report issues in the MicroSite Forge repository
 
 ---
 
-**Note**: OAuth setup requires you to have active developer accounts with each provider and may involve verification processes. Some features like Apple Sign-In require paid developer accounts ($99/year).
+**Note**: OAuth setup requires you to have active developer accounts with each provider and may involve verification processes.

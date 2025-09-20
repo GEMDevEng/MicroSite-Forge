@@ -46,7 +46,7 @@ export interface SMSCampaign {
 
 export interface CampaignSegmentation {
   tags?: string[]
-  status?: string[]
+  status?: ('new' | 'qualified' | 'contacted' | 'converted')[]
   score?: { min?: number; max?: number }
   source?: string[]
   location?: string
@@ -303,15 +303,31 @@ export class CommunicationManager {
 
   private async logCommunication(
     leadId: string,
-    type: 'email' | 'sms' | 'call',
+    type: 'email' | 'sms' | 'call' | 'note',
     direction: 'inbound' | 'outbound',
     content: string,
     status: string,
-    messageId?: string
+    messageId?: string,
+    metadata?: Record<string, any>
   ): Promise<void> {
     try {
-      // For now, we'll log to console - communications table can be added later
-      logger.info('Communication logged', { leadId, type, direction, status, messageId })
+      const { error } = await supabase
+        .from('communications')
+        .insert({
+          lead_id: leadId,
+          type,
+          direction,
+          content,
+          status,
+          message_id: messageId,
+          metadata: metadata || null
+        })
+
+      if (error) {
+        logger.error('Failed to log communication to database', error, { leadId, type })
+      } else {
+        logger.info('Communication logged to database', { leadId, type, direction, status })
+      }
     } catch (error) {
       logger.error('Failed to log communication', error instanceof Error ? error : new Error('Unknown error'), { leadId, type })
     }
