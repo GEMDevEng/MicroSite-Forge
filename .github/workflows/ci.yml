@@ -49,6 +49,7 @@ jobs:
 
       - name: Check code coverage threshold
         run: |
+          set -e
           if [ ! -f ./coverage/coverage-summary.json ]; then
             echo "Coverage summary not found. Skipping coverage check."
             exit 0
