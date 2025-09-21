@@ -39,6 +39,9 @@ jobs:
 
       - name: Run unit tests
         run: npm run test -- --coverage --watchAll=false --ci || true
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: http://localhost:54321
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: dummy-anon-key
 
       - name: Print npm debug log if failure
         if: failure()
