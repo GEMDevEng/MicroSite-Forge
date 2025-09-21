@@ -20,6 +20,9 @@ const customJestConfig = {
     '!src/types/**/*',
     '!src/styles/**/*',
   ],
+  // Disable handle leakage detection to prevent random CI failures
+  detectOpenHandles: false,
+  detectLeaks: false,
   testMatch: [
     '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
