@@ -591,12 +591,14 @@ export class LeadManager {
       .select('*')
       .order('created_at', { ascending: false })
 
+    const validStatuses = ["new", "qualified", "contacted", "converted"] as const
+
     if (siteId) {
       query = query.eq('site_id', siteId)
     }
 
-    if (status) {
-      query = query.eq('status', status)
+    if (status && validStatuses.includes(status as any)) {
+      query = query.eq('status', status as typeof validStatuses[number])
     }
 
     const { data, error } = await query

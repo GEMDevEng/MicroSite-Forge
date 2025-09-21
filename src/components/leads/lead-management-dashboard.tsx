@@ -272,12 +272,14 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       setLoading(true)
       let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
 
+      const validStatuses = ["new", "qualified", "contacted", "converted"] as const
+
       if (siteId) {
         query = query.eq('site_id', siteId)
       }
 
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter)
+      if (statusFilter !== 'all' && validStatuses.includes(statusFilter as any)) {
+        query = query.eq('status', statusFilter as typeof validStatuses[number])
       }
 
       const { data, error } = await query.limit(100)
