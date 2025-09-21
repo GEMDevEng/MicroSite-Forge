@@ -53,24 +53,24 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Content generation failed',
-          message: 'No content was generated for the given input.',
+          message: 'No content was generated.',
         },
         { status: 500 }
       );
     }
 
     // Validate the generated content
-    const validation = validateContentQuality(generatedContent!, validated.keyword);
+    const validation = validateContentQuality(generatedContent, validated.keyword);
 
     const response: ContentResponse = {
       success: true,
       data: {
-        title: generatedContent!.title,
-        content: generatedContent!.content,
-        metaDescription: generatedContent!.metaDescription,
-        seoKeywords: generatedContent!.seoKeywords,
-        suggestedImages: generatedContent!.suggestedImages,
-        contentScore: generatedContent!.contentScore,
+        title: generatedContent.title,
+        content: generatedContent.content,
+        metaDescription: generatedContent.metaDescription,
+        seoKeywords: generatedContent.seoKeywords,
+        suggestedImages: generatedContent.suggestedImages,
+        contentScore: generatedContent.contentScore,
         validation,
       },
     };
@@ -112,9 +112,22 @@ export async function PUT(request: NextRequest) {
     // Generate all content pieces
     const generatedContents = await generateWebsiteContent(contents);
 
+    for (const content of generatedContents) {
+      if (!content) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Content generation failed',
+            message: 'Some content pieces were not generated.',
+          },
+          { status: 500 }
+        );
+      }
+    }
+
     // Validate each piece
     const validatedContents = generatedContents.map((content, index) => {
-      const validation = validateContentQuality(content!, contents[index].keyword);
+      const validation = validateContentQuality(content, contents[index].keyword);
       return {
         ...content,
         validation,
