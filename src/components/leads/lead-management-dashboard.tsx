@@ -107,7 +107,7 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type">Communication Type</Label>
-              <Select value={type} onValueChange={(value: CommunicationType) => setType(value)}>
+              <Select value={type} onValueChange={(value: string) => setType(value as CommunicationType)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -213,7 +213,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         <div className="flex gap-2">
-          <Select value={lead.status} onValueChange={(value: LeadStatus) => onStatusChange(lead.id, value)}>
+          <Select value={lead.status} onValueChange={(value: string) => onStatusChange(lead.id, value as LeadStatus)}>
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -615,7 +615,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
                         </Button>
                         <Select
                           value={lead.status}
-                          onValueChange={(value: LeadStatus) => handleStatusChange(lead.id, value)}
+                          onValueChange={(value: string) => handleStatusChange(lead.id, value as LeadStatus)}
                         >
                           <SelectTrigger className="w-[100px]">
                             <SelectValue />
