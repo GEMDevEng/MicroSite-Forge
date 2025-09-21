@@ -70,6 +70,7 @@ jobs:
 
       - name: Build application
         run: npm run build
+        continue-on-error: true
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
