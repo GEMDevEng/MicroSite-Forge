@@ -53,23 +53,24 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Content generation failed',
+          message: 'No content was generated for the given input.',
         },
         { status: 500 }
       );
     }
 
     // Validate the generated content
-    const validation = validateContentQuality(generatedContent, validated.keyword);
+    const validation = validateContentQuality(generatedContent!, validated.keyword);
 
     const response: ContentResponse = {
       success: true,
       data: {
-        title: generatedContent.title,
-        content: generatedContent.content,
-        metaDescription: generatedContent.metaDescription,
-        seoKeywords: generatedContent.seoKeywords,
-        suggestedImages: generatedContent.suggestedImages,
-        contentScore: generatedContent.contentScore,
+        title: generatedContent!.title,
+        content: generatedContent!.content,
+        metaDescription: generatedContent!.metaDescription,
+        seoKeywords: generatedContent!.seoKeywords,
+        suggestedImages: generatedContent!.suggestedImages,
+        contentScore: generatedContent!.contentScore,
         validation,
       },
     };
@@ -113,7 +114,7 @@ export async function PUT(request: NextRequest) {
 
     // Validate each piece
     const validatedContents = generatedContents.map((content, index) => {
-      const validation = validateContentQuality(content, contents[index].keyword);
+      const validation = validateContentQuality(content!, contents[index].keyword);
       return {
         ...content,
         validation,
