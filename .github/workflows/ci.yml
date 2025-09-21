@@ -38,7 +38,11 @@ jobs:
         run: npm run type-check
 
       - name: Run unit tests
-        run: npm run test -- --coverage --watchAll=false --ci --silent
+        run: npm run test -- --coverage --watchAll=false --ci
+
+      - name: Print npm debug log if failure
+        if: failure()
+        run: cat npm-debug.log || true
 
       - name: Run integration tests
         run: npm run test:integration
