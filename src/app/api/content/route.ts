@@ -48,6 +48,16 @@ export async function POST(request: NextRequest) {
     // Generate content
     const generatedContent = await generateContent(validated);
 
+    if (!generatedContent) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Content generation failed',
+        },
+        { status: 500 }
+      );
+    }
+
     // Validate the generated content
     const validation = validateContentQuality(generatedContent, validated.keyword);
 
