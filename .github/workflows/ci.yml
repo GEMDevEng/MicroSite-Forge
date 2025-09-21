@@ -38,7 +38,7 @@ jobs:
         run: npm run type-check
 
       - name: Run unit tests
-        run: npm run test -- --coverage --watchAll=false
+        run: npm run test -- --coverage --watchAll=false --ci --silent
 
       - name: Run integration tests
         run: npm run test:integration
