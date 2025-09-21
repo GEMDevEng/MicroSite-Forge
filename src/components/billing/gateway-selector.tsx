@@ -1,7 +1,8 @@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { AVAILABLE_GATEWAYS, paymentGatewayManager, PaymentGatewayType } from '@/lib/payment-gateway'
+import { AVAILABLE_GATEWAYS, paymentGatewayManager } from '@/lib/payment-gateway'
+import { PaymentGatewayType } from '@/types/database'
 
 export function GatewaySelector() {
   const currentGateway: PaymentGatewayType = 'stripe' // This would come from user's profile/default settings

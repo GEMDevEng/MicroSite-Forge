@@ -121,7 +121,7 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
             </div>
             <div>
               <Label htmlFor="direction">Direction</Label>
-              <Select value={direction} onValueChange={(value: 'inbound' | 'outbound') => setDirection(value)}>
+              <Select value={direction} onValueChange={(value: string) => setDirection(value as 'inbound' | 'outbound')}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -290,9 +290,12 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       // Transform the data to match LeadData interface
       const transformedLeads: LeadData[] = data.map(lead => ({
         id: lead.id,
-        contact: lead.contact_info as ContactInfo,
+        contact: {
+          ...lead.contact_info as ContactInfo,
+          source: lead.source
+        },
         score: lead.score_data as LeadScore,
-        tags: lead.tags || [],
+        tags: (lead.tags as string[]) || [],
         status: lead.status,
         assigned_to: lead.assigned_to,
         follow_up_date: lead.follow_up_date,

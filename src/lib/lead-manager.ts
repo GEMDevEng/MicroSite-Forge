@@ -14,27 +14,6 @@ import {
   AssignmentResult
 } from '../types/leads'
 
-export interface IncomingLead {
-  site_id: string
-  name: string
-  email: string
-  phone?: string
-  message?: string
-  source: string
-}
-
-export interface EnrichedLeadData {
-  company?: string
-  title?: string
-  location?: string
-  industry?: string
-  companySize?: string
-  socialProfiles?: {
-    linkedin?: string
-    twitter?: string
-  }
-}
-
 export class LeadScorer {
   static calculateScore(incomingLead: IncomingLead): LeadScore {
     let engagement = 20 // Base engagement
@@ -395,9 +374,9 @@ export class LeadRouter {
   }
 
   private static hasRelevantSkills(leadData: LeadData, memberSkills: string[]): boolean {
-    const leadContext = `${leadData.contact.company || ''} ${leadData.contact.title || ''} ${leadData.contact.industry || ''}`.toLowerCase()
-    const leadTitle = (leadData.contact.title || '').toLowerCase()
-    const leadIndustry = (leadData.contact.industry || '').toLowerCase()
+    const leadContext = `${leadData.contact.company || ''}`.toLowerCase()
+    const leadTitle = ''.toLowerCase() // No title available
+    const leadIndustry = ''.toLowerCase() // No industry available
 
     const relevantSkills = memberSkills.map(skill => skill.toLowerCase())
 
@@ -538,6 +517,11 @@ export class LeadManager {
 
     if (error) {
       logger.error('Failed to create lead', error, { lead: incomingLead })
+      throw new Error('Failed to create lead')
+    }
+
+    if (!data) {
+      logger.error('No data returned from lead creation', new Error('No data returned'), { lead: incomingLead })
       throw new Error('Failed to create lead')
     }
 
