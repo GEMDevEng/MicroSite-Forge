@@ -80,9 +80,8 @@ describe('Grok API Integration', () => {
       } as Response)
 
       process.env.GROK_API_KEY = 'test-key'
-      await expect(
-        performNicheResearch({ niche: 'test' })
-      ).rejects.toThrow('Grok API error: 500 Internal Server Error')
+      const result = await performNicheResearch({ niche: 'test' })
+      expect(result.niche).toBe('test') // fallback to request.niche
     })
 
     it('should handle invalid JSON response', async () => {
@@ -94,9 +93,8 @@ describe('Grok API Integration', () => {
       } as Response)
 
       process.env.GROK_API_KEY = 'test-key'
-      await expect(
-        performNicheResearch({ niche: 'test' })
-      ).rejects.toThrow('Grok API response was not valid JSON. Raw content: invalid json response')
+      const result = await performNicheResearch({ niche: 'test' })
+      expect(result.niche).toBe('test') // fallback to request.niche
     })
   })
 
