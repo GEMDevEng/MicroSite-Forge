@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import { LeadData, LeadScore, ContactInfo, Database, PaymentGatewayType } from '../types/database'
+import { LeadData, LeadScore, ContactInfo, Database, PaymentGatewayType, Json } from '../types/database'
 import { logger } from './logger'
 import {
   IncomingLead,
@@ -98,7 +98,7 @@ export class LeadEnrichment {
       const { error: updateError } = await supabase
         .from('leads')
         .update({
-          contact_info: contactInfo,
+          contact_info: JSON.stringify(contactInfo) as Json,
           enriched_at: new Date().toISOString()
         })
         .eq('id', leadId)

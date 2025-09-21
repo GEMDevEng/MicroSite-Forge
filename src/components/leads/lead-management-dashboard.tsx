@@ -42,7 +42,7 @@ import { CommunicationManager } from '@/lib/communication'
 
 
 
-type LeadStatus = 'new' | 'qualified' | 'contacted' | 'converted'
+type Status = 'new' | 'qualified' | 'contacted' | 'converted'
 type CommunicationType = 'email' | 'sms' | 'call' | 'note'
 
 interface CommunicationDialogProps {
@@ -161,7 +161,7 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
 
 interface LeadCardProps {
   lead: LeadData
-  onStatusChange: (leadId: string, status: LeadStatus) => void
+  onStatusChange: (leadId: string, status: Status) => void
   onAssign: (leadId: string, assignee: string) => void
   onCommunicationOpen: (leadId: string) => void
 }
@@ -172,7 +172,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onAssign,
   onCommunicationOpen
 }) => {
-  const getStatusColor = (status: LeadStatus) => {
+  const getStatusColor = (status: Status) => {
     switch (status) {
       case 'new': return 'bg-blue-100 text-blue-800'
       case 'qualified': return 'bg-yellow-100 text-yellow-800'
@@ -213,7 +213,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         <div className="flex gap-2">
-          <Select value={lead.status} onValueChange={(value: string) => onStatusChange(lead.id, value as LeadStatus)}>
+          <Select value={lead.status} onValueChange={(value: string) => onStatusChange(lead.id, value as Status)}>
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -288,22 +288,86 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       }
 
       // Transform the data to match LeadData interface
-      const transformedLeads: LeadData[] = data.map(lead => ({
-        id: lead.id,
-        contact: {
-          ...lead.contact_info as ContactInfo,
-          source: lead.source
-        },
-        score: lead.score_data as LeadScore,
-        tags: (lead.tags as string[]) || [],
-        status: lead.status,
-        assigned_to: lead.assigned_to,
-        follow_up_date: lead.follow_up_date,
-        marketing_campaign: lead.marketing_campaign,
-        enriched_at: lead.enriched_at,
-        created_at: lead.created_at,
-        updated_at: lead.updated_at
-      }))
+      const transformedLeads: LeadData[] = data.map(lead => {
+        // Type guard functions
+        function isContactInfo(obj: any): obj is ContactInfo {
+          return (
+            typeof obj === "object" &&
+            obj !== null &&
+            "name" in obj &&
+            "email" in obj &&
+            typeof obj.name === "string" &&
+            typeof obj.email === "string"
+          )
+        }
+
+        function isLeadScore(obj: any): obj is LeadScore {
+          return (
+            typeof obj === "object" &&
+            obj !== null &&
+            "source" in obj &&
+            "engagement" in obj &&
+            "intent_level" in obj &&
+            "budget_indicators" in obj &&
+            "timeline_signals" in obj &&
+            "total_score" in obj &&
+            typeof obj.source === "string" &&
+            typeof obj.engagement === "number" &&
+            typeof obj.intent_level === "number" &&
+            typeof obj.budget_indicators === "number" &&
+            typeof obj.timeline_signals === "number" &&
+            typeof obj.total_score === "number"
+          )
+        }
+
+        let contactInfo: ContactInfo;
+        if (isContactInfo(lead.contact_info)) {
+          contactInfo = lead.contact_info;
+        } else {
+          contactInfo = {
+            name: lead.name || "Unknown",
+            email: lead.email,
+            phone: lead.phone || undefined
+          };
+        }
+
+        let leadScore: LeadScore;
+        if (isLeadScore(lead.score_data)) {
+          leadScore = lead.score_data;
+        } else {
+          leadScore = {
+            source: "organic" as const,
+            engagement: 0,
+            intent_level: 0,
+            budget_indicators: 0,
+            timeline_signals: 0,
+            total_score: 0
+          };
+        }
+
+        const validStatuses = ["new", "qualified", "contacted", "converted"] as const;
+        type StatusType = typeof validStatuses[number];
+        let safeStatus: StatusType;
+        if (validStatuses.includes(lead.status as any)) {
+          safeStatus = lead.status as StatusType;
+        } else {
+          safeStatus = "new";
+        }
+
+        return {
+          id: lead.id,
+          contact: contactInfo,
+          score: leadScore,
+          tags: Array.isArray(lead.tags) ? lead.tags as string[] : [],
+          status: safeStatus,
+          assigned_to: lead.assigned_to,
+          follow_up_date: lead.follow_up_date,
+          marketing_campaign: lead.marketing_campaign,
+          enriched_at: lead.enriched_at,
+          created_at: lead.created_at,
+          updated_at: lead.updated_at
+        }
+      })
 
       let filteredLeads = transformedLeads
 
@@ -337,7 +401,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
     // Update filtered leads - for now, this triggers re-render
   }, [searchTerm, leads])
 
-  const handleStatusChange = async (leadId: string, status: LeadStatus) => {
+  const handleStatusChange = async (leadId: string, status: Status) => {
     try {
       const { error } = await supabase
         .from('leads')
@@ -593,7 +657,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
                         {lead.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>{lead.contact.source || 'website'}</TableCell>
+                    <TableCell>{lead.score.source}</TableCell>
                     <TableCell>
                       {new Date(lead.created_at).toLocaleDateString()}
                     </TableCell>
@@ -615,7 +679,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
                         </Button>
                         <Select
                           value={lead.status}
-                          onValueChange={(value: string) => handleStatusChange(lead.id, value as LeadStatus)}
+                          onValueChange={(value: string) => handleStatusChange(lead.id, value as Status)}
                         >
                           <SelectTrigger className="w-[100px]">
                             <SelectValue />
