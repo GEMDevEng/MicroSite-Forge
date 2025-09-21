@@ -94,10 +94,10 @@ export async function generateContent(request: ContentGenerationRequest): Promis
     // Parse the JSON response with error handling
     let parsed;
     try {
-      parsed = JSON.parse(content) as GeneratedContent;
-    } catch (jsonErr) {
-      console.error("Failed to parse OpenAI API response as JSON:", jsonErr, content);
-      throw new Error("Invalid JSON from OpenAI API");
+      parsed = JSON.parse(content);
+    } catch (e) {
+      console.error("OpenAI API returned invalid JSON:", content);
+      throw new Error("OpenAI API response was not valid JSON");
     }
 
     // Validate required fields
@@ -240,9 +240,9 @@ export async function generateHeadingStructure(keyword: string, contentType: str
     let parsed;
     try {
       parsed = JSON.parse(content);
-    } catch (jsonErr) {
-      console.error("Failed to parse OpenAI API response as JSON:", jsonErr, content);
-      throw new Error("Invalid JSON from OpenAI API");
+    } catch (e) {
+      console.error("OpenAI API returned invalid JSON:", content);
+      throw new Error("OpenAI API response was not valid JSON");
     }
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {

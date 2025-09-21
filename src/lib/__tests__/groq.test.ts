@@ -96,7 +96,7 @@ describe('Grok API Integration', () => {
       process.env.GROK_API_KEY = 'test-key'
       await expect(
         performNicheResearch({ niche: 'test' })
-      ).rejects.toThrow('Invalid JSON from Grok API')
+      ).rejects.toThrow('Grok API response was not valid JSON')
     })
   })
 

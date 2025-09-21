@@ -111,7 +111,7 @@ describe('OpenAI API Integration', () => {
           keyword: 'test',
           contentType: 'blog-post',
         })
-      ).rejects.toThrow('Invalid JSON from OpenAI API')
+      ).rejects.toThrow('OpenAI API response was not valid JSON')
     })
   })
 
