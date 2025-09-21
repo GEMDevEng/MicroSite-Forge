@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Content generation failed',
-          message: 'Could not generate content. Please try again.',
         },
         { status: 500 }
       );
@@ -118,7 +117,6 @@ export async function PUT(request: NextRequest) {
           {
             success: false,
             error: 'Content generation failed',
-            message: 'Some content pieces were not generated.',
           },
           { status: 500 }
         );
