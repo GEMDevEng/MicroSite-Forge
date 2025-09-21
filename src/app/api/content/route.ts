@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
         {
           success: false,
           error: 'Content generation failed',
-          message: 'No content was generated.',
+          message: 'Could not generate content. Please try again.',
         },
         { status: 500 }
       );
