@@ -194,7 +194,7 @@ export function SubscriptionOverview() {
                 <div>
                   <h3 className="font-medium text-yellow-900">Approaching Limits</h3>
                   <p className="text-sm text-yellow-700 mt-1">
-                    You're approaching your monthly site generation limit.
+                    You are approaching your monthly site generation limit.
                     Consider upgrading your plan for unlimited usage.
                   </p>
                   <Button size="sm" className="mt-2" variant="outline">
