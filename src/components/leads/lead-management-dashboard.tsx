@@ -405,7 +405,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
     try {
       const { error } = await supabase
         .from('leads')
-        .update({ status, updated_at: new Date().toISOString() })
+        .update({ status: status as any, updated_at: new Date().toISOString() })
         .eq('id', leadId)
 
       if (error) {
@@ -704,7 +704,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       {/* Communication Dialog */}
       {selectedLeadData && (
         <CommunicationDialog
-          leadId={selectedLead}
+          leadId={selectedLead as string}
           leadName={selectedLeadData.contact.name}
           open={communicationDialogOpen}
           onOpenChange={setCommunicationDialogOpen}

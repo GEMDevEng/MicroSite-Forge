@@ -554,7 +554,7 @@ export class LeadManager {
     const { error } = await supabase
       .from('leads')
       .update({
-        status: status as any,
+        status: status as "new" | "qualified" | "contacted" | "converted",
         updated_at: new Date().toISOString()
       })
       .eq('id', leadId)
