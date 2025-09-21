@@ -621,3 +621,6 @@ export class LeadManager {
     }))
   }
 }
+
+// Re-export IncomingLead for API usage
+export type { IncomingLead }
