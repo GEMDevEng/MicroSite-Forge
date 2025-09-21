@@ -128,3 +128,6 @@ describe('OpenAI API Integration', () => {
       const result = validateContentQuality(content, 'plumbing services')
 
       expect(result.score).toBeGreaterThan(80)
+    })
+  })
+})
