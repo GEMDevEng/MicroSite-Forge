@@ -219,6 +219,28 @@ export class CommunicationManager {
     this.smsSender = new SMSSender()
   }
 
+  private isContactInfoWithCompany(obj: any): obj is { company?: string } {
+    return obj !== null && typeof obj === 'object' && !Array.isArray(obj)
+  }
+
+  private isScoreDataWithTotalScore(obj: any): obj is { total_score?: number } {
+    return obj !== null && typeof obj === 'object' && !Array.isArray(obj)
+  }
+
+  private getSafeCompany(contactInfo: any): string {
+    if (this.isContactInfoWithCompany(contactInfo) && contactInfo.company) {
+      return contactInfo.company
+    }
+    return 'your company'
+  }
+
+  private getSafeTotalScore(scoreData: any): number {
+    if (this.isScoreDataWithTotalScore(scoreData) && scoreData.total_score) {
+      return scoreData.total_score
+    }
+    return 0
+  }
+
   async sendLeadWelcomeEmail(leadId: string): Promise<boolean> {
     try {
       const { data: lead, error } = await supabase
@@ -233,10 +255,16 @@ export class CommunicationManager {
       }
 
       // Use default welcome template (will be stored in database later)
-      const contactInfo = lead.contact_info as any
+      const contactInfo = lead.contact_info
+
+      let company = 'your company'
+      if (this.isContactInfoWithCompany(contactInfo) && contactInfo.company) {
+        company = contactInfo.company
+      }
+
       const variables = {
         firstName: lead.name.split(' ')[0],
-        company: contactInfo?.company || 'your company'
+        company
       }
 
       const subject = `Welcome to MicroSite Forge, ${variables.firstName}!`
@@ -359,8 +387,8 @@ export class CommunicationManager {
       const promises = leads.map(async (lead) => {
         const variables = {
           firstName: lead.name.split(' ')[0],
-          company: lead.contact_info?.company || 'your company',
-          score: lead.score_data?.total_score || 0
+          company: this.getSafeCompany(lead.contact_info),
+          score: this.getSafeTotalScore(lead.score_data)
         }
 
         const result = await this.emailSender.sendEmail(
@@ -401,7 +429,7 @@ export class CommunicationManager {
         .map(async (lead) => {
           const variables = {
             firstName: lead.name.split(' ')[0],
-            company: lead.contact_info?.company || 'your company'
+            company: this.getSafeCompany(lead.contact_info)
           }
 
           const result = await this.smsSender.sendSMS(lead.phone!, campaign.smsTemplate.content, variables)

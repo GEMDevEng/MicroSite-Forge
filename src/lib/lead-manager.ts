@@ -606,19 +606,45 @@ export class LeadManager {
       throw new Error('Failed to fetch leads')
     }
 
-    return data.map(lead => ({
-      id: lead.id,
-      contact: lead.contact_info as unknown as ContactInfo,
-      score: lead.score_data as unknown as LeadScore,
-      tags: lead.tags as string[] || [],
-      status: lead.status,
-      assigned_to: lead.assigned_to,
-      follow_up_date: lead.follow_up_date,
-      marketing_campaign: lead.marketing_campaign,
-      enriched_at: lead.enriched_at,
-      created_at: lead.created_at,
-      updated_at: lead.updated_at
-    }))
+    return data.map(lead => {
+      // Type guard functions
+      function isContactInfo(obj: any): obj is ContactInfo {
+        return obj && typeof obj.name === "string" && typeof obj.email === "string"
+      }
+
+      function isLeadScore(obj: any): obj is LeadScore {
+        return obj && typeof obj.total_score === "number" && typeof obj.source === "string"
+      }
+
+      const contact = isContactInfo(lead.contact_info) ? lead.contact_info : {
+        name: lead.name || "Unknown",
+        email: lead.email,
+        phone: lead.phone || undefined
+      }
+
+      const score = isLeadScore(lead.score_data) ? lead.score_data : {
+        source: "organic" as const,
+        engagement: 0,
+        intent_level: 0,
+        budget_indicators: 0,
+        timeline_signals: 0,
+        total_score: 0
+      }
+
+      return {
+        id: lead.id,
+        contact,
+        score,
+        tags: Array.isArray(lead.tags) ? lead.tags as string[] : [],
+        status: lead.status,
+        assigned_to: lead.assigned_to,
+        follow_up_date: lead.follow_up_date,
+        marketing_campaign: lead.marketing_campaign,
+        enriched_at: lead.enriched_at,
+        created_at: lead.created_at,
+        updated_at: lead.updated_at
+      }
+    })
   }
 }
 

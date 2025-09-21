@@ -44,10 +44,10 @@ export interface LeadData {
   score: LeadScore
   tags: string[]
   status: 'new' | 'qualified' | 'contacted' | 'converted'
-  assigned_to?: string
-  follow_up_date?: string
-  marketing_campaign?: string
-  enriched_at?: string
+  assigned_to?: string | null
+  follow_up_date?: string | null
+  marketing_campaign?: string | null
+  enriched_at?: string | null
   created_at: string
   updated_at: string
 }
