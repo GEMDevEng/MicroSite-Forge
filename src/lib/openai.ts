@@ -97,7 +97,7 @@ export async function generateContent(request: ContentGenerationRequest): Promis
       parsed = JSON.parse(content);
     } catch (e) {
       console.error("OpenAI API returned invalid JSON:", content);
-      throw new Error("OpenAI API response was not valid JSON");
+      throw new Error(`OpenAI API response was not valid JSON. Raw content: ${content}`);
     }
 
     // Validate required fields

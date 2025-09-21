@@ -91,7 +91,7 @@ export async function performNicheResearch(request: NicheResearchRequest): Promi
       parsed = JSON.parse(content);
     } catch (e) {
       console.error("Grok API returned invalid JSON:", content);
-      throw new Error("Grok API response was not valid JSON");
+      throw new Error(`Grok API response was not valid JSON. Raw content: ${content}`);
     }
     return parsed;
   } catch (error) {
