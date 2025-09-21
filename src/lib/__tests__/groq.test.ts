@@ -82,7 +82,21 @@ describe('Grok API Integration', () => {
       process.env.GROK_API_KEY = 'test-key'
       await expect(
         performNicheResearch({ niche: 'test' })
-      ).rejects.toThrow()
+      ).rejects.toThrow('Grok API error: 500 Internal Server Error')
+    })
+
+    it('should handle invalid JSON response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'invalid json response' } }],
+        }),
+      } as Response)
+
+      process.env.GROK_API_KEY = 'test-key'
+      await expect(
+        performNicheResearch({ niche: 'test' })
+      ).rejects.toThrow('Invalid JSON from Grok API')
     })
   })
 

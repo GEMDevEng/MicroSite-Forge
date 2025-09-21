@@ -97,6 +97,22 @@ describe('OpenAI API Integration', () => {
         })
       ).rejects.toThrow('Invalid response format from OpenAI')
     })
+
+    it('should handle invalid JSON response', async () => {
+      mockFetch.mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          choices: [{ message: { content: 'not valid json' } }],
+        }),
+      } as Response)
+
+      await expect(
+        generateContent({
+          keyword: 'test',
+          contentType: 'blog-post',
+        })
+      ).rejects.toThrow('Invalid JSON from OpenAI API')
+    })
   })
 
   describe('validateContentQuality', () => {

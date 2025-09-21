@@ -91,8 +91,14 @@ export async function generateContent(request: ContentGenerationRequest): Promis
       throw new Error("No response from OpenAI API");
     }
 
-    // Parse the JSON response
-    const parsed = JSON.parse(content) as GeneratedContent;
+    // Parse the JSON response with error handling
+    let parsed;
+    try {
+      parsed = JSON.parse(content) as GeneratedContent;
+    } catch (jsonErr) {
+      console.error("Failed to parse OpenAI API response as JSON:", jsonErr, content);
+      throw new Error("Invalid JSON from OpenAI API");
+    }
 
     // Validate required fields
     if (!parsed.title || !parsed.content) {
@@ -231,7 +237,13 @@ export async function generateHeadingStructure(keyword: string, contentType: str
       throw new Error("No response from OpenAI API");
     }
 
-    const parsed = JSON.parse(content);
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (jsonErr) {
+      console.error("Failed to parse OpenAI API response as JSON:", jsonErr, content);
+      throw new Error("Invalid JSON from OpenAI API");
+    }
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("OpenAI headings error:", error);

@@ -85,8 +85,14 @@ export async function performNicheResearch(request: NicheResearchRequest): Promi
       throw new Error("No response from Grok API");
     }
 
-    // Parse the JSON response
-    const parsed = JSON.parse(content);
+    // Parse the JSON response with error handling
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (jsonErr) {
+      console.error("Failed to parse Grok API response as JSON:", jsonErr, content);
+      throw new Error("Invalid JSON from Grok API");
+    }
     return parsed;
   } catch (error) {
     console.error("Grok API error:", error);
@@ -139,7 +145,15 @@ export async function generateContentIdeas(keyword: string, contentType: string 
       throw new Error("No response from Grok API");
     }
 
-    const parsed = JSON.parse(content);
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (jsonErr) {
+      // For content ideas, return empty array instead of throwing
+      const errorMessage = jsonErr instanceof Error ? jsonErr.message : 'Unknown JSON parsing error';
+      console.warn("Failed to parse Grok API response as JSON, returning empty array:", errorMessage);
+      return [];
+    }
     return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error("Grok content ideas error:", error);
