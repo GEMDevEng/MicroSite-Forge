@@ -2,17 +2,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import Dashboard from '../page'
 
-// Mock supabase
-jest.mock('../../../lib/supabase', () => ({
-  createClient: jest.fn(() => ({
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        limit: jest.fn(() => Promise.resolve({ data: [], error: null }))
-      }))
-    }))
-  }))
-}))
-
 // Mock next/navigation
 const mockPush = jest.fn()
 jest.mock('next/navigation', () => ({
@@ -21,23 +10,43 @@ jest.mock('next/navigation', () => ({
   })
 }))
 
+// Mock the auth store
+jest.mock('../../../stores/auth', () => ({
+  useAuthStore: jest.fn(() => ({
+    user: { email: 'test@example.com' },
+    signOut: jest.fn(),
+    loading: false,
+    initialized: true,
+    initialize: jest.fn()
+  }))
+}))
+
 describe('Dashboard Page', () => {
   beforeEach(() => {
     jest.clearAllMocks()
   })
 
-  it('renders without crashing', async () => {
+  it('renders dashboard when user is authenticated', async () => {
     render(<Dashboard />)
 
-    // Wait for async operations to complete
     await waitFor(() => {
-      expect(screen.getByText('Your Microsites')).toBeInTheDocument()
+      expect(screen.getByText(/MicroSite Forge/)).toBeInTheDocument()
     })
+
+    expect(screen.getByText(/Welcome, test@example\.com/)).toBeInTheDocument()
   })
 
-  it('displays loading state initially', () => {
+  it('renders loading state when not initialized', () => {
+    // Mock for loading state
+    jest.mocked(require('../../../stores/auth')).useAuthStore.mockReturnValueOnce({
+      user: null,
+      signOut: jest.fn(),
+      loading: true,
+      initialized: false,
+      initialize: jest.fn()
+    })
+
     render(<Dashboard />)
-    // Loading state might not be visible due to async nature
-    expect(screen.getByText('Your Microsites')).toBeInTheDocument()
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
   })
 })
