@@ -23,7 +23,7 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set, get) => ({
+    (set, _get) => ({
       user: null,
       session: null,
       loading: false,
@@ -32,28 +32,31 @@ export const useAuthStore = create<AuthState>()(
       initialize: async () => {
         try {
           set({ loading: true })
-          
+
           // Get initial session
-          const { data: { session }, error } = await supabase.auth.getSession()
-          
+          const {
+            data: { session },
+            error,
+          } = await supabase.auth.getSession()
+
           if (error) {
             console.error('Error getting session:', error)
             return
           }
 
-          set({ 
-            session, 
+          set({
+            session,
             user: session?.user ?? null,
-            initialized: true 
+            initialized: true,
           })
 
           // Listen for auth changes
           supabase.auth.onAuthStateChange(async (event, session) => {
             console.log('Auth state changed:', event, session?.user?.email)
-            
-            set({ 
-              session, 
-              user: session?.user ?? null 
+
+            set({
+              session,
+              user: session?.user ?? null,
             })
 
             // Handle sign out
@@ -71,7 +74,7 @@ export const useAuthStore = create<AuthState>()(
       signIn: async (email: string, password: string) => {
         try {
           set({ loading: true })
-          
+
           const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -81,9 +84,9 @@ export const useAuthStore = create<AuthState>()(
             throw error
           }
 
-          set({ 
-            user: data.user, 
-            session: data.session 
+          set({
+            user: data.user,
+            session: data.session,
           })
         } catch (error) {
           console.error('Sign in error:', error)
@@ -96,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
       signUp: async (email: string, password: string) => {
         try {
           set({ loading: true })
-          
+
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -115,9 +118,9 @@ export const useAuthStore = create<AuthState>()(
             return
           }
 
-          set({ 
-            user: data.user, 
-            session: data.session 
+          set({
+            user: data.user,
+            session: data.session,
           })
         } catch (error) {
           console.error('Sign up error:', error)
@@ -130,16 +133,16 @@ export const useAuthStore = create<AuthState>()(
       signOut: async () => {
         try {
           set({ loading: true })
-          
+
           const { error } = await supabase.auth.signOut()
-          
+
           if (error) {
             throw error
           }
 
-          set({ 
-            user: null, 
-            session: null 
+          set({
+            user: null,
+            session: null,
           })
         } catch (error) {
           console.error('Sign out error:', error)
@@ -152,7 +155,7 @@ export const useAuthStore = create<AuthState>()(
       resetPassword: async (email: string) => {
         try {
           set({ loading: true })
-          
+
           const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/auth/reset-password`,
           })
@@ -192,8 +195,6 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-
-
       signInWithFacebook: async () => {
         try {
           set({ loading: true })
@@ -229,7 +230,9 @@ export const useAuthStore = create<AuthState>()(
           }
 
           // Refresh user data
-          const { data: { user } } = await supabase.auth.getUser()
+          const {
+            data: { user },
+          } = await supabase.auth.getUser()
           set({ user })
         } catch (error) {
           console.error('Update profile error:', error)
@@ -245,10 +248,10 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ 
+      partialize: (state) => ({
         user: state.user,
         session: state.session,
-        initialized: state.initialized 
+        initialized: state.initialized,
       }),
     }
   )
