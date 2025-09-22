@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user owns the site
-    const { data: site, error: siteCheckError } = await supabase
+    const { data: site, error: siteCheckError }: { data: { id: string; user_id: string } | null, error: any } = await supabase
       .from('sites')
       .select('id, user_id')
       .eq('id', site_id)

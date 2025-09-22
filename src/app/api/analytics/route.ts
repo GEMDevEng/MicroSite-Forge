@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@/lib/supabase'
 import { AnalyticsEngine, ReportBuilder, ReportScheduler } from '@/lib/analytics'
 import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
-    const res = NextResponse.next()
-    const supabase = createMiddlewareClient({ req: request, res })
+    const supabase = createServerClient()
 
     const {
       data: { session },
@@ -70,8 +69,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const res = NextResponse.next()
-    const supabase = createMiddlewareClient({ req: request, res })
+    const supabase = createServerClient()
 
     const {
       data: { session },

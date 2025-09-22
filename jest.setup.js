@@ -1,3 +1,4 @@
+import 'whatwg-fetch'
 import '@testing-library/jest-dom'
 
 // Mock Next.js router
@@ -41,6 +42,8 @@ jest.mock('@/lib/supabase', () => ({
     })),
   },
 }))
+
+global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve({ data: [] }) }))
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'

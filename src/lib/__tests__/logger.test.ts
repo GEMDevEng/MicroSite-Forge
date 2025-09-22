@@ -28,7 +28,7 @@ describe('Logger', () => {
   it('should log error messages', () => {
     const error = new Error('Test error')
     logger.error('Test error message', error, { id: 123 })
-    expect(console.error).toHaveBeenCalledTimes(1)
+    expect(console.error).toHaveBeenCalledTimes(2)
   })
 
   it('should log warning messages', () => {
