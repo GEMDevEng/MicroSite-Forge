@@ -69,7 +69,9 @@ export function InvoiceGenerator() {
   }
 
   const handleGenerateInvoice = () => {
-    console.log('Generating invoice for:', selectedPeriod, selectedClient)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('Generating invoice for:', selectedPeriod, selectedClient)
+    }
     // In a real implementation, this would trigger the invoice generation API
     setGenerateInvoice(false)
   }

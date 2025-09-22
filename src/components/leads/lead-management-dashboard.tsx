@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -267,7 +267,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
   const [selectedLead, setSelectedLead] = useState<string | null>(null)
   const [communicationDialogOpen, setCommunicationDialogOpen] = useState(false)
 
-  const fetchLeads = async () => {
+  const fetchLeads = useCallback(async () => {
     try {
       setLoading(true)
       let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
@@ -371,27 +371,17 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         }
       })
 
-      let filteredLeads = transformedLeads
-
-      if (searchTerm) {
-        filteredLeads = transformedLeads.filter(lead =>
-          lead.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.contact.phone?.includes(searchTerm)
-        )
-      }
-
-      setLeads(filteredLeads)
+      setLeads(transformedLeads)
     } catch (error) {
       logger.error('Failed to fetch leads', error instanceof Error ? error : new Error('Unknown error'), { userId, siteId })
     } finally {
       setLoading(false)
     }
-  }
+  }, [userId, siteId, statusFilter])
 
   useEffect(() => {
     fetchLeads()
-  }, [userId, siteId, statusFilter])
+  }, [fetchLeads])
 
   useEffect(() => {
     const filtered = leads.filter(lead =>

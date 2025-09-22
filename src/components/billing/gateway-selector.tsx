@@ -10,14 +10,18 @@ export function GatewaySelector() {
   const handleGatewayChange = async (value: string) => {
     try {
       const newGateway = value as PaymentGatewayType
-      console.log(`Switching to gateway: ${newGateway}`)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`Switching to gateway: ${newGateway}`)
+      }
       // In a real implementation, this would:
       // 1. Update user's preferred gateway in database
       // 2. Validate the new gateway is properly configured
       // 3. Handle any migration logic for active subscriptions
       // 4. Send confirmation email
     } catch (error) {
-      console.error('Failed to change gateway:', error)
+      if (process.env.NODE_ENV !== 'production') {
+        console.error('Failed to change gateway:', error)
+      }
     }
   }
 
