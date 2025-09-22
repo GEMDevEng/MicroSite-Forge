@@ -1,22 +1,22 @@
-const GITHUB_API_BASE = "https://api.github.com";
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_API_BASE = 'https://api.github.com'
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN
 
 interface GitHubRepo {
-  name: string;
-  full_name: string;
-  html_url: string;
-  clone_url: string;
-  default_branch: string;
-  visibility: 'public' | 'private';
+  name: string
+  full_name: string
+  html_url: string
+  clone_url: string
+  default_branch: string
+  visibility: 'public' | 'private'
 }
 
 interface GitHubFile {
-  name: string;
-  path: string;
-  sha: string;
-  size: number;
-  url: string;
-  type: 'file' | 'dir';
+  name: string
+  path: string
+  sha: string
+  size: number
+  url: string
+  type: 'file' | 'dir'
 }
 
 /**
@@ -28,18 +28,18 @@ interface GitHubFile {
  */
 export async function createHugoTemplateRepository(
   repoName: string,
-  description: string = "Hugo template for microsite generation",
+  description: string = 'Hugo template for microsite generation',
   isPrivate: boolean = false
 ): Promise<GitHubRepo> {
   if (!GITHUB_TOKEN) {
-    throw new Error("GITHUB_TOKEN is not configured");
+    throw new Error('GITHUB_TOKEN is not configured')
   }
 
   try {
     const response = await fetch(`${GITHUB_API_BASE}/user/repos`, {
       method: 'POST',
       headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
+        Authorization: `token ${GITHUB_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
@@ -48,17 +48,19 @@ export async function createHugoTemplateRepository(
         private: isPrivate,
         auto_init: true, // Create README.md
       }),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
     }
 
-    const repo = await response.json();
-    return repo;
+    const repo = await response.json()
+    return repo
   } catch (error) {
-    console.error("GitHub create repo error:", error);
-    throw new Error(`Failed to create repository: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('GitHub create repo error:', error)
+    throw new Error(
+      `Failed to create repository: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
   }
 }
 
@@ -72,29 +74,31 @@ export async function createHugoTemplateRepository(
 export async function getRepositoryContents(
   owner: string,
   repo: string,
-  path: string = ""
+  path: string = ''
 ): Promise<GitHubFile[]> {
   if (!GITHUB_TOKEN) {
-    throw new Error("GITHUB_TOKEN is not configured");
+    throw new Error('GITHUB_TOKEN is not configured')
   }
 
   try {
-    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`;
+    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`
     const response = await fetch(url, {
       headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
+        Authorization: `token ${GITHUB_TOKEN}`,
       },
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
     }
 
-    const contents = await response.json();
-    return Array.isArray(contents) ? contents : [contents];
+    const contents = await response.json()
+    return Array.isArray(contents) ? contents : [contents]
   } catch (error) {
-    console.error("GitHub get contents error:", error);
-    throw new Error(`Failed to get repository contents: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('GitHub get contents error:', error)
+    throw new Error(
+      `Failed to get repository contents: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
   }
 }
 
@@ -114,28 +118,28 @@ export async function createOrUpdateFile(
   path: string,
   content: string,
   message: string,
-  branch: string = "main"
+  branch: string = 'main'
 ): Promise<any> {
   if (!GITHUB_TOKEN) {
-    throw new Error("GITHUB_TOKEN is not configured");
+    throw new Error('GITHUB_TOKEN is not configured')
   }
 
   try {
-    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`;
+    const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}/contents/${path}`
 
     // Check if file exists to get SHA for update
-    let sha: string | undefined;
+    let sha: string | undefined
     try {
       const existingFileResponse = await fetch(url, {
         headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
+          Authorization: `token ${GITHUB_TOKEN}`,
         },
-      });
+      })
       if (existingFileResponse.ok) {
-        const existingFile = await existingFileResponse.json();
-        sha = existingFile.sha;
+        const existingFile = await existingFileResponse.json()
+        sha = existingFile.sha
       }
-    } catch (error) {
+    } catch {
       // File doesn't exist, which is fine for creation
     }
 
@@ -143,30 +147,32 @@ export async function createOrUpdateFile(
       message,
       content: Buffer.from(content).toString('base64'),
       branch,
-    };
+    }
 
     if (sha) {
-      body.sha = sha; // Required for updates
+      body.sha = sha // Required for updates
     }
 
     const response = await fetch(url, {
       method: 'PUT',
       headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
+        Authorization: `token ${GITHUB_TOKEN}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-    });
+    })
 
     if (!response.ok) {
-      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`)
     }
 
-    const result = await response.json();
-    return result;
+    const result = await response.json()
+    return result
   } catch (error) {
-    console.error("GitHub file operation error:", error);
-    throw new Error(`Failed to create/update file: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    console.error('GitHub file operation error:', error)
+    throw new Error(
+      `Failed to create/update file: ${error instanceof Error ? error.message : 'Unknown error'}`
+    )
   }
 }
 
@@ -180,16 +186,16 @@ export async function initializeHugoTemplate(
   owner: string,
   repo: string,
   templateConfig: {
-    title?: string;
-    baseURL?: string;
-    theme?: string;
+    title?: string
+    baseURL?: string
+    theme?: string
   } = {}
 ): Promise<void> {
-  const { title = "Microsite Template", baseURL = "/", theme = "ananke" } = templateConfig;
+  const { title = 'Microsite Template', baseURL = '/' } = templateConfig
 
   const files = [
     {
-      path: "config.toml",
+      path: 'config.toml',
       content: `[params]
   title = "${title}"
   baseURL = "${baseURL}"
@@ -216,7 +222,7 @@ export async function initializeHugoTemplate(
 `,
     },
     {
-      path: "content/_index.md",
+      path: 'content/_index.md',
       content: `---
 title: "${title}"
 description: "Welcome to our microsite"
@@ -229,7 +235,7 @@ This is a Hugo-powered microsite template created for lead generation.
 `,
     },
     {
-      path: "content/about/_index.md",
+      path: 'content/about/_index.md',
       content: `---
 title: "About Us"
 description: "Learn more about our services"
@@ -242,7 +248,7 @@ We provide exceptional services in [niche].
 `,
     },
     {
-      path: "content/contact/_index.md",
+      path: 'content/contact/_index.md',
       content: `---
 title: "Contact Us"
 description: "Get in touch with us"
@@ -257,7 +263,7 @@ Ready to get started? Contact us today!
 `,
     },
     {
-      path: "layouts/_default/baseof.html",
+      path: 'layouts/_default/baseof.html',
       content: `<!DOCTYPE html>
 <html lang="{{ $.Site.Language.Lang }}">
 <head>
@@ -275,7 +281,7 @@ Ready to get started? Contact us today!
 </html>`,
     },
     {
-      path: "assets/css/main.css",
+      path: 'assets/css/main.css',
       content: `@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 
 body {
@@ -309,7 +315,7 @@ body {
   color: white;
 }`,
     },
-  ];
+  ]
 
   // Create files one by one
   for (const file of files) {
@@ -319,7 +325,7 @@ body {
       file.path,
       file.content,
       `Initialize Hugo template: ${file.path}`
-    );
+    )
   }
 }
 
@@ -334,14 +340,14 @@ export async function generateHugoSite(
   owner: string,
   repo: string,
   content: Array<{
-    path: string;
-    content: string;
-    title: string;
+    path: string
+    content: string
+    title: string
   }>,
   config: {
-    siteTitle: string;
-    domain: string;
-    description?: string;
+    siteTitle: string
+    domain: string
+    description?: string
   }
 ): Promise<void> {
   // Update site config
@@ -374,25 +380,13 @@ export async function generateHugoSite(
   goldmark:
     renderer:
       unsafe: true
-`;
+`
 
-  await createOrUpdateFile(
-    owner,
-    repo,
-    "config.toml",
-    configContent,
-    "Update site configuration"
-  );
+  await createOrUpdateFile(owner, repo, 'config.toml', configContent, 'Update site configuration')
 
   // Create content files
   for (const item of content) {
-    await createOrUpdateFile(
-      owner,
-      repo,
-      item.path,
-      item.content,
-      `Add content: ${item.title}`
-    );
+    await createOrUpdateFile(owner, repo, item.path, item.content, `Add content: ${item.title}`)
   }
 }
 
@@ -403,7 +397,7 @@ export async function generateHugoSite(
  */
 export async function triggerGitHubPagesDeployment(owner: string, repo: string): Promise<void> {
   if (!GITHUB_TOKEN) {
-    throw new Error("GITHUB_TOKEN is not configured");
+    throw new Error('GITHUB_TOKEN is not configured')
   }
 
   try {
@@ -413,20 +407,20 @@ export async function triggerGitHubPagesDeployment(owner: string, repo: string):
       {
         method: 'POST',
         headers: {
-          'Authorization': `token ${GITHUB_TOKEN}`,
+          Authorization: `token ${GITHUB_TOKEN}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ref: 'main', // branch to deploy from
         }),
       }
-    );
+    )
 
     if (!workflowResponse.ok && workflowResponse.status !== 204) {
-      throw new Error(`GitHub Pages deployment trigger failed: ${workflowResponse.status}`);
+      throw new Error(`GitHub Pages deployment trigger failed: ${workflowResponse.status}`)
     }
   } catch (error) {
-    console.error("GitHub Pages deployment error:", error);
+    console.error('GitHub Pages deployment error:', error)
     // Don't throw error for Pages deployment as it might not be enabled
   }
 }

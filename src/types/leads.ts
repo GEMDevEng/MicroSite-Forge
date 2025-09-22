@@ -1,5 +1,5 @@
 // Consolidated Lead Types and Interfaces
-import { ContactInfo, LeadScore, Database } from './database'
+import { ContactInfo, LeadScore } from './database'
 
 export interface IncomingLead {
   site_id: string

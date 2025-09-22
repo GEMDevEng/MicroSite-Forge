@@ -1,4 +1,4 @@
-"use client"
+'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
 import { Badge } from '@/components/ui/badge'
@@ -7,7 +7,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import {
@@ -16,31 +22,22 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow
+  TableRow,
 } from '@/components/ui/table'
 import {
   Mail,
   Phone,
   MessageSquare,
   UserCheck,
-  Calendar,
   Filter,
   Search,
-  Plus,
-  Edit,
-  Trash,
-  Eye,
   BarChart3,
   Users,
-  PhoneCall,
-  Send
+  Send,
 } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 import { logger } from '@/lib/logger'
 import { LeadData, ContactInfo, LeadScore } from '@/types/database'
-import { CommunicationManager } from '@/lib/communication'
-
-
 
 type Status = 'new' | 'qualified' | 'contacted' | 'converted'
 type CommunicationType = 'email' | 'sms' | 'call' | 'note'
@@ -58,7 +55,7 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
   leadName,
   open,
   onOpenChange,
-  onCommunicationAdded
+  onCommunicationAdded,
 }) => {
   const [type, setType] = useState<CommunicationType>('email')
   const [content, setContent] = useState('')
@@ -70,15 +67,13 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
     setLoading(true)
 
     try {
-      const { error } = await supabase
-        .from('communications')
-        .insert({
-          lead_id: leadId,
-          type,
-          direction,
-          content,
-          status: type === 'email' || type === 'sms' ? 'sent' : 'sent'
-        })
+      const { error } = await supabase.from('communications').insert({
+        lead_id: leadId,
+        type,
+        direction,
+        content,
+        status: type === 'email' || type === 'sms' ? 'sent' : 'sent',
+      })
 
       if (error) {
         logger.error('Failed to add communication', error, { leadId, type })
@@ -90,7 +85,11 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
         onOpenChange(false)
       }
     } catch (error) {
-      logger.error('Failed to add communication', error instanceof Error ? error : new Error('Unknown error'), { leadId, type })
+      logger.error(
+        'Failed to add communication',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId, type }
+      )
       alert('An error occurred. Please try again.')
     } finally {
       setLoading(false)
@@ -107,7 +106,10 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="type">Communication Type</Label>
-              <Select value={type} onValueChange={(value: string) => setType(value as CommunicationType)}>
+              <Select
+                value={type}
+                onValueChange={(value: string) => setType(value as CommunicationType)}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -121,7 +123,10 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
             </div>
             <div>
               <Label htmlFor="direction">Direction</Label>
-              <Select value={direction} onValueChange={(value: string) => setDirection(value as 'inbound' | 'outbound')}>
+              <Select
+                value={direction}
+                onValueChange={(value: string) => setDirection(value as 'inbound' | 'outbound')}
+              >
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -170,15 +175,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
   lead,
   onStatusChange,
   onAssign,
-  onCommunicationOpen
+  onCommunicationOpen,
 }) => {
   const getStatusColor = (status: Status) => {
     switch (status) {
-      case 'new': return 'bg-blue-100 text-blue-800'
-      case 'qualified': return 'bg-yellow-100 text-yellow-800'
-      case 'contacted': return 'bg-green-100 text-green-800'
-      case 'converted': return 'bg-purple-100 text-purple-800'
-      default: return 'bg-gray-100 text-gray-800'
+      case 'new':
+        return 'bg-blue-100 text-blue-800'
+      case 'qualified':
+        return 'bg-yellow-100 text-yellow-800'
+      case 'contacted':
+        return 'bg-green-100 text-green-800'
+      case 'converted':
+        return 'bg-purple-100 text-purple-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
     }
   }
 
@@ -189,9 +199,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   }
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
-        <div className="flex justify-between items-start">
+        <div className="flex items-start justify-between">
           <div>
             <CardTitle className="text-lg">{lead.contact.name}</CardTitle>
             <p className="text-sm text-muted-foreground">{lead.contact.email}</p>
@@ -199,9 +209,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               <p className="text-sm text-muted-foreground">{lead.contact.phone}</p>
             )}
           </div>
-          <Badge className={getStatusColor(lead.status)}>
-            {lead.status}
-          </Badge>
+          <Badge className={getStatusColor(lead.status)}>{lead.status}</Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -213,7 +221,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         <div className="flex gap-2">
-          <Select value={lead.status} onValueChange={(value: string) => onStatusChange(lead.id, value as Status)}>
+          <Select
+            value={lead.status}
+            onValueChange={(value: string) => onStatusChange(lead.id, value as Status)}
+          >
             <SelectTrigger className="w-full">
               <SelectValue />
             </SelectTrigger>
@@ -233,7 +244,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             onClick={() => onCommunicationOpen(lead.id)}
             className="flex-1"
           >
-            <MessageSquare className="w-4 h-4 mr-2" />
+            <MessageSquare className="mr-2 h-4 w-4" />
             Communicate
           </Button>
           <Button
@@ -242,7 +253,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             onClick={() => onAssign(lead.id, 'user_id')}
             className="flex-1"
           >
-            <UserCheck className="w-4 h-4 mr-2" />
+            <UserCheck className="mr-2 h-4 w-4" />
             Assign
           </Button>
         </div>
@@ -258,7 +269,7 @@ interface LeadManagementDashboardProps {
 
 export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = ({
   userId,
-  siteId
+  siteId,
 }) => {
   const [leads, setLeads] = useState<LeadData[]>([])
   const [loading, setLoading] = useState(true)
@@ -272,14 +283,14 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       setLoading(true)
       let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
 
-      const validStatuses = ["new", "qualified", "contacted", "converted"] as const
+      const validStatuses = ['new', 'qualified', 'contacted', 'converted'] as const
 
       if (siteId) {
         query = query.eq('site_id', siteId)
       }
 
       if (statusFilter !== 'all' && validStatuses.includes(statusFilter as any)) {
-        query = query.eq('status', statusFilter as typeof validStatuses[number])
+        query = query.eq('status', statusFilter as (typeof validStatuses)[number])
       }
 
       const { data, error } = await query.limit(100)
@@ -290,90 +301,94 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       }
 
       // Transform the data to match LeadData interface
-      const transformedLeads: LeadData[] = data.map(lead => {
+      const transformedLeads: LeadData[] = data.map((lead) => {
         // Type guard functions
         function isContactInfo(obj: any): obj is ContactInfo {
           return (
-            typeof obj === "object" &&
+            typeof obj === 'object' &&
             obj !== null &&
-            "name" in obj &&
-            "email" in obj &&
-            typeof obj.name === "string" &&
-            typeof obj.email === "string"
+            'name' in obj &&
+            'email' in obj &&
+            typeof obj.name === 'string' &&
+            typeof obj.email === 'string'
           )
         }
 
         function isLeadScore(obj: any): obj is LeadScore {
           return (
-            typeof obj === "object" &&
+            typeof obj === 'object' &&
             obj !== null &&
-            "source" in obj &&
-            "engagement" in obj &&
-            "intent_level" in obj &&
-            "budget_indicators" in obj &&
-            "timeline_signals" in obj &&
-            "total_score" in obj &&
-            typeof obj.source === "string" &&
-            typeof obj.engagement === "number" &&
-            typeof obj.intent_level === "number" &&
-            typeof obj.budget_indicators === "number" &&
-            typeof obj.timeline_signals === "number" &&
-            typeof obj.total_score === "number"
+            'source' in obj &&
+            'engagement' in obj &&
+            'intent_level' in obj &&
+            'budget_indicators' in obj &&
+            'timeline_signals' in obj &&
+            'total_score' in obj &&
+            typeof obj.source === 'string' &&
+            typeof obj.engagement === 'number' &&
+            typeof obj.intent_level === 'number' &&
+            typeof obj.budget_indicators === 'number' &&
+            typeof obj.timeline_signals === 'number' &&
+            typeof obj.total_score === 'number'
           )
         }
 
-        let contactInfo: ContactInfo;
+        let contactInfo: ContactInfo
         if (isContactInfo(lead.contact_info)) {
-          contactInfo = lead.contact_info;
+          contactInfo = lead.contact_info
         } else {
           contactInfo = {
-            name: lead.name || "Unknown",
+            name: lead.name || 'Unknown',
             email: lead.email,
-            phone: lead.phone || undefined
-          };
+            phone: lead.phone || undefined,
+          }
         }
 
-        let leadScore: LeadScore;
+        let leadScore: LeadScore
         if (isLeadScore(lead.score_data)) {
-          leadScore = lead.score_data;
+          leadScore = lead.score_data
         } else {
           leadScore = {
-            source: "organic" as const,
+            source: 'organic' as const,
             engagement: 0,
             intent_level: 0,
             budget_indicators: 0,
             timeline_signals: 0,
-            total_score: 0
-          };
+            total_score: 0,
+          }
         }
 
-        const validStatuses = ["new", "qualified", "contacted", "converted"] as const;
-        type StatusType = typeof validStatuses[number];
-        let safeStatus: StatusType;
+        const validStatuses = ['new', 'qualified', 'contacted', 'converted'] as const
+        type StatusType = (typeof validStatuses)[number]
+        let safeStatus: StatusType
         if (validStatuses.includes(lead.status as any)) {
-          safeStatus = lead.status as StatusType;
+          safeStatus = lead.status as StatusType
         } else {
-          safeStatus = "new";
+          safeStatus = 'new'
         }
 
         return {
           id: lead.id,
           contact: contactInfo,
           score: leadScore,
-          tags: Array.isArray(lead.tags) ? lead.tags as string[] : [],
+          tags: Array.isArray(lead.tags) ? (lead.tags as string[]) : [],
           status: safeStatus,
           assigned_to: lead.assigned_to,
           follow_up_date: lead.follow_up_date,
           marketing_campaign: lead.marketing_campaign,
           enriched_at: lead.enriched_at,
           created_at: lead.created_at,
-          updated_at: lead.updated_at
+          updated_at: lead.updated_at,
         }
       })
 
       setLeads(transformedLeads)
     } catch (error) {
-      logger.error('Failed to fetch leads', error instanceof Error ? error : new Error('Unknown error'), { userId, siteId })
+      logger.error(
+        'Failed to fetch leads',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { userId, siteId }
+      )
     } finally {
       setLoading(false)
     }
@@ -384,13 +399,13 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
   }, [fetchLeads])
 
   useEffect(() => {
-    const filtered = leads.filter(lead =>
-      searchTerm === '' ||
-      lead.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      lead.contact.phone?.includes(searchTerm)
-    )
-    // Update filtered leads - for now, this triggers re-render
+    // TODO: Implement search filtering
+    // const filtered = leads.filter(lead =>
+    //   searchTerm === '' ||
+    //   lead.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //   lead.contact.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    //   lead.contact.phone?.includes(searchTerm)
+    // )
   }, [searchTerm, leads])
 
   const handleStatusChange = async (leadId: string, status: Status) => {
@@ -404,13 +419,15 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         logger.error('Failed to update lead status', error, { leadId, status })
         alert('Failed to update lead status. Please try again.')
       } else {
-        setLeads(leads.map(lead =>
-          lead.id === leadId ? { ...lead, status } : lead
-        ))
+        setLeads(leads.map((lead) => (lead.id === leadId ? { ...lead, status } : lead)))
         logger.info('Lead status updated', { leadId, status })
       }
     } catch (error) {
-      logger.error('Failed to update lead status', error instanceof Error ? error : new Error('Unknown error'), { leadId, status })
+      logger.error(
+        'Failed to update lead status',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId, status }
+      )
     }
   }
 
@@ -420,7 +437,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         .from('leads')
         .update({
           assigned_to: assignee,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', leadId)
 
@@ -428,13 +445,17 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         logger.error('Failed to assign lead', error, { leadId, assignee })
         alert('Failed to assign lead. Please try again.')
       } else {
-        setLeads(leads.map(lead =>
-          lead.id === leadId ? { ...lead, assigned_to: assignee } : lead
-        ))
+        setLeads(
+          leads.map((lead) => (lead.id === leadId ? { ...lead, assigned_to: assignee } : lead))
+        )
         logger.info('Lead assigned', { leadId, assignee })
       }
     } catch (error) {
-      logger.error('Failed to assign lead', error instanceof Error ? error : new Error('Unknown error'), { leadId, assignee })
+      logger.error(
+        'Failed to assign lead',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId, assignee }
+      )
     }
   }
 
@@ -447,17 +468,17 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
     fetchLeads() // Refresh leads data
   }
 
-  const selectedLeadData = leads.find(l => l.id === selectedLead)
+  const selectedLeadData = leads.find((l) => l.id === selectedLead)
 
   const getStatusStats = () => {
     const stats = {
       new: 0,
       qualified: 0,
       contacted: 0,
-      converted: 0
+      converted: 0,
     }
 
-    leads.forEach(lead => {
+    leads.forEach((lead) => {
       stats[lead.status]++
     })
 
@@ -469,27 +490,25 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Lead Management</h2>
-          <p className="text-muted-foreground">
-            Manage and nurture your leads effectively
-          </p>
+          <p className="text-muted-foreground">Manage and nurture your leads effectively</p>
         </div>
         <div className="flex gap-2">
           <Button variant="outline">
-            <BarChart3 className="w-4 h-4 mr-2" />
+            <BarChart3 className="mr-2 h-4 w-4" />
             Analytics
           </Button>
           <Button variant="outline">
-            <Mail className="w-4 h-4 mr-2" />
+            <Mail className="mr-2 h-4 w-4" />
             Trigger Campaign
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">New Leads</CardTitle>
@@ -531,7 +550,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       {/* Filters */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             <div className="flex-1">
               <Label htmlFor="search">Search leads</Label>
               <div className="relative">
@@ -573,7 +592,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
 
         <TabsContent value="grid" className="space-y-4">
           {loading ? (
-            <div className="flex justify-center items-center p-8">
+            <div className="flex items-center justify-center p-8">
               <div className="text-muted-foreground">Loading leads...</div>
             </div>
           ) : leads.length === 0 ? (
@@ -591,7 +610,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
               </CardContent>
             </Card>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
               {leads.map((lead) => (
                 <LeadCard
                   key={lead.id}
@@ -632,27 +651,35 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className={`font-medium ${
-                        lead.score.total_score >= 70 ? 'text-green-600' :
-                        lead.score.total_score >= 40 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
+                      <span
+                        className={`font-medium ${
+                          lead.score.total_score >= 70
+                            ? 'text-green-600'
+                            : lead.score.total_score >= 40
+                              ? 'text-yellow-600'
+                              : 'text-red-600'
+                        }`}
+                      >
                         {lead.score.total_score}/100
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge className={
-                        lead.status === 'new' ? 'bg-blue-100 text-blue-800' :
-                        lead.status === 'qualified' ? 'bg-yellow-100 text-yellow-800' :
-                        lead.status === 'contacted' ? 'bg-green-100 text-green-800' :
-                        'bg-purple-100 text-purple-800'
-                      }>
+                      <Badge
+                        className={
+                          lead.status === 'new'
+                            ? 'bg-blue-100 text-blue-800'
+                            : lead.status === 'qualified'
+                              ? 'bg-yellow-100 text-yellow-800'
+                              : lead.status === 'contacted'
+                                ? 'bg-green-100 text-green-800'
+                                : 'bg-purple-100 text-purple-800'
+                        }
+                      >
                         {lead.status}
                       </Badge>
                     </TableCell>
                     <TableCell>{lead.score.source}</TableCell>
-                    <TableCell>
-                      {new Date(lead.created_at).toLocaleDateString()}
-                    </TableCell>
+                    <TableCell>{new Date(lead.created_at).toLocaleDateString()}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
                         <Button
@@ -660,18 +687,20 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
                           variant="outline"
                           onClick={() => handleCommunicationOpen(lead.id)}
                         >
-                          <MessageSquare className="w-4 h-4" />
+                          <MessageSquare className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
                           variant="outline"
                           onClick={() => handleAssign(lead.id, 'user_id')}
                         >
-                          <UserCheck className="w-4 h-4" />
+                          <UserCheck className="h-4 w-4" />
                         </Button>
                         <Select
                           value={lead.status}
-                          onValueChange={(value: string) => handleStatusChange(lead.id, value as Status)}
+                          onValueChange={(value: string) =>
+                            handleStatusChange(lead.id, value as Status)
+                          }
                         >
                           <SelectTrigger className="w-[100px]">
                             <SelectValue />
