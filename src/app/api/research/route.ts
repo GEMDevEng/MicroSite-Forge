@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { performNicheResearch } from '@/lib/grok';
-import { findAvailableDomains, checkKeywordDomainVariations } from '@/lib/porkbun';
-import { researchRateLimit, domainCheckRateLimit } from '@/lib/rate-limit';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from 'next/server'
+import { performNicheResearch } from '@/lib/grok'
+import { findAvailableDomains } from '@/lib/porkbun'
+import { researchRateLimit } from '@/lib/rate-limit'
+import { z } from 'zod'
 
 // Validation schema for niche research request
 const NicheResearchSchema = z.object({
@@ -13,35 +13,35 @@ const NicheResearchSchema = z.object({
   domainSearch: z.boolean().default(true),
   maxDomains: z.number().min(1).max(50).default(10),
   maxDomainBudget: z.number().optional(),
-});
+})
 
 // Combined response type
 interface ResearchResponse {
-  niche: string;
-  keywords: any[];
-  trendingTopics: string[];
-  contentOpportunities: string[];
-  competitorInsights?: string[];
-  availableDomains: any[];
-  recommendedDomain?: string;
-  estimatedCost?: number;
+  niche: string
+  keywords: any[]
+  trendingTopics: string[]
+  contentOpportunities: string[]
+  competitorInsights?: string[]
+  availableDomains: any[]
+  recommendedDomain?: string
+  estimatedCost?: number
 }
 
 // POST /api/research - Perform comprehensive market research
 export async function POST(request: NextRequest) {
   // Apply rate limiting
-  const rateLimitResponse = researchRateLimit(request as any);
+  const rateLimitResponse = researchRateLimit(request as any)
   if (rateLimitResponse) {
-    return rateLimitResponse;
+    return rateLimitResponse
   }
 
   try {
-    const body = await request.json();
+    const body = await request.json()
 
     // Validate request body
-    const validated = NicheResearchSchema.parse(body);
+    const validated = NicheResearchSchema.parse(body)
 
-    const researchPromises: Promise<any>[] = [];
+    const researchPromises: Promise<any>[] = []
 
     // Perform niche research with Grok
     const nicheResearchPromise = performNicheResearch({
@@ -49,30 +49,25 @@ export async function POST(request: NextRequest) {
       targetAudience: validated.targetAudience,
       geography: validated.geography,
       competitorAnalysis: validated.competitorAnalysis,
-    });
-    researchPromises.push(nicheResearchPromise);
+    })
+    researchPromises.push(nicheResearchPromise)
 
     // Check domains if requested
-    let availableDomainsPromise = null;
+    let availableDomainsPromise = null
     if (validated.domainSearch) {
-      availableDomainsPromise = findAvailableDomains(
-        validated.niche,
-        validated.maxDomainBudget
-      );
-      researchPromises.push(availableDomainsPromise);
+      availableDomainsPromise = findAvailableDomains(validated.niche, validated.maxDomainBudget)
+      researchPromises.push(availableDomainsPromise)
     }
 
     // Wait for all research to complete
-    const results = await Promise.allSettled(researchPromises);
+    const results = await Promise.allSettled(researchPromises)
 
-    const nicheResearch = results[0].status === 'fulfilled' ? results[0].value : null;
-    const availableDomains = validated.domainSearch && results[1]?.status === 'fulfilled' ? results[1].value : [];
+    const nicheResearch = results[0].status === 'fulfilled' ? results[0].value : null
+    const availableDomains =
+      validated.domainSearch && results[1]?.status === 'fulfilled' ? results[1].value : []
 
     if (!nicheResearch) {
-      return NextResponse.json(
-        { error: 'Failed to perform niche research' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to perform niche research' }, { status: 500 })
     }
 
     // Build response
@@ -83,26 +78,26 @@ export async function POST(request: NextRequest) {
       contentOpportunities: nicheResearch.contentOpportunities,
       competitorInsights: nicheResearch.competitorInsights,
       availableDomains: availableDomains.slice(0, validated.maxDomains),
-    };
+    }
 
     // Find best domain recommendation (shortest available domain with lowest cost)
     if (availableDomains.length > 0) {
       const bestDomain = availableDomains
         .filter((domain: any) => domain.price && domain.price > 0)
-        .sort((a: any, b: any) => a.domain.length - b.domain.length || a.price - b.price)[0];
+        .sort((a: any, b: any) => a.domain.length - b.domain.length || a.price - b.price)[0]
 
       if (bestDomain) {
-        response.recommendedDomain = bestDomain.domain;
-        response.estimatedCost = bestDomain.price;
+        response.recommendedDomain = bestDomain.domain
+        response.estimatedCost = bestDomain.price
       }
     }
 
     return NextResponse.json({
       success: true,
       data: response,
-    });
+    })
   } catch (error) {
-    console.error('Research API error:', error);
+    console.error('Research API error:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -111,7 +106,7 @@ export async function POST(request: NextRequest) {
           details: error.errors,
         },
         { status: 400 }
-      );
+      )
     }
 
     return NextResponse.json(
@@ -120,26 +115,23 @@ export async function POST(request: NextRequest) {
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
-    );
+    )
   }
 }
 
 // GET /api/research/domains - Check domain availability for a keyword
 export async function GET(request: NextRequest) {
-  const url = new URL(request.url);
-  const keyword = url.searchParams.get('keyword');
-  const budget = url.searchParams.get('budget');
+  const url = new URL(request.url)
+  const keyword = url.searchParams.get('keyword')
+  const budget = url.searchParams.get('budget')
 
   if (!keyword || keyword.length < 2) {
-    return NextResponse.json(
-      { error: 'Keyword must be at least 2 characters' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: 'Keyword must be at least 2 characters' }, { status: 400 })
   }
 
   try {
-    const budgetNum = budget ? parseFloat(budget) : undefined;
-    const availableDomains = await findAvailableDomains(keyword, budgetNum);
+    const budgetNum = budget ? parseFloat(budget) : undefined
+    const availableDomains = await findAvailableDomains(keyword, budgetNum)
 
     return NextResponse.json({
       success: true,
@@ -147,9 +139,9 @@ export async function GET(request: NextRequest) {
         keyword,
         availableDomains: availableDomains.slice(0, 20), // Limit response size
       },
-    });
+    })
   } catch (error) {
-    console.error('Domain check API error:', error);
+    console.error('Domain check API error:', error)
 
     return NextResponse.json(
       {
@@ -157,6 +149,6 @@ export async function GET(request: NextRequest) {
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       { status: 500 }
-    );
+    )
   }
 }

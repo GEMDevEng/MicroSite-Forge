@@ -1,28 +1,25 @@
-import { Suspense } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { PlusCircle, Mail, MessageSquare, Users, TrendingUp, Calendar, Clock } from 'lucide-react'
-import Link from 'next/link'
+import { PlusCircle, Mail, MessageSquare, Users, TrendingUp, Clock } from 'lucide-react'
 import { CampaignList } from '@/components/campaigns/campaign-list'
-import { CampaignStats } from '@/components/campaigns/campaign-stats'
 import { CreateCampaignDialog } from '@/components/campaigns/create-campaign-dialog'
 
 export default function CampaignsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
+      <div className="border-b bg-white">
+        <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Campaign Management</h1>
               <p className="text-gray-600">Manage email and SMS campaigns for lead nurturing</p>
             </div>
             <CreateCampaignDialog>
               <Button>
-                <PlusCircle className="h-4 w-4 mr-2" />
+                <PlusCircle className="mr-2 h-4 w-4" />
                 Create Campaign
               </Button>
             </CreateCampaignDialog>
@@ -31,9 +28,9 @@ export default function CampaignsPage() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         {/* Quick Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
@@ -128,8 +125,7 @@ export default function CampaignsPage() {
                     <p className="text-sm text-gray-500">Sent to 450 new leads • Open rate: 32%</p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    <Clock className="h-4 w-4 inline mr-1" />
-                    2 hours ago
+                    <Clock className="mr-1 inline h-4 w-4" />2 hours ago
                   </div>
                 </div>
 
@@ -139,11 +135,12 @@ export default function CampaignsPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">Follow-up SMS Campaign</p>
-                    <p className="text-sm text-gray-500">Sent to 89 qualified leads • Response rate: 18%</p>
+                    <p className="text-sm text-gray-500">
+                      Sent to 89 qualified leads • Response rate: 18%
+                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    <Clock className="h-4 w-4 inline mr-1" />
-                    5 hours ago
+                    <Clock className="mr-1 inline h-4 w-4" />5 hours ago
                   </div>
                 </div>
 
@@ -153,11 +150,12 @@ export default function CampaignsPage() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm font-medium">Newsletter Campaign</p>
-                    <p className="text-sm text-gray-500">Scheduled campaign completed • 1,234 deliveries</p>
+                    <p className="text-sm text-gray-500">
+                      Scheduled campaign completed • 1,234 deliveries
+                    </p>
                   </div>
                   <div className="text-sm text-gray-500">
-                    <Clock className="h-4 w-4 inline mr-1" />
-                    1 day ago
+                    <Clock className="mr-1 inline h-4 w-4" />1 day ago
                   </div>
                 </div>
               </div>

@@ -1,60 +1,65 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { generateWebsiteContent } from '@/lib/openai';
-import { generateHugoSite, createHugoTemplateRepository } from '@/lib/github';
-import { createHugoSite as createNetlifyHugoSite } from '@/lib/netlify';
-import { z } from 'zod';
+import { NextRequest, NextResponse } from 'next/server'
+import { generateWebsiteContent } from '@/lib/openai'
+import { generateHugoSite, createHugoTemplateRepository } from '@/lib/github'
+import { createHugoSite as createNetlifyHugoSite } from '@/lib/netlify'
+import { z } from 'zod'
 
 // Validation schema for site generation request
 const SiteGenerationSchema = z.object({
   niche: z.string().min(2).max(100),
-  domain: z.string().regex(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, "Invalid domain format"),
+  domain: z.string().regex(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/, 'Invalid domain format'),
   siteTitle: z.string().min(1).max(100),
   description: z.string().max(500).optional(),
   keywords: z.array(z.string()).min(1).max(10),
   targetAudience: z.string().optional(),
   tone: z.enum(['professional', 'casual', 'enthusiastic', 'educational']).default('professional'),
-  githubRepoName: z.string().regex(/^[a-zA-Z0-9._-]+$/, "Invalid repository name").optional(),
-  colorScheme: z.object({
-    primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-    secondary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
-  }).optional(),
-});
+  githubRepoName: z
+    .string()
+    .regex(/^[a-zA-Z0-9._-]+$/, 'Invalid repository name')
+    .optional(),
+  colorScheme: z
+    .object({
+      primary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+      secondary: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
+    })
+    .optional(),
+})
 
 interface SiteGenerationResponse {
-  success: boolean;
+  success: boolean
   site: {
-    id: string;
-    name: string;
-    url: string;
-    domain: string;
-    githubUrl: string;
-    netlifyUrl: string;
-    status: 'generating' | 'deploying' | 'completed' | 'failed';
+    id: string
+    name: string
+    url: string
+    domain: string
+    githubUrl: string
+    netlifyUrl: string
+    status: 'generating' | 'deploying' | 'completed' | 'failed'
     progress: {
-      research: boolean;
-      content: boolean;
-      github: boolean;
-      netlify: boolean;
-      domain: boolean;
-    };
-  };
+      research: boolean
+      content: boolean
+      github: boolean
+      netlify: boolean
+      domain: boolean
+    }
+  }
   content?: {
     pages: Array<{
-      title: string;
-      content: string;
-      path: string;
-    }>;
-    totalWords: number;
-  };
+      title: string
+      content: string
+      path: string
+    }>
+    totalWords: number
+  }
 }
 
 // POST /api/sites/generate - Generate a complete microsite
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body = await request.json()
 
     // Validate request body
-    const validated = SiteGenerationSchema.parse(body);
+    const validated = SiteGenerationSchema.parse(body)
 
     // Extract validated data
     const {
@@ -66,8 +71,7 @@ export async function POST(request: NextRequest) {
       targetAudience,
       tone,
       githubRepoName,
-      colorScheme = { primary: '#007bff', secondary: '#6c757d' }
-    } = validated;
+    } = validated
 
     // Step 1: Generate content for the site (5 pages)
     const contentRequests = [
@@ -111,26 +115,27 @@ export async function POST(request: NextRequest) {
         tone,
         wordCount: 900,
       },
-    ];
+    ]
 
-    console.log('Generating website content...');
-    const generatedContent = await generateWebsiteContent(contentRequests);
+    console.log('Generating website content...')
+    const generatedContent = await generateWebsiteContent(contentRequests)
 
     // Step 2: Create GitHub repository with Hugo template
-    const repoName = githubRepoName || `microsite-${niche.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`;
-    console.log(`Creating GitHub repository: ${repoName}`);
+    const repoName =
+      githubRepoName || `microsite-${niche.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`
+    console.log(`Creating GitHub repository: ${repoName}`)
 
     const githubRepo = await createHugoTemplateRepository(
       repoName,
       `Hugo microsite for ${niche} - ${siteTitle}`,
       false // public repo for deployment
-    );
+    )
 
     // Extract owner from repo URL or assume from GitHub token
-    const [owner] = githubRepo.full_name.split('/');
+    const [owner] = githubRepo.full_name.split('/')
 
     // Step 3: Generate Hugo site with content
-    console.log('Generating Hugo site files...');
+    console.log('Generating Hugo site files...')
     const hugoContent = [
       {
         path: 'content/_index.md',
@@ -141,10 +146,13 @@ keywords: "${keywords.join(', ')}"
 draft: false
 ---
 
-${generatedContent[0]?.content || `# Welcome to ${siteTitle}
+${
+  generatedContent[0]?.content ||
+  `# Welcome to ${siteTitle}
 
 Professional ${niche} services for ${targetAudience || 'everyone'}.
-`}
+`
+}
 `,
         title: 'Homepage',
       },
@@ -156,10 +164,13 @@ description: "Professional ${niche} services we offer"
 draft: false
 ---
 
-${generatedContent[1]?.content || `# Our Services
+${
+  generatedContent[1]?.content ||
+  `# Our Services
 
 We provide comprehensive ${niche} solutions tailored to your needs.
-`}
+`
+}
 `,
         title: 'Services',
       },
@@ -171,10 +182,13 @@ description: "Learn more about our ${niche} expertise"
 draft: false
 ---
 
-${generatedContent[2]?.content || `# About Us
+${
+  generatedContent[2]?.content ||
+  `# About Us
 
 With years of experience in ${niche}, we provide exceptional service and results.
-`}
+`
+}
 `,
         title: 'About',
       },
@@ -186,7 +200,9 @@ description: "Get in touch with us for ${niche} services"
 draft: false
 ---
 
-${generatedContent[3]?.content || `# Contact Us
+${
+  generatedContent[3]?.content ||
+  `# Contact Us
 
 Ready to discuss your ${niche} needs? Contact us today!
 
@@ -205,7 +221,8 @@ Ready to discuss your ${niche} needs? Contact us today!
   </div>
   <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Send Message</button>
 </form>
-`}
+`
+}
 `,
         title: 'Contact',
       },
@@ -218,34 +235,37 @@ draft: false
 date: ${new Date().toISOString().split('T')[0]}
 ---
 
-${generatedContent[4]?.content || `# Expert ${niche} Tips
+${
+  generatedContent[4]?.content ||
+  `# Expert ${niche} Tips
 
 Discover the latest strategies and best practices in ${niche}.
-`}
+`
+}
 `,
         title: 'Blog Post',
       },
-    ];
+    ]
 
     await generateHugoSite(owner, repoName, hugoContent, {
       siteTitle,
       domain,
       description,
-    });
+    })
 
     // Step 4: Create Netlify site connected to GitHub repo
-    console.log('Creating Netlify deployment...');
+    console.log('Creating Netlify deployment...')
     const netlifySite = await createNetlifyHugoSite(
       siteTitle.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + Date.now(),
       githubRepo.clone_url,
       'main',
       domain
-    );
+    )
 
     // Step 5: Calculate content stats
     const totalWords = hugoContent.reduce((total, page) => {
-      return total + (page.content.split(/\s+/).length || 0);
-    }, 0);
+      return total + (page.content.split(/\s+/).length || 0)
+    }, 0)
 
     const response: SiteGenerationResponse = {
       success: true,
@@ -266,18 +286,18 @@ Discover the latest strategies and best practices in ${niche}.
         },
       },
       content: {
-        pages: hugoContent.map(c => ({
+        pages: hugoContent.map((c) => ({
           title: c.title,
           content: c.content.slice(0, 200) + '...', // Truncated for response
           path: c.path,
         })),
         totalWords,
       },
-    };
+    }
 
-    return NextResponse.json(response);
+    return NextResponse.json(response)
   } catch (error) {
-    console.error('Site generation error:', error);
+    console.error('Site generation error:', error)
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -287,11 +307,12 @@ Discover the latest strategies and best practices in ${niche}.
           details: error.errors,
         },
         { status: 400 }
-      );
+      )
     }
 
     // Return partial success if some steps completed
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred during site generation';
+    const errorMessage =
+      error instanceof Error ? error.message : 'Unknown error occurred during site generation'
 
     return NextResponse.json(
       {
@@ -310,7 +331,7 @@ Discover the latest strategies and best practices in ${niche}.
         },
       },
       { status: 500 }
-    );
+    )
   }
 }
 
@@ -332,5 +353,5 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
         domain: true,
       },
     },
-  });
+  })
 }

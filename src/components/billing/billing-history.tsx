@@ -1,7 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Download, Receipt, CreditCard, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Download, Receipt, CheckCircle, XCircle, Clock } from 'lucide-react'
 
 // Mock billing history data
 const mockBillingHistory = [
@@ -14,7 +14,7 @@ const mockBillingHistory = [
     description: 'Monthly Pro Plan',
     gateway: 'stripe',
     invoiceId: 'INV-2025-11-001',
-    downloadUrl: '#'
+    downloadUrl: '#',
   },
   {
     id: '2',
@@ -25,7 +25,7 @@ const mockBillingHistory = [
     description: 'Monthly Pro Plan',
     gateway: 'stripe',
     invoiceId: 'INV-2025-10-001',
-    downloadUrl: '#'
+    downloadUrl: '#',
   },
   {
     id: '3',
@@ -36,7 +36,7 @@ const mockBillingHistory = [
     description: 'Monthly Pro Plan',
     gateway: 'stripe',
     invoiceId: 'INV-2025-09-001',
-    downloadUrl: '#'
+    downloadUrl: '#',
   },
   {
     id: '4',
@@ -47,8 +47,8 @@ const mockBillingHistory = [
     description: 'Monthly Pro Plan',
     gateway: 'stripe',
     invoiceId: 'INV-2025-08-001',
-    downloadUrl: '#'
-  }
+    downloadUrl: '#',
+  },
 ]
 
 export function BillingHistory() {
@@ -56,7 +56,7 @@ export function BillingHistory() {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     })
   }
 
@@ -77,30 +77,22 @@ export function BillingHistory() {
     const statusConfig = {
       paid: { color: 'bg-green-100 text-green-800', label: 'Paid' },
       pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending' },
-      failed: { color: 'bg-red-100 text-red-800', label: 'Failed' }
+      failed: { color: 'bg-red-100 text-red-800', label: 'Failed' },
     }
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.paid
-    return (
-      <Badge className={`${config.color} border-0`}>
-        {config.label}
-      </Badge>
-    )
+    return <Badge className={`${config.color} border-0`}>{config.label}</Badge>
   }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Billing History</h3>
-          <p className="text-sm text-gray-500">
-            View and download your past invoices
-          </p>
+          <p className="text-sm text-gray-500">View and download your past invoices</p>
         </div>
-        <Button variant="outline">
-          Export All
-        </Button>
+        <Button variant="outline">Export All</Button>
       </div>
 
       {/* Billing History */}
@@ -128,16 +120,18 @@ export function BillingHistory() {
                   <div className="flex items-center space-x-2">
                     {getStatusBadge(invoice.status)}
                     <Button size="sm" variant="outline">
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="mr-2 h-4 w-4" />
                       Download
                     </Button>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t">
+              <div className="mt-4 border-t pt-4">
                 <div className="flex items-center justify-between text-sm text-gray-500">
-                  <span>Paid via {invoice.gateway.charAt(0).toUpperCase() + invoice.gateway.slice(1)}</span>
+                  <span>
+                    Paid via {invoice.gateway.charAt(0).toUpperCase() + invoice.gateway.slice(1)}
+                  </span>
                   <span>Tax: $0.00 (excl.)</span>
                 </div>
               </div>
@@ -149,7 +143,7 @@ export function BillingHistory() {
       {/* Summary Card */}
       <Card>
         <CardContent className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-4">
             <div>
               <h4 className="text-sm font-medium text-gray-500">Total Billed</h4>
               <p className="text-2xl font-bold">$1,196</p>

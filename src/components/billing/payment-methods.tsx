@@ -1,22 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import {
-  CreditCard,
-  Plus,
-  Trash2,
-  Star,
-  AlertCircle,
-  CheckCircle,
-  Calendar
-} from 'lucide-react'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Plus, Trash2, Star, AlertCircle, CheckCircle, Calendar } from 'lucide-react'
 
 // Mock payment methods data
 const mockPaymentMethods = [
@@ -28,7 +33,7 @@ const mockPaymentMethods = [
     expiryMonth: 12,
     expiryYear: 2026,
     isDefault: true,
-    addedAt: '2025-01-15'
+    addedAt: '2025-01-15',
   },
   {
     id: '2',
@@ -38,8 +43,8 @@ const mockPaymentMethods = [
     expiryMonth: 8,
     expiryYear: 2027,
     isDefault: false,
-    addedAt: '2025-01-20'
-  }
+    addedAt: '2025-01-20',
+  },
 ]
 
 export function PaymentMethods() {
@@ -58,70 +63,52 @@ export function PaymentMethods() {
   }
 
   const handleSetDefault = (methodId: string) => {
-    setPaymentMethods(methods =>
-      methods.map(method => ({
+    setPaymentMethods((methods) =>
+      methods.map((method) => ({
         ...method,
-        isDefault: method.id === methodId
+        isDefault: method.id === methodId,
       }))
     )
   }
 
   const handleRemoveMethod = (methodId: string) => {
-    setPaymentMethods(methods => methods.filter(method => method.id !== methodId))
+    setPaymentMethods((methods) => methods.filter((method) => method.id !== methodId))
   }
 
   const AddPaymentDialog = () => (
     <Dialog open={isAddingMethod} onOpenChange={setIsAddingMethod}>
       <DialogTrigger asChild>
         <Button>
-          <Plus className="h-4 w-4 mr-2" />
+          <Plus className="mr-2 h-4 w-4" />
           Add Payment Method
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Add Payment Method</DialogTitle>
-          <DialogDescription>
-            Add a new credit card or payment method for billing
-          </DialogDescription>
+          <DialogDescription>Add a new credit card or payment method for billing</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4">
           <div>
             <Label htmlFor="card-number">Card Number</Label>
-            <Input
-              id="card-number"
-              placeholder="1234 5678 9012 3456"
-              className="mt-1"
-            />
+            <Input id="card-number" placeholder="1234 5678 9012 3456" className="mt-1" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="expiry">Expiry Date</Label>
-              <Input
-                id="expiry"
-                placeholder="MM/YY"
-                className="mt-1"
-              />
+              <Input id="expiry" placeholder="MM/YY" className="mt-1" />
             </div>
             <div>
               <Label htmlFor="cvc">CVC</Label>
-              <Input
-                id="cvc"
-                placeholder="123"
-                className="mt-1"
-              />
+              <Input id="cvc" placeholder="123" className="mt-1" />
             </div>
           </div>
 
           <div>
             <Label htmlFor="cardholder">Cardholder Name</Label>
-            <Input
-              id="cardholder"
-              placeholder="John Doe"
-              className="mt-1"
-            />
+            <Input id="cardholder" placeholder="John Doe" className="mt-1" />
           </div>
 
           <div>
@@ -140,9 +127,7 @@ export function PaymentMethods() {
           </div>
 
           <div className="flex space-x-3 pt-4">
-            <Button onClick={() => setIsAddingMethod(false)}>
-              Add Payment Method
-            </Button>
+            <Button onClick={() => setIsAddingMethod(false)}>Add Payment Method</Button>
             <Button variant="outline" onClick={() => setIsAddingMethod(false)}>
               Cancel
             </Button>
@@ -155,12 +140,10 @@ export function PaymentMethods() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Payment Methods</h3>
-          <p className="text-sm text-gray-500">
-            Manage your credit cards and payment methods
-          </p>
+          <p className="text-sm text-gray-500">Manage your credit cards and payment methods</p>
         </div>
         <AddPaymentDialog />
       </div>
@@ -175,18 +158,14 @@ export function PaymentMethods() {
                   <div className="text-2xl">{getCardBrandLogo(method.brand)}</div>
                   <div>
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium">
-                        •••• •••• •••• {method.last4}
-                      </span>
+                      <span className="font-medium">•••• •••• •••• {method.last4}</span>
                       {method.isDefault && (
-                        <Badge className="bg-green-100 text-green-800 border-0">
-                          Default
-                        </Badge>
+                        <Badge className="border-0 bg-green-100 text-green-800">Default</Badge>
                       )}
                     </div>
-                    <div className="flex items-center space-x-4 mt-1">
-                      <span className="text-sm text-gray-500 flex items-center">
-                        <Calendar className="h-4 w-4 mr-1" />
+                    <div className="mt-1 flex items-center space-x-4">
+                      <span className="flex items-center text-sm text-gray-500">
+                        <Calendar className="mr-1 h-4 w-4" />
                         Expires {formatExpiryDate(method.expiryMonth, method.expiryYear)}
                       </span>
                     </div>
@@ -196,7 +175,7 @@ export function PaymentMethods() {
                 <div className="flex items-center space-x-2">
                   {method.isDefault ? (
                     <Button variant="ghost" size="sm" disabled>
-                      <CheckCircle className="h-4 w-4 mr-2" />
+                      <CheckCircle className="mr-2 h-4 w-4" />
                       Default
                     </Button>
                   ) : (
@@ -206,7 +185,7 @@ export function PaymentMethods() {
                         size="sm"
                         onClick={() => handleSetDefault(method.id)}
                       >
-                        <Star className="h-4 w-4 mr-2" />
+                        <Star className="mr-2 h-4 w-4" />
                         Set as Default
                       </Button>
                       <Button
@@ -229,23 +208,23 @@ export function PaymentMethods() {
       <Card>
         <CardContent className="p-6">
           <div className="flex items-start space-x-3">
-            <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+            <CheckCircle className="mt-0.5 h-5 w-5 text-green-600" />
             <div>
               <h3 className="font-medium text-green-900">Secure & Protected</h3>
-              <p className="text-sm text-green-700 mt-1">
-                Your payment information is encrypted and securely stored according to PCI DSS standards.
-                We never store your full card details.
+              <p className="mt-1 text-sm text-green-700">
+                Your payment information is encrypted and securely stored according to PCI DSS
+                standards. We never store your full card details.
               </p>
             </div>
           </div>
 
-          <div className="flex items-start space-x-3 mt-4">
-            <AlertCircle className="h-5 w-5 text-blue-600 mt-0.5" />
+          <div className="mt-4 flex items-start space-x-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 text-blue-600" />
             <div>
               <h3 className="font-medium text-blue-900">Automatic Payments</h3>
-              <p className="text-sm text-blue-700 mt-1">
-                We automatically charge your default payment method on your billing date.
-                You will receive an email confirmation 24 hours before each charge.
+              <p className="mt-1 text-sm text-blue-700">
+                We automatically charge your default payment method on your billing date. You will
+                receive an email confirmation 24 hours before each charge.
               </p>
             </div>
           </div>
