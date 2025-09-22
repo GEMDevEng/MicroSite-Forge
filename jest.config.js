@@ -20,6 +20,7 @@ const customJestConfig = {
     '!src/types/**/*',
     '!src/styles/**/*',
   ],
+  coverageReporters: ['json-summary', 'text', 'lcov', 'clover'],
   // Disable handle leakage detection to prevent random CI failures
   detectOpenHandles: false,
   detectLeaks: false,
