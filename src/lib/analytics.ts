@@ -60,7 +60,7 @@ export interface CustomReport {
   id: string
   name: string
   filters: {
-    dateRange: { start: string, end: string }
+    dateRange: { start: string; end: string }
     sites?: string[]
     leadStatus?: string[]
     sources?: string[]
@@ -95,7 +95,7 @@ export class AnalyticsEngine {
 
       const totalSites = sites?.length || 0
       const totalLeads = leads?.length || 0
-      const qualifiedLeads = leads?.filter(lead => lead.status === 'qualified').length || 0
+      const qualifiedLeads = leads?.filter((lead) => lead.status === 'qualified').length || 0
       const activeSites = totalSites // Assume all sites are active
       const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0
 
@@ -105,17 +105,20 @@ export class AnalyticsEngine {
         totalRevenue,
         conversionRate,
         activeSites,
-        qualifiedLeads
+        qualifiedLeads,
       }
     } catch (error) {
-      logger.error('Failed to get dashboard data', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Failed to get dashboard data',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return {
         totalSites: 0,
         totalLeads: 0,
         totalRevenue: 0,
         conversionRate: 0,
         activeSites: 0,
-        qualifiedLeads: 0
+        qualifiedLeads: 0,
       }
     }
   }
@@ -130,23 +133,25 @@ export class AnalyticsEngine {
       if (error) throw error
 
       const totalLeads = leads?.length || 0
-      const newLeads = leads?.filter(lead => lead.status === 'new').length || 0
-      const qualified = leads?.filter(lead => lead.status === 'qualified').length || 0
-      const contacted = leads?.filter(lead => lead.status === 'contacted').length || 0
-      const converted = leads?.filter(lead => lead.status === 'converted').length || 0
+      const newLeads = leads?.filter((lead) => lead.status === 'new').length || 0
+      const qualified = leads?.filter((lead) => lead.status === 'qualified').length || 0
+      const contacted = leads?.filter((lead) => lead.status === 'contacted').length || 0
+      const converted = leads?.filter((lead) => lead.status === 'converted').length || 0
 
-      const scores = leads?.map(lead => (lead.score_data as any)?.total_score).filter(Boolean) as number[]
+      const scores = leads
+        ?.map((lead) => (lead.score_data as any)?.total_score)
+        .filter(Boolean) as number[]
       const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
       const conversionRate = totalLeads > 0 ? (converted / totalLeads) * 100 : 0
 
       // Mock cost per lead
-      const costPerLead = 25.50
+      const costPerLead = 25.5
 
       // Group by sources
       const sourceMap = new Map<string, number>()
       const sourceConversions = new Map<string, number>()
 
-      leads?.forEach(lead => {
+      leads?.forEach((lead) => {
         const source = lead.source || 'unknown'
         sourceMap.set(source, (sourceMap.get(source) || 0) + 1)
         if (lead.status === 'converted') {
@@ -159,7 +164,7 @@ export class AnalyticsEngine {
         return {
           source,
           count,
-          conversionRate: count > 0 ? (conversions / count) * 100 : 0
+          conversionRate: count > 0 ? (conversions / count) * 100 : 0,
         }
       })
 
@@ -172,10 +177,13 @@ export class AnalyticsEngine {
         avgScore,
         conversionRate,
         costPerLead,
-        leadSources
+        leadSources,
       }
     } catch (error) {
-      logger.error('Failed to get lead analytics', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Failed to get lead analytics',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return {
         totalLeads: 0,
         newLeads: 0,
@@ -185,12 +193,12 @@ export class AnalyticsEngine {
         avgScore: 0,
         conversionRate: 0,
         costPerLead: 0,
-        leadSources: []
+        leadSources: [],
       }
     }
   }
 
-  async getRevenueTracking(userId: string): Promise<AnalyticsData['revenueTracking']> {
+  async getRevenueTracking(_userId: string): Promise<AnalyticsData['revenueTracking']> {
     try {
       // Mock data for now - in production, query subscription/invoice tables
       const monthlyRecurring = Math.floor(Math.random() * 5000) + 1000
@@ -213,16 +221,19 @@ export class AnalyticsEngine {
         oneTimeServices,
         churnRate,
         lifetimeValue: 15000, // Mock LTV
-        monthlyRevenue
+        monthlyRevenue,
       }
     } catch (error) {
-      logger.error('Failed to get revenue tracking', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Failed to get revenue tracking',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return {
         monthlyRecurring: 0,
         oneTimeServices: 0,
         churnRate: 0,
         lifetimeValue: 0,
-        monthlyRevenue: []
+        monthlyRevenue: [],
       }
     }
   }
@@ -237,20 +248,24 @@ export class AnalyticsEngine {
       if (error) throw error
 
       // Mock performance data for each site
-      const sitePerformance = sites?.map(site => ({
-        site_id: site.id,
-        name: site.name || site.domain,
-        views: Math.floor(Math.random() * 10000) + 1000,
-        leads_generated: Math.floor(Math.random() * 100) + 10,
-        conversion_rate: Math.random() * 10,
-        revenue: Math.floor(Math.random() * 5000),
-        bounce_rate: Math.random() * 50,
-        avg_session_duration: Math.floor(Math.random() * 300) + 60
-      })) || []
+      const sitePerformance =
+        sites?.map((site) => ({
+          site_id: site.id,
+          name: site.name || site.domain,
+          views: Math.floor(Math.random() * 10000) + 1000,
+          leads_generated: Math.floor(Math.random() * 100) + 10,
+          conversion_rate: Math.random() * 10,
+          revenue: Math.floor(Math.random() * 5000),
+          bounce_rate: Math.random() * 50,
+          avg_session_duration: Math.floor(Math.random() * 300) + 60,
+        })) || []
 
       return sitePerformance
     } catch (error) {
-      logger.error('Failed to get site performance', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Failed to get site performance',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return []
     }
   }
@@ -284,23 +299,31 @@ export class ReportBuilder {
 
       return data
     } catch (error) {
-      logger.error('Failed to generate custom report', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Failed to generate custom report',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       throw error
     }
   }
 }
 
 export class ReportScheduler {
-  static async scheduleReport(report: CustomReport, userId: string): Promise<void> {
+  static async scheduleReport(report: CustomReport, _userId: string): Promise<void> {
     try {
       // This would set up cron jobs or scheduled tasks
-      logger.info('Scheduling report', { reportId: report.id, frequency: report.schedule?.frequency })
+      logger.info('Scheduling report', {
+        reportId: report.id,
+        frequency: report.schedule?.frequency,
+      })
 
       // Implementation would involve scheduling the ReportBuilder.generateCustomReport
       // and sending via email or storing the report
-
     } catch (error) {
-      logger.error('Failed to schedule report', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Failed to schedule report',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       throw error
     }
   }

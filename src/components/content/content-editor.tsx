@@ -8,7 +8,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Textarea } from '@/components/ui/textarea'
 import {
-  Save,
   RefreshCw,
   Eye,
   FileText,
@@ -17,7 +16,7 @@ import {
   CheckCircle,
   Search,
   Target,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react'
 
 // Types
@@ -78,8 +77,8 @@ export default function ContentEditor({
   }
 
   const getScoreIcon = (score: number) => {
-    if (score >= 70) return <CheckCircle className="w-4 h-4" />
-    return <AlertTriangle className="w-4 h-4" />
+    if (score >= 70) return <CheckCircle className="h-4 w-4" />
+    return <AlertTriangle className="h-4 w-4" />
   }
 
   const renderMarkdown = (markdown: string) => {
@@ -107,7 +106,7 @@ export default function ContentEditor({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
+                <FileText className="h-5 w-5" />
                 Content Editor
               </CardTitle>
               <div className="flex items-center gap-2">
@@ -119,11 +118,11 @@ export default function ContentEditor({
             </div>
             <div className="flex gap-2">
               <Button
-                variant={previewMode ? "default" : "outline"}
+                variant={previewMode ? 'default' : 'outline'}
                 size="sm"
                 onClick={() => setPreviewMode(!previewMode)}
               >
-                <Eye className="w-4 h-4 mr-1" />
+                <Eye className="mr-1 h-4 w-4" />
                 {previewMode ? 'Edit' : 'Preview'}
               </Button>
               {onApproveContent && (
@@ -131,7 +130,7 @@ export default function ContentEditor({
                   onClick={() => onApproveContent(editedContent)}
                   disabled={calculateAverageScore() < 70}
                 >
-                  <CheckCircle className="w-4 h-4 mr-1" />
+                  <CheckCircle className="mr-1 h-4 w-4" />
                   Approve & Deploy
                 </Button>
               )}
@@ -142,15 +141,19 @@ export default function ContentEditor({
           <CardContent>
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
-                <Target className="w-4 h-4" />
-                <span>Niche: <strong>{niche}</strong></span>
+                <Target className="h-4 w-4" />
+                <span>
+                  Niche: <strong>{niche}</strong>
+                </span>
               </div>
               <div className="flex items-center gap-1">
-                <Search className="w-4 h-4" />
-                <span>Keyword: <strong>{keyword}</strong></span>
+                <Search className="h-4 w-4" />
+                <span>
+                  Keyword: <strong>{keyword}</strong>
+                </span>
               </div>
               <div className="flex items-center gap-1">
-                <FileText className="w-4 h-4" />
+                <FileText className="h-4 w-4" />
                 <span>Pages: {editedContent.length}</span>
               </div>
             </div>
@@ -169,7 +172,7 @@ export default function ContentEditor({
                     {getScoreIcon(item.validation.score)}
                     <CardTitle className="text-lg">{item.title}</CardTitle>
                   </div>
-                  <Badge variant={item.validation.passed ? "default" : "destructive"}>
+                  <Badge variant={item.validation.passed ? 'default' : 'destructive'}>
                     {item.validation.score}/100
                   </Badge>
                   {item.path && (
@@ -187,12 +190,8 @@ export default function ContentEditor({
                     {editingIndex === index ? 'Done' : 'Edit'}
                   </Button>
                   {onRegenerateContent && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleRegenerate(index)}
-                    >
-                      <RefreshCw className="w-4 h-4 mr-1" />
+                    <Button variant="outline" size="sm" onClick={() => handleRegenerate(index)}>
+                      <RefreshCw className="mr-1 h-4 w-4" />
                       Regenerate
                     </Button>
                   )}
@@ -201,7 +200,7 @@ export default function ContentEditor({
               {item.validation.issues.length > 0 && (
                 <div className="mt-2">
                   <div className="flex items-center gap-1 text-sm text-orange-600">
-                    <AlertTriangle className="w-4 h-4" />
+                    <AlertTriangle className="h-4 w-4" />
                     Issues: {item.validation.issues.join(', ')}
                   </div>
                 </div>
@@ -212,7 +211,7 @@ export default function ContentEditor({
               {editingIndex === index ? (
                 // Edit Mode
                 <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                     <div>
                       <Label htmlFor={`title-${index}`}>Title</Label>
                       <Input
@@ -226,28 +225,36 @@ export default function ContentEditor({
                       <Input
                         id={`keywords-${index}`}
                         value={item.seoKeywords.join(', ')}
-                        onChange={(e) => handleContentChange(
-                          index,
-                          'seoKeywords',
-                          e.target.value.split(',').map(k => k.trim())
-                        )}
+                        onChange={(e) =>
+                          handleContentChange(
+                            index,
+                            'seoKeywords',
+                            e.target.value.split(',').map((k) => k.trim())
+                          )
+                        }
                       />
                     </div>
                   </div>
 
                   <div>
-                    <Label htmlFor={`meta-${index}`}>Meta Description ({item.metaDescription.length}/160)</Label>
+                    <Label htmlFor={`meta-${index}`}>
+                      Meta Description ({item.metaDescription.length}/160)
+                    </Label>
                     <Textarea
                       id={`meta-${index}`}
                       value={item.metaDescription}
-                      onChange={(e) => handleContentChange(index, 'metaDescription', e.target.value)}
+                      onChange={(e) =>
+                        handleContentChange(index, 'metaDescription', e.target.value)
+                      }
                       rows={2}
                       className={item.metaDescription.length > 160 ? 'border-red-300' : ''}
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor={`content-${index}`}>Content (Word count: {item.validation.wordCount})</Label>
+                    <Label htmlFor={`content-${index}`}>
+                      Content (Word count: {item.validation.wordCount})
+                    </Label>
                     <Textarea
                       id={`content-${index}`}
                       value={item.content}
@@ -261,48 +268,54 @@ export default function ContentEditor({
                 // Preview Mode
                 <div className="space-y-4">
                   {previewMode ? (
-                    <div className="border rounded p-4 bg-gray-50">
-                      <h1 className="text-2xl font-bold mb-4">{item.title}</h1>
+                    <div className="rounded border bg-gray-50 p-4">
+                      <h1 className="mb-4 text-2xl font-bold">{item.title}</h1>
                       <div
                         className="prose prose-sm max-w-none"
                         dangerouslySetInnerHTML={{
-                          __html: `<p class="text-gray-600 mb-4">${item.metaDescription}</p>` + renderMarkdown(item.content)
+                          __html:
+                            `<p class="text-gray-600 mb-4">${item.metaDescription}</p>` +
+                            renderMarkdown(item.content),
                         }}
                       />
                     </div>
                   ) : (
                     <div className="space-y-3">
                       <div>
-                        <h3 className="font-semibold mb-2">Keywords</h3>
+                        <h3 className="mb-2 font-semibold">Keywords</h3>
                         <div className="flex flex-wrap gap-1">
                           {item.seoKeywords.map((keyword, kid) => (
-                            <Badge key={kid} variant="secondary">{keyword}</Badge>
+                            <Badge key={kid} variant="secondary">
+                              {keyword}
+                            </Badge>
                           ))}
                         </div>
                       </div>
 
                       <div>
-                        <h3 className="font-semibold mb-2">Meta Description</h3>
-                        <p className="text-sm text-gray-600 bg-yellow-50 p-2 rounded border">
+                        <h3 className="mb-2 font-semibold">Meta Description</h3>
+                        <p className="rounded border bg-yellow-50 p-2 text-sm text-gray-600">
                           {item.metaDescription}
                         </p>
                       </div>
 
                       <div>
-                        <h3 className="font-semibold mb-2">Content Preview</h3>
-                        <div className="text-sm text-gray-700 bg-gray-50 p-3 rounded font-mono max-h-48 overflow-hidden">
+                        <h3 className="mb-2 font-semibold">Content Preview</h3>
+                        <div className="max-h-48 overflow-hidden rounded bg-gray-50 p-3 font-mono text-sm text-gray-700">
                           {item.content.slice(0, 500)}...
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 text-sm text-gray-500 pt-2 border-t">
+                      <div className="flex items-center gap-4 border-t pt-2 text-sm text-gray-500">
                         <span>Word count: {item.validation.wordCount}</span>
-                        <span className={`flex items-center gap-1 ${getScoreColor(item.validation.score)}`}>
-                          <TrendingUp className="w-3 h-3" />
+                        <span
+                          className={`flex items-center gap-1 ${getScoreColor(item.validation.score)}`}
+                        >
+                          <TrendingUp className="h-3 w-3" />
                           SEO Score: {item.validation.score}/100
                         </span>
                         <span className="flex items-center gap-1">
-                          <MessageSquare className="w-3 h-3" />
+                          <MessageSquare className="h-3 w-3" />
                           Issues: {item.validation.issues.length}
                         </span>
                       </div>

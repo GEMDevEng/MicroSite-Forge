@@ -1,6 +1,5 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { X } from "lucide-react"
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
 interface DialogProps {
   open: boolean
@@ -53,61 +52,46 @@ const Dialog: React.FC<DialogProps> = ({ open, onOpenChange, children }) => {
   return (
     <>
       {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-black/50 z-50"
-        onClick={() => onOpenChange(false)}
-      />
+      <div className="fixed inset-0 z-50 bg-black/50" onClick={() => onOpenChange(false)} />
 
       {/* Dialog */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        {children}
-      </div>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">{children}</div>
     </>
   )
 }
 
-const DialogTrigger: React.FC<DialogTriggerProps> = ({ children, asChild }) => {
+const DialogTrigger: React.FC<DialogTriggerProps> = ({ children, asChild: _asChild }) => {
   return <>{children}</>
 }
 
 const DialogContent: React.FC<DialogContentProps> = ({ children, className }) => {
   return (
-    <div className={cn(
-      "bg-white rounded-lg shadow-lg max-w-md w-full max-h-[85vh] overflow-y-auto",
-      className
-    )}>
+    <div
+      className={cn(
+        'max-h-[85vh] w-full max-w-md overflow-y-auto rounded-lg bg-white shadow-lg',
+        className
+      )}
+    >
       {children}
     </div>
   )
 }
 
 const DialogHeader: React.FC<DialogHeaderProps> = ({ children }) => {
-  return (
-    <div className="flex flex-col space-y-1.5 p-6 border-b">
-      {children}
-    </div>
-  )
+  return <div className="flex flex-col space-y-1.5 border-b p-6">{children}</div>
 }
 
 const DialogTitle: React.FC<DialogTitleProps> = ({ children }) => {
-  return (
-    <h3 className="text-lg font-semibold leading-none tracking-tight">
-      {children}
-    </h3>
-  )
+  return <h3 className="text-lg font-semibold leading-none tracking-tight">{children}</h3>
 }
 
 const DialogDescription: React.FC<DialogDescriptionProps> = ({ children }) => {
-  return (
-    <p className="text-sm text-muted-foreground">
-      {children}
-    </p>
-  )
+  return <p className="text-sm text-muted-foreground">{children}</p>
 }
 
 const DialogFooter: React.FC<DialogFooterProps> = ({ children }) => {
   return (
-    <div className="flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 p-6 border-t">
+    <div className="flex flex-col-reverse border-t p-6 sm:flex-row sm:justify-end sm:space-x-2">
       {children}
     </div>
   )
@@ -120,5 +104,5 @@ export {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter
+  DialogFooter,
 }
