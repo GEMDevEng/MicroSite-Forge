@@ -42,7 +42,7 @@ jobs:
         run: npm run type-check
 
       - name: Run unit tests
-        run: npm run test:coverage -- --watchAll=false
+        run: npm run test:coverage -- --watchAll=false --passWithNoTests=false
 
       - name: Print npm debug log if failure
         if: failure()
