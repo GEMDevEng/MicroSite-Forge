@@ -17,34 +17,38 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const type = searchParams.get('type') // 'dashboard', 'leads', 'revenue', 'sites', 'report'
-    const reportId = searchParams.get('reportId')
 
     const analytics = new AnalyticsEngine()
     const userId = session.user.id
 
     switch (type) {
-      case 'dashboard':
+      case 'dashboard': {
         const dashboardData = await analytics.getDashboardData(userId)
         return NextResponse.json(dashboardData)
+      }
 
-      case 'leads':
+      case 'leads': {
         const leadData = await analytics.getLeadAnalytics(userId)
         return NextResponse.json(leadData)
+      }
 
-      case 'revenue':
+      case 'revenue': {
         const revenueData = await analytics.getRevenueTracking(userId)
         return NextResponse.json(revenueData)
+      }
 
-      case 'sites':
+      case 'sites': {
         const siteData = await analytics.getSitePerformance(userId)
         return NextResponse.json(siteData)
+      }
 
-      case 'realtime':
+      case 'realtime': {
         // For real-time metrics - could use websockets in production
         const realtimeData = await analytics.getDashboardData(userId)
         return NextResponse.json({ ...realtimeData, timestamp: new Date().toISOString() })
+      }
 
-      default:
+      default: {
         // Default comprehensive dashboard data
         const overview = await analytics.getDashboardData(userId)
         const leadAnalytics = await analytics.getLeadAnalytics(userId)
@@ -57,6 +61,7 @@ export async function GET(request: NextRequest) {
           revenueTracking,
           sitePerformance,
         })
+      }
     }
   } catch (error) {
     logger.error('Analytics API error', error instanceof Error ? error : new Error('Unknown error'))
