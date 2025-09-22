@@ -1,7 +1,13 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { AVAILABLE_GATEWAYS, paymentGatewayManager } from '@/lib/payment-gateway'
+import { AVAILABLE_GATEWAYS } from '@/lib/payment-gateway'
 import { PaymentGatewayType } from '@/types/database'
 
 export function GatewaySelector() {
@@ -42,9 +48,7 @@ export function GatewaySelector() {
                   <span className="text-xs text-gray-500">{gateway.fees.transaction}</span>
                 </div>
                 {gateway.isActive && (
-                  <Badge className="bg-green-100 text-green-800 border-0 ml-auto">
-                    Active
-                  </Badge>
+                  <Badge className="ml-auto border-0 bg-green-100 text-green-800">Active</Badge>
                 )}
               </div>
             </SelectItem>

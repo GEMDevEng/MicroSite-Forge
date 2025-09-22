@@ -7,11 +7,10 @@ import {
   Users,
   Globe,
   Mail,
-  Calendar,
   ChevronRight,
   CheckCircle,
   AlertCircle,
-  BarChart3
+  BarChart3,
 } from 'lucide-react'
 
 // Mock data - will be replaced with API calls
@@ -26,13 +25,13 @@ const subscriptionData = {
     sitesGenerated: 847,
     leadsGenerated: 2541,
     emailCampaigns: 12,
-    apiCalls: 45678
+    apiCalls: 45678,
   },
   limits: {
     sitesPerMonth: 1500,
     leadsPerMonth: 5000,
     emailCampaigns: 20,
-    apiCallsPerMonth: 100000
+    apiCallsPerMonth: 100000,
   },
   features: [
     'Unlimited microsites',
@@ -40,8 +39,8 @@ const subscriptionData = {
     'Email & SMS automation',
     'Custom domains',
     'API access',
-    'Priority support'
-  ]
+    'Priority support',
+  ],
 }
 
 export function SubscriptionOverview() {
@@ -49,20 +48,18 @@ export function SubscriptionOverview() {
     return Math.min((used / limit) * 100, 100)
   }
 
-  const getUsageColor = (percentage: number) => {
-    if (percentage >= 90) return 'text-red-600'
-    if (percentage >= 75) return 'text-yellow-600'
-    return 'text-green-600'
-  }
-
-  const UsageMeter = ({ label, used, limit, icon: Icon }: {
+  const UsageMeter = ({
+    label,
+    used,
+    limit,
+    icon: Icon,
+  }: {
     label: string
     used: number
     limit: number
     icon: any
   }) => {
     const percentage = calculateUsagePercentage(used, limit)
-    const color = getUsageColor(percentage)
 
     return (
       <div className="space-y-2">
@@ -71,7 +68,9 @@ export function SubscriptionOverview() {
             <Icon className="h-4 w-4 text-gray-400" />
             <span>{label}</span>
           </div>
-          <span className="font-medium">{used.toLocaleString()} / {limit.toLocaleString()}</span>
+          <span className="font-medium">
+            {used.toLocaleString()} / {limit.toLocaleString()}
+          </span>
         </div>
         <Progress value={percentage} className="h-2" />
         <div className="flex justify-between text-xs text-gray-500">
@@ -93,51 +92,45 @@ export function SubscriptionOverview() {
                 <CheckCircle className="h-5 w-5 text-green-500" />
                 <span>Current Subscription</span>
               </CardTitle>
-              <CardDescription>
-                Your current plan and billing information
-              </CardDescription>
+              <CardDescription>Your current plan and billing information</CardDescription>
             </div>
-            <Badge className="bg-green-100 text-green-800 border-0">
-              Active
-            </Badge>
+            <Badge className="border-0 bg-green-100 text-green-800">Active</Badge>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Plan</h3>
+              <h3 className="mb-1 text-sm font-medium text-gray-500">Plan</h3>
               <p className="text-2xl font-bold">{subscriptionData.planName}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Billing Cycle</h3>
+              <h3 className="mb-1 text-sm font-medium text-gray-500">Billing Cycle</h3>
               <p className="text-lg font-semibold">{subscriptionData.billingCycle}</p>
             </div>
             <div>
-              <h3 className="text-sm font-medium text-gray-500 mb-1">Next Billing</h3>
+              <h3 className="mb-1 text-sm font-medium text-gray-500">Next Billing</h3>
               <p className="text-lg font-semibold">
                 {new Date(subscriptionData.nextBillingDate).toLocaleDateString('en-US', {
                   month: 'short',
                   day: 'numeric',
-                  year: 'numeric'
+                  year: 'numeric',
                 })}
               </p>
             </div>
           </div>
 
-          <div className="mt-6 pt-6 border-t">
+          <div className="mt-6 border-t pt-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-1">Amount Due</h3>
+                <h3 className="mb-1 text-sm font-medium text-gray-500">Amount Due</h3>
                 <p className="text-3xl font-bold">${subscriptionData.amountDue}</p>
-                <p className="text-sm text-gray-500">per {subscriptionData.billingCycle.toLowerCase()}</p>
+                <p className="text-sm text-gray-500">
+                  per {subscriptionData.billingCycle.toLowerCase()}
+                </p>
               </div>
               <div className="flex space-x-3">
-                <Button variant="outline">
-                  Change Plan
-                </Button>
-                <Button>
-                  Upgrade Plan
-                </Button>
+                <Button variant="outline">Change Plan</Button>
+                <Button>Upgrade Plan</Button>
               </div>
             </div>
           </div>
@@ -151,12 +144,10 @@ export function SubscriptionOverview() {
             <BarChart3 className="h-5 w-5" />
             <span>Usage This Month</span>
           </CardTitle>
-          <CardDescription>
-            Your current usage against monthly limits
-          </CardDescription>
+          <CardDescription>Your current usage against monthly limits</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <UsageMeter
               label="Sites Generated"
               used={subscriptionData.usage.sitesGenerated}
@@ -188,14 +179,14 @@ export function SubscriptionOverview() {
 
           {/* Usage Warning */}
           {subscriptionData.usage.sitesGenerated > subscriptionData.limits.sitesPerMonth * 0.9 && (
-            <div className="mt-6 p-4 bg-yellow-50 rounded-lg">
+            <div className="mt-6 rounded-lg bg-yellow-50 p-4">
               <div className="flex items-start space-x-3">
-                <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+                <AlertCircle className="mt-0.5 h-5 w-5 text-yellow-600" />
                 <div>
                   <h3 className="font-medium text-yellow-900">Approaching Limits</h3>
-                  <p className="text-sm text-yellow-700 mt-1">
-                    You are approaching your monthly site generation limit.
-                    Consider upgrading your plan for unlimited usage.
+                  <p className="mt-1 text-sm text-yellow-700">
+                    You are approaching your monthly site generation limit. Consider upgrading your
+                    plan for unlimited usage.
                   </p>
                   <Button size="sm" className="mt-2" variant="outline">
                     Upgrade Plan
@@ -211,21 +202,19 @@ export function SubscriptionOverview() {
       <Card>
         <CardHeader>
           <CardTitle>Plan Features</CardTitle>
-          <CardDescription>
-            Features included in your current subscription
-          </CardDescription>
+          <CardDescription>Features included in your current subscription</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             {subscriptionData.features.map((feature, index) => (
               <div key={index} className="flex items-center space-x-3">
-                <CheckCircle className="h-5 w-5 text-green-500 flex-shrink-0" />
+                <CheckCircle className="h-5 w-5 flex-shrink-0 text-green-500" />
                 <span className="text-sm">{feature}</span>
               </div>
             ))}
           </div>
 
-          <div className="mt-6 pt-6 border-t">
+          <div className="mt-6 border-t pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-medium">Need more features?</h3>
@@ -233,7 +222,7 @@ export function SubscriptionOverview() {
               </div>
               <Button variant="outline">
                 View All Plans
-                <ChevronRight className="h-4 w-4 ml-2" />
+                <ChevronRight className="ml-2 h-4 w-4" />
               </Button>
             </div>
           </div>

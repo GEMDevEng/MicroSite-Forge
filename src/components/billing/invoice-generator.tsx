@@ -4,9 +4,14 @@ import { useState } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { CalendarIcon, Download, FileText, Receipt, Settings } from 'lucide-react'
 
 // Mock invoice data
@@ -18,7 +23,7 @@ const mockInvoices = [
     status: 'paid',
     client: 'Pro Plan Subscription',
     downloadUrl: '#',
-    pdfSize: '2.1 MB'
+    pdfSize: '2.1 MB',
   },
   {
     id: 'INV-2025-10-001',
@@ -27,7 +32,7 @@ const mockInvoices = [
     status: 'paid',
     client: 'Pro Plan Subscription',
     downloadUrl: '#',
-    pdfSize: '2.1 MB'
+    pdfSize: '2.1 MB',
   },
   {
     id: 'INV-2025-09-001',
@@ -36,8 +41,8 @@ const mockInvoices = [
     status: 'paid',
     client: 'Pro Plan Subscription',
     downloadUrl: '#',
-    pdfSize: '2.1 MB'
-  }
+    pdfSize: '2.1 MB',
+  },
 ]
 
 export function InvoiceGenerator() {
@@ -49,7 +54,7 @@ export function InvoiceGenerator() {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
-      year: 'numeric'
+      year: 'numeric',
     })
   }
 
@@ -57,15 +62,11 @@ export function InvoiceGenerator() {
     const statusConfig = {
       paid: { color: 'bg-green-100 text-green-800', label: 'Paid' },
       unpaid: { color: 'bg-yellow-100 text-yellow-800', label: 'Unpaid' },
-      draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' }
+      draft: { color: 'bg-gray-100 text-gray-800', label: 'Draft' },
     }
 
     const config = statusConfig[status as keyof typeof statusConfig] || statusConfig.draft
-    return (
-      <Badge className={`${config.color} border-0`}>
-        {config.label}
-      </Badge>
-    )
+    return <Badge className={`${config.color} border-0`}>{config.label}</Badge>
   }
 
   const handleGenerateInvoice = () => {
@@ -79,21 +80,17 @@ export function InvoiceGenerator() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <div>
           <h3 className="text-lg font-semibold">Invoice Generator</h3>
-          <p className="text-sm text-gray-500">
-            Generate and manage professional invoices
-          </p>
+          <p className="text-sm text-gray-500">Generate and manage professional invoices</p>
         </div>
         <div className="flex space-x-3">
           <Button variant="outline">
-            <Settings className="h-4 w-4 mr-2" />
+            <Settings className="mr-2 h-4 w-4" />
             Templates
           </Button>
-          <Button onClick={() => setGenerateInvoice(true)}>
-            Generate Invoice
-          </Button>
+          <Button onClick={() => setGenerateInvoice(true)}>Generate Invoice</Button>
         </div>
       </div>
 
@@ -105,12 +102,10 @@ export function InvoiceGenerator() {
               <FileText className="h-5 w-5" />
               <span>Generate New Invoice</span>
             </CardTitle>
-            <CardDescription>
-              Create a custom invoice for a specific period
-            </CardDescription>
+            <CardDescription>Create a custom invoice for a specific period</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="billing-period">Billing Period</Label>
                 <Select value={selectedPeriod} onValueChange={setSelectedPeriod}>
@@ -141,9 +136,7 @@ export function InvoiceGenerator() {
             </div>
 
             <div className="flex space-x-3 pt-4">
-              <Button onClick={handleGenerateInvoice}>
-                Generate Invoice
-              </Button>
+              <Button onClick={handleGenerateInvoice}>Generate Invoice</Button>
               <Button variant="outline" onClick={() => setGenerateInvoice(false)}>
                 Cancel
               </Button>
@@ -159,23 +152,24 @@ export function InvoiceGenerator() {
             <Receipt className="h-5 w-5" />
             <span>Recent Invoices</span>
           </CardTitle>
-          <CardDescription>
-            Your most recently generated invoices
-          </CardDescription>
+          <CardDescription>Your most recently generated invoices</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
             {mockInvoices.map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between p-4 border rounded-lg">
+              <div
+                key={invoice.id}
+                className="flex items-center justify-between rounded-lg border p-4"
+              >
                 <div className="flex items-center space-x-4">
-                  <div className="p-2 bg-blue-100 rounded-lg">
+                  <div className="rounded-lg bg-blue-100 p-2">
                     <Receipt className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
                     <div className="font-medium">{invoice.id}</div>
                     <div className="text-sm text-gray-500">
                       {invoice.client} • {formatDate(invoice.date)}
-                      <div className="text-xs text-gray-400 mt-1">{invoice.pdfSize}</div>
+                      <div className="mt-1 text-xs text-gray-400">{invoice.pdfSize}</div>
                     </div>
                   </div>
                 </div>
@@ -187,7 +181,7 @@ export function InvoiceGenerator() {
                   </div>
 
                   <Button size="sm" variant="outline">
-                    <Download className="h-4 w-4 mr-2" />
+                    <Download className="mr-2 h-4 w-4" />
                     Download
                   </Button>
                 </div>
@@ -197,9 +191,9 @@ export function InvoiceGenerator() {
 
           {/* Empty State */}
           {mockInvoices.length === 0 && (
-            <div className="text-center py-8">
-              <Receipt className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No invoices yet</h3>
+            <div className="py-8 text-center">
+              <Receipt className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+              <h3 className="mb-2 text-lg font-medium text-gray-900">No invoices yet</h3>
               <p className="text-gray-500">Generate your first invoice to get started</p>
             </div>
           )}
@@ -207,7 +201,7 @@ export function InvoiceGenerator() {
       </Card>
 
       {/* Invoice Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Invoiced</CardTitle>

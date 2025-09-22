@@ -1,17 +1,31 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Mail, MessageSquare, Users, Calendar, Target, Send, Eye, MousePointer } from 'lucide-react'
-import { CampaignSegmentation, EmailCampaign, SMSCampaign } from '@/lib/communication'
+import { Mail, MessageSquare, Users, Target, Send } from 'lucide-react'
+import { CampaignSegmentation } from '@/lib/communication'
 
 interface CreateCampaignDialogProps {
   children: React.ReactNode
@@ -57,9 +71,9 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
       source: [],
       location: '',
       daysSinceContact: undefined,
-      daysSinceSignup: undefined
+      daysSinceSignup: undefined,
     },
-    template: null
+    template: null,
   })
 
   // Mock data
@@ -68,38 +82,40 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
       id: '1',
       name: 'Welcome Email',
       subject: 'Welcome to MicroSite Forge, {{firstName}}!',
-      htmlContent: '<p>Hello {{firstName}},</p><p>Thank you for your interest in {{company}}...</p>',
-      variables: ['firstName', 'company']
+      htmlContent:
+        '<p>Hello {{firstName}},</p><p>Thank you for your interest in {{company}}...</p>',
+      variables: ['firstName', 'company'],
     },
     {
       id: '2',
       name: 'Follow-up Sequence',
       subject: 'Following up on your recent inquiry',
       htmlContent: '<p>Hi {{firstName}},</p><p>We noticed you were interested...</p>',
-      variables: ['firstName', 'company']
-    }
+      variables: ['firstName', 'company'],
+    },
   ]
 
   const smsTemplates: SMSTemplate[] = [
     {
       id: '1',
       name: 'Welcome SMS',
-      content: 'Hi {{firstName}}! Thanks for your interest in {{company}}. Reply STOP to unsubscribe.',
-      variables: ['firstName', 'company']
+      content:
+        'Hi {{firstName}}! Thanks for your interest in {{company}}. Reply STOP to unsubscribe.',
+      variables: ['firstName', 'company'],
     },
     {
       id: '2',
       name: 'Follow-up SMS',
       content: 'Hi {{firstName}}, just checking in about your project. How can we help?',
-      variables: ['firstName']
-    }
+      variables: ['firstName'],
+    },
   ]
 
   const leadSegments = [
     { id: '1', name: 'New Leads', count: 450, status: 'new' },
     { id: '2', name: 'Qualified Leads', count: 234, status: 'qualified' },
     { id: '3', name: 'High-Value Prospects', count: 89, tags: ['high-value'] },
-    { id: '4', name: 'Inactive 30+ Days', count: 156, daysSinceContact: 30 }
+    { id: '4', name: 'Inactive 30+ Days', count: 156, daysSinceContact: 30 },
   ]
 
   const handleCreateCampaign = async () => {
@@ -108,7 +124,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
       console.log('Creating campaign:', formData)
 
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
 
       setOpen(false)
       // Reset form
@@ -123,9 +139,9 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
           source: [],
           location: '',
           daysSinceContact: undefined,
-          daysSinceSignup: undefined
+          daysSinceSignup: undefined,
         },
-        template: null
+        template: null,
       })
       setActiveTab('details')
     } catch (error) {
@@ -134,17 +150,17 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
   }
 
   const updateFormData = (field: keyof CampaignFormData, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
+    setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
   const updateSegment = (field: keyof CampaignSegmentation, value: any) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      segment: { ...prev.segment, [field]: value }
+      segment: { ...prev.segment, [field]: value },
     }))
   }
 
-  const selectPredefinedSegment = (segment: typeof leadSegments[0]) => {
+  const selectPredefinedSegment = (segment: (typeof leadSegments)[0]) => {
     updateSegment('tags', segment.tags ? [segment.tags] : [])
     updateSegment('status', segment.status ? [segment.status] : [])
     updateSegment('daysSinceContact', segment.daysSinceContact)
@@ -152,10 +168,8 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="max-h-[80vh] max-w-4xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Campaign</DialogTitle>
           <DialogDescription>
@@ -195,11 +209,11 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
 
               <div>
                 <Label>Campaign Type</Label>
-                <div className="flex space-x-4 mt-2">
+                <div className="mt-2 flex space-x-4">
                   <Card
                     className={`cursor-pointer transition-all ${
                       campaignType === 'email'
-                        ? 'ring-2 ring-blue-500 bg-blue-50'
+                        ? 'bg-blue-50 ring-2 ring-blue-500'
                         : 'hover:bg-gray-50'
                     }`}
                     onClick={() => {
@@ -221,7 +235,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                   <Card
                     className={`cursor-pointer transition-all ${
                       campaignType === 'sms'
-                        ? 'ring-2 ring-green-500 bg-green-50'
+                        ? 'bg-green-50 ring-2 ring-green-500'
                         : 'hover:bg-gray-50'
                     }`}
                     onClick={() => {
@@ -248,11 +262,11 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
             <div className="space-y-6">
               <div>
                 <Label className="text-base font-semibold">Select Target Audience</Label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                   {leadSegments.map((segment) => (
                     <Card
                       key={segment.id}
-                      className="cursor-pointer hover:bg-gray-50 transition-colors"
+                      className="cursor-pointer transition-colors hover:bg-gray-50"
                       onClick={() => selectPredefinedSegment(segment)}
                     >
                       <CardContent className="p-4">
@@ -270,9 +284,9 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
               </div>
 
               <div className="border-t pt-6">
-                <Label className="text-base font-semibold mb-4 block">Custom Segmentation</Label>
+                <Label className="mb-4 block text-base font-semibold">Custom Segmentation</Label>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div>
                     <Label>Status</Label>
                     <Select>
@@ -308,10 +322,12 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                       type="number"
                       placeholder="0"
                       value={formData.segment.score?.min || ''}
-                      onChange={(e) => updateSegment('score', {
-                        ...formData.segment.score,
-                        min: e.target.value ? Number(e.target.value) : undefined
-                      })}
+                      onChange={(e) =>
+                        updateSegment('score', {
+                          ...formData.segment.score,
+                          min: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
                     />
                   </div>
 
@@ -321,10 +337,12 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                       type="number"
                       placeholder="100"
                       value={formData.segment.score?.max || ''}
-                      onChange={(e) => updateSegment('score', {
-                        ...formData.segment.score,
-                        max: e.target.value ? Number(e.target.value) : undefined
-                      })}
+                      onChange={(e) =>
+                        updateSegment('score', {
+                          ...formData.segment.score,
+                          max: e.target.value ? Number(e.target.value) : undefined,
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -335,19 +353,19 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
           <TabsContent value="content" className="space-y-6">
             <div>
               <Label className="text-base font-semibold">Select Template</Label>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+              <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
                 {(campaignType === 'email' ? emailTemplates : smsTemplates).map((template) => (
                   <Card
                     key={template.id}
                     className={`cursor-pointer transition-all ${
                       formData.template?.id === template.id
-                        ? 'ring-2 ring-blue-500 bg-blue-50'
+                        ? 'bg-blue-50 ring-2 ring-blue-500'
                         : 'hover:bg-gray-50'
                     }`}
                     onClick={() => updateFormData('template', template)}
                   >
                     <CardContent className="p-4">
-                      <div className="flex items-start justify-between mb-2">
+                      <div className="mb-2 flex items-start justify-between">
                         <h4 className="font-medium">{template.name}</h4>
                         {campaignType === 'email' && (
                           <p className="text-sm text-gray-500">
@@ -355,20 +373,22 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                           </p>
                         )}
                       </div>
-                      <p className="text-sm text-gray-600 mb-3">
+                      <p className="mb-3 text-sm text-gray-600">
                         {campaignType === 'email'
-                          ? (template as EmailTemplate).htmlContent.replace(/<[^>]*>/g, '').substring(0, 100) + '...'
-                          : (template as SMSTemplate).content
-                        }
+                          ? (template as EmailTemplate).htmlContent
+                              .replace(/<[^>]*>/g, '')
+                              .substring(0, 100) + '...'
+                          : (template as SMSTemplate).content}
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {(campaignType === 'email' ? (template as EmailTemplate).variables : (template as SMSTemplate).variables)
-                          .map((variable) => (
-                            <Badge key={variable} variant="secondary" className="text-xs">
-                              {variable}
-                            </Badge>
-                          ))
-                        }
+                        {(campaignType === 'email'
+                          ? (template as EmailTemplate).variables
+                          : (template as SMSTemplate).variables
+                        ).map((variable) => (
+                          <Badge key={variable} variant="secondary" className="text-xs">
+                            {variable}
+                          </Badge>
+                        ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -398,7 +418,13 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                     </div>
                     <div>
                       <Label className="text-sm text-gray-500">Type</Label>
-                      <Badge className={campaignType === 'email' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}>
+                      <Badge
+                        className={
+                          campaignType === 'email'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-green-100 text-green-800'
+                        }
+                      >
                         {campaignType.toUpperCase()}
                       </Badge>
                     </div>
@@ -426,8 +452,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                       <span className="text-gray-500">Status Filters:</span>{' '}
                       {formData.segment.status?.length
                         ? formData.segment.status.join(', ')
-                        : 'None'
-                      }
+                        : 'None'}
                     </p>
                     <p className="text-sm">
                       <span className="text-gray-500">Score Range:</span>{' '}
@@ -437,8 +462,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
                       <span className="text-gray-500">Source Filters:</span>{' '}
                       {formData.segment.source?.length
                         ? formData.segment.source.join(', ')
-                        : 'None'
-                      }
+                        : 'None'}
                     </p>
                   </div>
                 </CardContent>
@@ -471,7 +495,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
         </Tabs>
 
         <DialogFooter>
-          <div className="flex justify-between w-full">
+          <div className="flex w-full justify-between">
             <div>
               {activeTab !== 'details' && (
                 <Button
@@ -495,9 +519,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
               </Button>
 
               {activeTab === 'review' ? (
-                <Button onClick={handleCreateCampaign}>
-                  Create Campaign
-                </Button>
+                <Button onClick={handleCreateCampaign}>Create Campaign</Button>
               ) : (
                 <Button
                   onClick={() => {
