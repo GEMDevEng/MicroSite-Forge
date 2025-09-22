@@ -42,7 +42,7 @@ jobs:
         run: npm run type-check
 
       - name: Run unit tests
-        run: npm run test -- --coverage --watchAll=false --ci || true
+        run: npm run test -- --coverage --watchAll=false --ci
 
       - name: Print npm debug log if failure
         if: failure()
@@ -59,14 +59,14 @@ jobs:
         run: |
           set -e
           if [ ! -f ./coverage/coverage-summary.json ]; then
-            echo "Coverage summary not found. Skipping coverage check."
-            exit 0
+            echo "Coverage summary not found. Failing build."
+            exit 1
           fi
           COVERAGE=$(node -p "require('./coverage/coverage-summary.json').total.lines.pct")
           echo "Code coverage is $COVERAGE%"
           if [ $(echo "$COVERAGE < 80" | bc -l) -eq 1 ]; then
-            echo "Warning: Code coverage is below 80% (required minimum)"
-            exit 0  # Allow CI to continue
+            echo "Code coverage is below 80% (required minimum)"
+            exit 1
           fi
 
       - name: Upload coverage reports
@@ -79,7 +79,6 @@ jobs:
 
       - name: Build application
         run: npm run build
-        continue-on-error: true
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
@@ -87,8 +86,10 @@ jobs:
       - name: Run E2E tests
         run: npm run test:e2e
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://test.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'test-anon-key' }}
+          GROK_API_KEY: ${{ secrets.GROK_API_KEY || '' }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY || '' }}
 
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4

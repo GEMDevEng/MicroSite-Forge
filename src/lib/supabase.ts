@@ -4,7 +4,8 @@ import { Database } from '@/types/database'
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-if (!supabaseUrl || !supabaseAnonKey) {
+// Skip validation in test environment to allow mocking
+if (process.env.NODE_ENV !== 'test' && (!supabaseUrl || !supabaseAnonKey)) {
   throw new Error('Missing Supabase environment variables')
 }
 
@@ -19,8 +20,9 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
 // Server-side client for API routes
 export const createServerClient = () => {
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-  
-  if (!supabaseServiceKey) {
+
+  // Skip validation in test environment to allow mocking
+  if (process.env.NODE_ENV !== 'test' && !supabaseServiceKey) {
     throw new Error('Missing Supabase service role key')
   }
 

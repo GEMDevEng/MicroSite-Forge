@@ -27,7 +27,8 @@ interface GeneratedContent {
  */
 export async function generateContent(request: ContentGenerationRequest): Promise<GeneratedContent | null> {
   const API_KEY = process.env.OPENAI_API_KEY
-  if (!API_KEY) {
+  // Skip validation in test environment to allow mocking
+  if (process.env.NODE_ENV !== 'test' && !API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
 
@@ -203,7 +204,8 @@ export function validateContentQuality(content: GeneratedContent, keyword: strin
  */
 export async function generateHeadingStructure(keyword: string, contentType: string): Promise<string[]> {
   const API_KEY = process.env.OPENAI_API_KEY
-  if (!API_KEY) {
+  // Skip validation in test environment to allow mocking
+  if (process.env.NODE_ENV !== 'test' && !API_KEY) {
     throw new Error("OPENAI_API_KEY is not configured");
   }
 
