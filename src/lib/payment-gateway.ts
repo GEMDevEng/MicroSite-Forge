@@ -1,8 +1,5 @@
-import { supabase } from './supabase'
 import { logger } from './logger'
-import { PaymentGatewayType, Database } from '../types/database'
-
-type UserRow = Database['public']['Tables']['users']['Row']
+import { PaymentGatewayType } from '../types/database'
 
 export interface PaymentGateway {
   type: PaymentGatewayType
@@ -82,9 +79,9 @@ export const AVAILABLE_GATEWAYS: Record<PaymentGatewayType, PaymentGateway> = {
     fees: {
       transaction: '2.9% + $0.30',
       subscription: '0.4%',
-      refund: 'Free'
+      refund: 'Free',
     },
-    isActive: true
+    isActive: true,
   },
   paypal: {
     type: 'paypal',
@@ -95,22 +92,28 @@ export const AVAILABLE_GATEWAYS: Record<PaymentGatewayType, PaymentGateway> = {
     fees: {
       transaction: '2.59% + $0.49',
       subscription: '2.59% + $0.49',
-      refund: 'Free for up to 180 days'
+      refund: 'Free for up to 180 days',
     },
-    isActive: true
+    isActive: true,
   },
   adyen: {
     type: 'adyen',
     name: 'Adyen',
     logo: '🌍',
     supportedCurrencies: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'CHF'],
-    features: ['Subscriptions', 'Metered Billing', 'One-time Payments', 'Refunds', 'Global Optimization'],
+    features: [
+      'Subscriptions',
+      'Metered Billing',
+      'One-time Payments',
+      'Refunds',
+      'Global Optimization',
+    ],
     fees: {
       transaction: 'Interchange++',
       subscription: 'Interchange++',
-      refund: 'Free'
+      refund: 'Free',
     },
-    isActive: true
+    isActive: true,
   },
   square: {
     type: 'square',
@@ -121,9 +124,9 @@ export const AVAILABLE_GATEWAYS: Record<PaymentGatewayType, PaymentGateway> = {
     fees: {
       transaction: '2.9% + $0.30 online',
       subscription: '2.9% + $0.30',
-      refund: 'Free for up to 1 year'
+      refund: 'Free for up to 1 year',
     },
-    isActive: true
+    isActive: true,
   },
   authorize_net: {
     type: 'authorize_net',
@@ -134,10 +137,10 @@ export const AVAILABLE_GATEWAYS: Record<PaymentGatewayType, PaymentGateway> = {
     fees: {
       transaction: '2.9% + $0.49',
       subscription: '$25/month + $0.10 per transaction',
-      refund: 'Free'
+      refund: 'Free',
     },
-    isActive: true
-  }
+    isActive: true,
+  },
 }
 
 // Abstract Payment Gateway Interface
@@ -161,7 +164,11 @@ abstract class AbstractPaymentGateway {
       logger.info('Payment event logged', { eventType, userId, gateway, ...metadata })
       // In production, this would store in a payment_logs table
     } catch (error) {
-      logger.error('Failed to log payment event', error instanceof Error ? error : new Error('Unknown error'), { eventType, userId, gateway })
+      logger.error(
+        'Failed to log payment event',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { eventType, userId, gateway }
+      )
     }
   }
 }
@@ -181,7 +188,7 @@ class StripeGateway extends AbstractPaymentGateway {
         // Store subscription details in database
         await this.logPaymentEvent('subscription_created', params.userId, 'stripe', {
           subscriptionId: mockResponse.subscriptionId,
-          gatewaySubscriptionId: mockResponse.gatewaySubscriptionId
+          gatewaySubscriptionId: mockResponse.gatewaySubscriptionId,
         })
 
         return mockResponse
@@ -189,7 +196,11 @@ class StripeGateway extends AbstractPaymentGateway {
 
       return { success: false, error: mockResponse.error }
     } catch (error) {
-      logger.error('Stripe subscription creation failed', error instanceof Error ? error : new Error('Unknown error'), { userId: params.userId })
+      logger.error(
+        'Stripe subscription creation failed',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { userId: params.userId }
+      )
       return { success: false, error: 'Subscription creation failed' }
     }
   }
@@ -201,7 +212,11 @@ class StripeGateway extends AbstractPaymentGateway {
       const mockResponse = await this.mockStripeApi('meter_usage', params)
       return mockResponse.success
     } catch (error) {
-      logger.error('Stripe meter usage failed', error instanceof Error ? error : new Error('Unknown error'), { userId: params.userId })
+      logger.error(
+        'Stripe meter usage failed',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { userId: params.userId }
+      )
       return false
     }
   }
@@ -220,18 +235,22 @@ class StripeGateway extends AbstractPaymentGateway {
           currency: 'usd',
           status: 'open',
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          downloadUrl: mockResponse.downloadUrl
+          downloadUrl: mockResponse.downloadUrl,
         }
       }
 
       return null
     } catch (error) {
-      logger.error('Stripe invoice generation failed', error instanceof Error ? error : new Error('Unknown error'), { subscriptionId })
+      logger.error(
+        'Stripe invoice generation failed',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { subscriptionId }
+      )
       return null
     }
   }
 
-  async handleWebhook(payload: any, signature: string): Promise<WebhookResult> {
+  async handleWebhook(payload: any, _signature: string): Promise<WebhookResult> {
     try {
       logger.info('Processing Stripe webhook', { eventType: payload.type })
 
@@ -241,10 +260,13 @@ class StripeGateway extends AbstractPaymentGateway {
         eventType: payload.type,
         subscriptionId: payload.data?.object?.subscription?.id,
         invoiceId: payload.data?.object?.id,
-        status: payload.data?.object?.status
+        status: payload.data?.object?.status,
       }
     } catch (error) {
-      logger.error('Stripe webhook processing failed', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Stripe webhook processing failed',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return { processed: false, eventType: 'unknown' }
     }
   }
@@ -259,7 +281,11 @@ class StripeGateway extends AbstractPaymentGateway {
         ? { success: true, refundId: mockResponse.refundId, amount }
         : { success: false, error: mockResponse.error }
     } catch (error) {
-      logger.error('Stripe refund failed', error instanceof Error ? error : new Error('Unknown error'), { paymentId })
+      logger.error(
+        'Stripe refund failed',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { paymentId }
+      )
       return { success: false, error: 'Refund processing failed' }
     }
   }
@@ -272,9 +298,9 @@ class StripeGateway extends AbstractPaymentGateway {
     return !!(apiKey && webhookSecret)
   }
 
-  private async mockStripeApi(action: string, params: any): Promise<any> {
+  private async mockStripeApi(_action: string, _params: any): Promise<any> {
     // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Mock successful response - replace with actual Stripe SDK calls
     return {
@@ -283,7 +309,7 @@ class StripeGateway extends AbstractPaymentGateway {
       gatewaySubscriptionId: `stripe_sub_${Date.now()}`,
       amount: 4999, // $49.99
       nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      error: null
+      error: null,
     }
   }
 }
@@ -302,16 +328,20 @@ class PayPalGateway extends AbstractPaymentGateway {
         subscriptionId: `paypal_sub_${Date.now()}`,
         gatewaySubscriptionId: `braintree_sub_${Date.now()}`,
         amount: 4999,
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       }
 
       await this.logPaymentEvent('subscription_created', params.userId, 'paypal', {
-        subscriptionId: mockResponse.subscriptionId
+        subscriptionId: mockResponse.subscriptionId,
       })
 
       return mockResponse
     } catch (error) {
-      logger.error('PayPal subscription creation failed', error instanceof Error ? error : new Error('Unknown error'), { userId: params.userId })
+      logger.error(
+        'PayPal subscription creation failed',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { userId: params.userId }
+      )
       return { success: false, error: 'Subscription creation failed' }
     }
   }
@@ -326,16 +356,19 @@ class PayPalGateway extends AbstractPaymentGateway {
     return null // PayPal has different invoice handling
   }
 
-  async handleWebhook(payload: any, signature: string): Promise<WebhookResult> {
+  async handleWebhook(payload: any, _signature: string): Promise<WebhookResult> {
     try {
       logger.info('Processing PayPal webhook', { eventType: payload.event_type })
       return {
         processed: true,
         eventType: payload.event_type,
-        subscriptionId: payload.resource?.subscription?.id
+        subscriptionId: payload.resource?.subscription?.id,
       }
     } catch (error) {
-      logger.error('PayPal webhook processing failed', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'PayPal webhook processing failed',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return { processed: false, eventType: 'unknown' }
     }
   }
@@ -365,16 +398,20 @@ class AdyenGateway extends AbstractPaymentGateway {
         subscriptionId: `adyen_sub_${Date.now()}`,
         gatewaySubscriptionId: `adyen_pay_${Date.now()}`,
         amount: 4999,
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
       }
 
       await this.logPaymentEvent('subscription_created', params.userId, 'adyen', {
-        subscriptionId: mockResponse.subscriptionId
+        subscriptionId: mockResponse.subscriptionId,
       })
 
       return mockResponse
     } catch (error) {
-      logger.error('Adyen subscription creation failed', error instanceof Error ? error : new Error('Unknown error'), { userId: params.userId })
+      logger.error(
+        'Adyen subscription creation failed',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { userId: params.userId }
+      )
       return { success: false, error: 'Subscription creation failed' }
     }
   }
@@ -389,16 +426,19 @@ class AdyenGateway extends AbstractPaymentGateway {
     return null
   }
 
-  async handleWebhook(payload: any, signature: string): Promise<WebhookResult> {
+  async handleWebhook(payload: any, _signature: string): Promise<WebhookResult> {
     try {
       logger.info('Processing Adyen webhook', { eventType: payload.type })
       return {
         processed: true,
         eventType: payload.type,
-        subscriptionId: payload.subscription?.id
+        subscriptionId: payload.subscription?.id,
       }
     } catch (error) {
-      logger.error('Adyen webhook processing failed', error instanceof Error ? error : new Error('Unknown error'))
+      logger.error(
+        'Adyen webhook processing failed',
+        error instanceof Error ? error : new Error('Unknown error')
+      )
       return { processed: false, eventType: 'unknown' }
     }
   }
@@ -419,24 +459,24 @@ class AdyenGateway extends AbstractPaymentGateway {
 class SquareGateway extends AbstractPaymentGateway {
   type: PaymentGatewayType = 'square'
 
-  async createSubscription(params: SubscriptionParams): Promise<SubscriptionResult> {
-    logger.info('Creating Square subscription', { userId: params.userId })
+  async createSubscription(_params: SubscriptionParams): Promise<SubscriptionResult> {
+    logger.info('Creating Square subscription')
     return { success: false, error: 'Not implemented yet' }
   }
 
-  async meterUsage(params: MeterUsageParams): Promise<boolean> {
+  async meterUsage(_params: MeterUsageParams): Promise<boolean> {
     return false
   }
 
-  async generateInvoice(subscriptionId: string): Promise<InvoiceData | null> {
+  async generateInvoice(_subscriptionId: string): Promise<InvoiceData | null> {
     return null
   }
 
-  async handleWebhook(payload: any, signature: string): Promise<WebhookResult> {
+  async handleWebhook(_payload: any, _signature: string): Promise<WebhookResult> {
     return { processed: false, eventType: 'unknown' }
   }
 
-  async refund(paymentId: string, amount: number): Promise<RefundResult> {
+  async refund(_paymentId: string, _amount: number): Promise<RefundResult> {
     return { success: false, error: 'Not implemented yet' }
   }
 
@@ -448,24 +488,24 @@ class SquareGateway extends AbstractPaymentGateway {
 class AuthorizeNetGateway extends AbstractPaymentGateway {
   type: PaymentGatewayType = 'authorize_net'
 
-  async createSubscription(params: SubscriptionParams): Promise<SubscriptionResult> {
-    logger.info('Creating Authorize.net subscription', { userId: params.userId })
+  async createSubscription(_params: SubscriptionParams): Promise<SubscriptionResult> {
+    logger.info('Creating Authorize.net subscription')
     return { success: false, error: 'Not implemented yet' }
   }
 
-  async meterUsage(params: MeterUsageParams): Promise<boolean> {
+  async meterUsage(_params: MeterUsageParams): Promise<boolean> {
     return false
   }
 
-  async generateInvoice(subscriptionId: string): Promise<InvoiceData | null> {
+  async generateInvoice(_subscriptionId: string): Promise<InvoiceData | null> {
     return null
   }
 
-  async handleWebhook(payload: any, signature: string): Promise<WebhookResult> {
+  async handleWebhook(_payload: any, _signature: string): Promise<WebhookResult> {
     return { processed: false, eventType: 'unknown' }
   }
 
-  async refund(paymentId: string, amount: number): Promise<RefundResult> {
+  async refund(_paymentId: string, _amount: number): Promise<RefundResult> {
     return { success: false, error: 'Not implemented yet' }
   }
 
@@ -492,7 +532,7 @@ export class PaymentGatewayManager {
   }
 
   getAvailableGateways(): PaymentGateway[] {
-    return Object.values(AVAILABLE_GATEWAYS).filter(gw => gw.isActive)
+    return Object.values(AVAILABLE_GATEWAYS).filter((gw) => gw.isActive)
   }
 
   async createSubscription(params: SubscriptionParams): Promise<SubscriptionResult> {
@@ -515,36 +555,53 @@ export class PaymentGatewayManager {
     const gateway = this.getGateway(gatewayType)
 
     if (!gateway) {
-      logger.error('Unsupported gateway for meter usage', new Error('Unsupported gateway'), { gateway: gatewayType })
+      logger.error('Unsupported gateway for meter usage', new Error('Unsupported gateway'), {
+        gateway: gatewayType,
+      })
       return false
     }
 
     return gateway.meterUsage(params)
   }
 
-  async generateInvoice(subscriptionId: string, gatewayType: PaymentGatewayType = 'stripe'): Promise<InvoiceData | null> {
+  async generateInvoice(
+    subscriptionId: string,
+    gatewayType: PaymentGatewayType = 'stripe'
+  ): Promise<InvoiceData | null> {
     const gateway = this.getGateway(gatewayType)
 
     if (!gateway) {
-      logger.error('Unsupported gateway for invoice generation', new Error('Unsupported gateway'), { gateway: gatewayType })
+      logger.error('Unsupported gateway for invoice generation', new Error('Unsupported gateway'), {
+        gateway: gatewayType,
+      })
       return null
     }
 
     return gateway.generateInvoice(subscriptionId)
   }
 
-  async handleWebhook(gatewayType: PaymentGatewayType, payload: any, signature: string): Promise<WebhookResult> {
+  async handleWebhook(
+    gatewayType: PaymentGatewayType,
+    payload: any,
+    signature: string
+  ): Promise<WebhookResult> {
     const gateway = this.getGateway(gatewayType)
 
     if (!gateway) {
-      logger.error('Unsupported gateway for webhook', new Error('Unsupported gateway'), { gateway: gatewayType })
+      logger.error('Unsupported gateway for webhook', new Error('Unsupported gateway'), {
+        gateway: gatewayType,
+      })
       return { processed: false, eventType: 'unknown' }
     }
 
     return gateway.handleWebhook(payload, signature)
   }
 
-  async processRefund(gatewayType: PaymentGatewayType, paymentId: string, amount: number): Promise<RefundResult> {
+  async processRefund(
+    gatewayType: PaymentGatewayType,
+    paymentId: string,
+    amount: number
+  ): Promise<RefundResult> {
     const gateway = this.getGateway(gatewayType)
 
     if (!gateway) {
@@ -557,9 +614,9 @@ export class PaymentGatewayManager {
   // Gateway selection optimization based on transaction type and costs
   recommendGateway(
     amount: number,
-    currency: string,
-    isSubscription: boolean,
-    country?: string
+    _currency: string,
+    _isSubscription: boolean,
+    _country?: string
   ): PaymentGatewayType {
     // Simple recommendation logic based on fees and capabilities
     // In production, this would consider more factors like merchant category, volume, etc.
@@ -568,7 +625,7 @@ export class PaymentGatewayManager {
       return 'adyen' // Lowest interchange fees for high amounts
     }
 
-    if (isSubscription && amount < 50) {
+    if (_isSubscription && amount < 50) {
       return 'stripe' // Lower subscription fees
     }
 
@@ -578,8 +635,8 @@ export class PaymentGatewayManager {
   // Cost comparison for different gateways
   async compareGatewayCosts(
     amount: number,
-    currency: string,
-    isSubscription: boolean
+    _currency: string,
+    _isSubscription: boolean
   ): Promise<Record<PaymentGatewayType, number>> {
     const costs: Record<string, number> = {}
 
