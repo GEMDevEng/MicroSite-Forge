@@ -65,7 +65,7 @@ describe('API Integration Tests', () => {
 
   describe('Analytics API', () => {
     it('should return mock analytics data for authenticated requests', async () => {
-      const { GET } = await import('../src/app/api/analytics/route')
+      const { GET } = await import('app/api/analytics/route')
 
       const request = new Request('http://localhost:3000/api/analytics')
       const response = await GET(request)
@@ -84,7 +84,7 @@ describe('API Integration Tests', () => {
         data: { session: null },
       })
 
-      const { GET } = await import('../src/app/api/analytics/route')
+      const { GET } = await import('app/api/analytics/route')
 
       const request = new Request('http://localhost:3000/api/analytics')
       const response = await GET(request)
@@ -115,7 +115,7 @@ describe('API Integration Tests', () => {
         }),
       }))
 
-      const { POST } = await import('../src/app/api/sites/generate/route')
+      const { POST } = await import('app/api/sites/generate/route')
 
       const request = new Request('http://localhost:3000/api/sites/generate', {
         method: 'POST',
@@ -144,7 +144,7 @@ describe('API Integration Tests', () => {
         })),
       }))
 
-      const { POST } = await import('../src/app/api/sites/generate/route')
+      const { POST } = await import('app/api/sites/generate/route')
 
       const request = new Request('http://localhost:3000/api/sites/generate', {
         method: 'POST',
@@ -177,7 +177,7 @@ describe('API Integration Tests', () => {
         }),
       }))
 
-      const { POST } = await import('../src/app/api/content/route')
+      const { POST } = await import('app/api/content/route')
 
       const request = new Request('http://localhost:3000/api/content', {
         method: 'POST',
