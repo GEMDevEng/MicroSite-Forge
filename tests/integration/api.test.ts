@@ -1,5 +1,7 @@
 // Integration tests for API routes using supertest
 
+import { NextRequest } from 'next/server'
+
 // Mock Supabase at the top level
 jest.mock('../src/lib/supabase-server', () => ({
   createServerClient: jest.fn(() => ({
@@ -67,7 +69,7 @@ describe('API Integration Tests', () => {
     it('should return mock analytics data for authenticated requests', async () => {
       const { GET } = await import('app/api/analytics/route')
 
-      const request = new Request('http://localhost:3000/api/analytics')
+      const request = new NextRequest('http://localhost:3000/api/analytics')
       const response = await GET(request)
 
       expect(response.status).toBe(200)
@@ -86,7 +88,7 @@ describe('API Integration Tests', () => {
 
       const { GET } = await import('app/api/analytics/route')
 
-      const request = new Request('http://localhost:3000/api/analytics')
+      const request = new NextRequest('http://localhost:3000/api/analytics')
       const response = await GET(request)
 
       expect(response.status).toBe(401)
@@ -117,7 +119,7 @@ describe('API Integration Tests', () => {
 
       const { POST } = await import('app/api/sites/generate/route')
 
-      const request = new Request('http://localhost:3000/api/sites/generate', {
+      const request = new NextRequest('http://localhost:3000/api/sites/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -146,7 +148,7 @@ describe('API Integration Tests', () => {
 
       const { POST } = await import('app/api/sites/generate/route')
 
-      const request = new Request('http://localhost:3000/api/sites/generate', {
+      const request = new NextRequest('http://localhost:3000/api/sites/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({}),
@@ -179,7 +181,7 @@ describe('API Integration Tests', () => {
 
       const { POST } = await import('app/api/content/route')
 
-      const request = new Request('http://localhost:3000/api/content', {
+      const request = new NextRequest('http://localhost:3000/api/content', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
