@@ -1,37 +1,62 @@
-import { fixupConfigRules, fixupPluginRules } from "@eslint/eslintrc";
-import globals from "globals";
-import tsParser from "@typescript-eslint/parser";
-import js from "@eslint/js";
+import js from '@eslint/js'
+import typescriptEslint from 'typescript-eslint'
+import react from 'eslint-plugin-react'
+import nextPlugin from '@next/eslint-plugin-next'
 
 export default [
   {
-    name: "ignores",
-    ignores: ["**/dist/**", "**/node_modules/**", "**/build/**"],
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'dist/**',
+      'build/**',
+      'coverage/**',
+      '**/*.d.ts',
+      '**/*.config.js',
+      '**/*.config.cjs',
+      '**/*.config.mjs',
+      'eslint.config.js',
+      '**/*.config.js',
+      '**/jest.config.cjs',
+      '**/jest.integration.config.cjs',
+      '**/jest.setup.js',
+      '**/postcss.config.cjs',
+      '**/tailwind.config.js',
+      'scripts/**',
+      'test-results/**',
+      'playwright-report/**',
+    ],
   },
   js.configs.recommended,
+  ...typescriptEslint.configs.recommended,
   {
-    files: ["**/*.{js,jsx,ts,tsx}"],
-    languageOptions: {
-      globals: {
-        ...globals.browser,
-        ...globals.node,
-      },
-      parser: tsParser,
-      ecmaVersion: "latest",
-      sourceType: "module",
+    files: ['**/*.{js,jsx,ts,tsx}'],
+    plugins: {
+      react,
+      '@next/next': nextPlugin,
     },
     rules: {
+      // Next.js recommended rules
+      ...nextPlugin.configs.recommended.rules,
+      ...nextPlugin.configs['core-web-vitals'].rules,
+
+      // Custom rules
       // Allow 'any' type for development flexibility
-      "@typescript-eslint/no-explicit-any": "warn",
+      '@typescript-eslint/no-explicit-any': 'warn',
       // Allow unused variables starting with underscore
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        { "argsIgnorePattern": "^_" }
-      ],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       // Allow require() in test files
-      "@typescript-eslint/no-require-imports": "off",
+      '@typescript-eslint/no-require-imports': 'off',
       // Allow empty interfaces (common in React components)
-      "@typescript-eslint/no-empty-object-type": "off",
+      '@typescript-eslint/no-empty-object-type': 'off',
+    },
+    settings: {
+      react: {
+        version: 'detect',
+      },
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: 'error',
     },
   },
-];
+]
