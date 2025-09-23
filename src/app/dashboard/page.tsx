@@ -3,6 +3,67 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/auth'
+import { KeywordSuggestion } from '@/lib/grok'
+
+// Define interfaces for the dashboard data
+interface DomainCheckResult {
+  domain: string
+  price?: number
+  available: boolean
+}
+
+interface ResearchData {
+  niche: string
+  keywords: KeywordSuggestion[]
+  recommendedDomain?: string
+  trendingTopics?: string[]
+  contentOpportunities?: string[]
+  competitorInsights?: string[]
+  availableDomains?: DomainCheckResult[]
+}
+
+interface AnalyticsOverview {
+  totalSites: number
+  totalLeads: number
+  totalRevenue: number
+  conversionRate?: number
+  qualifiedLeads?: number
+  activeSites?: number
+}
+
+interface AnalyticsData {
+  overview?: AnalyticsOverview
+}
+
+interface ContentItem {
+  title: string
+  content: string
+  metaDescription: string
+  seoKeywords: string[]
+  path?: string
+  validation: {
+    score: number
+    issues: string[]
+    wordCount: number
+    passed: boolean
+  }
+}
+
+interface Site {
+  id?: string
+  name: string
+  siteTitle?: string
+  domain?: string
+  status: string
+  url?: string
+  githubUrl?: string
+  content?: {
+    pages?: ContentItem[]
+    totalWords?: number
+  }
+  progress?: Record<string, boolean>
+  created_at?: string
+}
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -16,11 +77,11 @@ export default function DashboardPage() {
 
   // All hooks must be called before any early returns
   const [activeTab, setActiveTab] = useState('overview')
-  const [researchData, setResearchData] = useState<any>(null)
-  const [generatedContent, setGeneratedContent] = useState<any[]>([])
-  const [sites, setSites] = useState<any[]>([])
+  const [researchData, setResearchData] = useState<ResearchData | null>(null)
+  const [generatedContent, setGeneratedContent] = useState<ContentItem[]>([])
+  const [sites, setSites] = useState<Site[]>([])
   const [isGeneratingSite, setIsGeneratingSite] = useState(false)
-  const [analyticsData, setAnalyticsData] = useState<any>(null)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
   const [loadingAnalytics, setLoadingAnalytics] = useState(false)
 
   useEffect(() => {
@@ -66,9 +127,9 @@ export default function DashboardPage() {
 
   if (!initialized || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -86,12 +147,12 @@ export default function DashboardPage() {
     { id: 'sites', label: 'My Sites', icon: Cloud },
   ]
 
-  const handleResearchComplete = (data: any) => {
+  const handleResearchComplete = (data: ResearchData) => {
     setResearchData(data)
     console.log('Research completed:', data)
   }
 
-  const handleContentUpdate = (index: number, updatedContent: any) => {
+  const handleContentUpdate = (index: number, updatedContent: ContentItem) => {
     const updated = [...generatedContent]
     updated[index] = updatedContent
     setGeneratedContent(updated)
@@ -129,7 +190,7 @@ export default function DashboardPage() {
     }
   }
 
-  const handleApproveContent = async (content: any[]) => {
+  const handleApproveContent = async (content: ContentItem[]) => {
     if (!researchData || !content.length) return
 
     setIsGeneratingSite(true)
@@ -145,7 +206,7 @@ export default function DashboardPage() {
         domain: recommendedDomain,
         siteTitle: `${researchData.niche} Services - Professional Solutions`,
         description: `Professional ${researchData.niche} services for all your needs.`,
-        keywords: researchData.keywords?.slice(0, 5).map((k: any) => k.keyword) || [researchData.niche],
+        keywords: researchData.keywords?.slice(0, 5).map((k) => k.keyword) || [researchData.niche],
         targetAudience: 'general',
         tone: 'professional',
         githubRepoName: `microsite-${researchData.niche.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now()}`,
@@ -159,7 +220,7 @@ export default function DashboardPage() {
 
       if (response.ok) {
         const data = await response.json()
-        setSites(prev => [...prev, data.site])
+        setSites((prev) => [...prev, data.site])
         setActiveTab('sites')
       } else {
         const error = await response.json()
@@ -176,17 +237,13 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-6">
             <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">
-                🚀 MicroSite Forge
-              </h1>
+              <h1 className="text-2xl font-bold text-gray-900">🚀 MicroSite Forge</h1>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Welcome, {user.email}
-              </span>
+              <span className="text-sm text-gray-600">Welcome, {user.email}</span>
               <Button variant="outline" onClick={handleSignOut}>
                 Sign Out
               </Button>
@@ -195,9 +252,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
         {/* Tabs */}
-        <div className="border-b border-gray-200 mb-8">
+        <div className="mb-8 border-b border-gray-200">
           <nav className="-mb-px flex space-x-8" aria-label="Tabs">
             {tabs.map((tab) => {
               const Icon = tab.icon
@@ -205,13 +262,13 @@ export default function DashboardPage() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
+                  className={`flex items-center gap-2 border-b-2 px-1 py-2 text-sm font-medium ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="h-4 w-4" />
                   {tab.label}
                 </button>
               )
@@ -224,25 +281,25 @@ export default function DashboardPage() {
           {activeTab === 'overview' && (
             <div className="space-y-6">
               {loadingAnalytics ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
                   {[1, 2, 3].map((i) => (
                     <Card key={i}>
                       <CardContent className="pt-6">
                         <div className="animate-pulse">
-                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-                          <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
-                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                          <div className="mb-2 h-4 w-3/4 rounded bg-gray-200"></div>
+                          <div className="mb-2 h-8 w-1/2 rounded bg-gray-200"></div>
+                          <div className="h-3 w-1/2 rounded bg-gray-200"></div>
                         </div>
                       </CardContent>
                     </Card>
                   ))}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-3">
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Cloud className="w-5 h-5" />
+                        <Cloud className="h-5 w-5" />
                         Sites Created
                       </CardTitle>
                     </CardHeader>
@@ -251,7 +308,9 @@ export default function DashboardPage() {
                         {analyticsData?.overview?.totalSites || 0}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {analyticsData?.overview?.totalSites === 0 ? 'Ready to create your first microsite' : 'Microsites deployed'}
+                        {analyticsData?.overview?.totalSites === 0
+                          ? 'Ready to create your first microsite'
+                          : 'Microsites deployed'}
                       </p>
                     </CardContent>
                   </Card>
@@ -259,7 +318,7 @@ export default function DashboardPage() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <TrendingUp className="w-5 h-5" />
+                        <TrendingUp className="h-5 w-5" />
                         Leads Generated
                       </CardTitle>
                     </CardHeader>
@@ -268,7 +327,9 @@ export default function DashboardPage() {
                         {analyticsData?.overview?.totalLeads || 0}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {analyticsData?.overview?.qualifiedLeads ? `${analyticsData.overview.qualifiedLeads} qualified` : 'Start with niche research'}
+                        {analyticsData?.overview?.qualifiedLeads
+                          ? `${analyticsData.overview.qualifiedLeads} qualified`
+                          : 'Start with niche research'}
                       </p>
                     </CardContent>
                   </Card>
@@ -276,7 +337,7 @@ export default function DashboardPage() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <FileText className="w-5 h-5" />
+                        <FileText className="h-5 w-5" />
                         Revenue
                       </CardTitle>
                     </CardHeader>
@@ -285,7 +346,9 @@ export default function DashboardPage() {
                         ${analyticsData?.overview?.totalRevenue?.toLocaleString() || '0'}
                       </p>
                       <p className="text-sm text-gray-600">
-                        {analyticsData?.overview?.conversionRate ? `${analyticsData.overview.conversionRate.toFixed(1)}% conversion` : 'Get started with lead generation'}
+                        {analyticsData?.overview?.conversionRate
+                          ? `${analyticsData.overview.conversionRate.toFixed(1)}% conversion`
+                          : 'Get started with lead generation'}
                       </p>
                     </CardContent>
                   </Card>
@@ -321,24 +384,26 @@ export default function DashboardPage() {
             <>
               {!researchData ? (
                 <Card>
-                  <CardContent className="pt-6 text-center py-16">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Research First Required</h3>
-                    <p className="text-sm text-gray-500 mb-4">
+                  <CardContent className="py-16 pt-6 text-center">
+                    <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 className="mb-2 text-sm font-semibold text-gray-900">
+                      Research First Required
+                    </h3>
+                    <p className="mb-4 text-sm text-gray-500">
                       You need to complete niche research before generating content.
                     </p>
                     <Button onClick={() => setActiveTab('research')} variant="outline">
-                      <Search className="w-4 h-4 mr-2" />
+                      <Search className="mr-2 h-4 w-4" />
                       Go to Research
                     </Button>
                   </CardContent>
                 </Card>
               ) : generatedContent.length === 0 ? (
                 <Card>
-                  <CardContent className="pt-6 text-center py-16">
-                    <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Content Generation</h3>
-                    <p className="text-sm text-gray-500 mb-6">
+                  <CardContent className="py-16 pt-6 text-center">
+                    <FileText className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 className="mb-2 text-sm font-semibold text-gray-900">Content Generation</h3>
+                    <p className="mb-6 text-sm text-gray-500">
                       Generate AI-powered content for your {researchData.niche} microsite.
                     </p>
                     <Button
@@ -369,40 +434,44 @@ export default function DashboardPage() {
                               tone: 'professional',
                               wordCount: 400,
                             },
-                          ];
+                          ]
 
                           const responses = await Promise.all(
-                            contentRequests.map(req =>
+                            contentRequests.map((req) =>
                               fetch('/api/content', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify(req),
                               })
                             )
-                          );
+                          )
 
                           const contents = await Promise.all(
                             responses.map(async (res, i) => {
                               if (res.ok) {
-                                const data = await res.json();
+                                const data = await res.json()
                                 return {
                                   ...data.data,
-                                  path: ['content/_index.md', 'content/about/_index.md', 'content/contact/_index.md'][i],
-                                };
+                                  path: [
+                                    'content/_index.md',
+                                    'content/about/_index.md',
+                                    'content/contact/_index.md',
+                                  ][i],
+                                }
                               }
-                              return null;
+                              return null
                             })
-                          );
+                          )
 
-                          setGeneratedContent(contents.filter(Boolean));
+                          setGeneratedContent(contents.filter(Boolean))
                         } catch (error) {
-                          console.error('Content generation failed:', error);
-                          alert('Content generation failed. Please try again.');
+                          console.error('Content generation failed:', error)
+                          alert('Content generation failed. Please try again.')
                         }
                       }}
                       disabled={isGeneratingSite}
                     >
-                      {isGeneratingSite && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+                      {isGeneratingSite && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                       Generate Content
                     </Button>
                   </CardContent>
@@ -424,14 +493,17 @@ export default function DashboardPage() {
             <div>
               {sites.length === 0 ? (
                 <Card>
-                  <CardContent className="pt-6 text-center py-16">
-                    <Cloud className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2">No Sites Created Yet</h3>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Your published microsites will appear here once you complete the research and content steps.
+                  <CardContent className="py-16 pt-6 text-center">
+                    <Cloud className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                    <h3 className="mb-2 text-sm font-semibold text-gray-900">
+                      No Sites Created Yet
+                    </h3>
+                    <p className="mb-4 text-sm text-gray-500">
+                      Your published microsites will appear here once you complete the research and
+                      content steps.
                     </p>
                     <Button onClick={() => setActiveTab('research')} variant="outline">
-                      <Search className="w-4 h-4 mr-2" />
+                      <Search className="mr-2 h-4 w-4" />
                       Start Your First Site
                     </Button>
                   </CardContent>
@@ -441,7 +513,7 @@ export default function DashboardPage() {
                   <Card>
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
-                        <Cloud className="w-5 h-5" />
+                        <Cloud className="h-5 w-5" />
                         Your Microsites ({sites.length})
                       </CardTitle>
                       <CardDescription>
@@ -450,18 +522,21 @@ export default function DashboardPage() {
                     </CardHeader>
                   </Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
                     {sites.map((site, index) => (
                       <Card key={index} className="overflow-hidden">
                         <CardHeader className="pb-3">
                           <div className="flex items-center justify-between">
-                            <CardTitle className="text-lg truncate" title={site.name}>
+                            <CardTitle className="truncate text-lg" title={site.name}>
                               {site.siteTitle || site.name}
                             </CardTitle>
                             <Badge
                               variant={
-                                site.status === 'completed' ? 'default' :
-                                site.status === 'deploying' ? 'secondary' : 'destructive'
+                                site.status === 'completed'
+                                  ? 'default'
+                                  : site.status === 'deploying'
+                                    ? 'secondary'
+                                    : 'destructive'
                               }
                             >
                               {site.status}
@@ -491,11 +566,11 @@ export default function DashboardPage() {
                                     {Object.values(site.progress).filter(Boolean).length}/5
                                   </span>
                                 </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div className="h-2 w-full rounded-full bg-gray-200">
                                   <div
-                                    className="bg-blue-600 h-2 rounded-full"
+                                    className="h-2 rounded-full bg-blue-600"
                                     style={{
-                                      width: `${(Object.values(site.progress).filter(Boolean).length / 5) * 100}%`
+                                      width: `${(Object.values(site.progress).filter(Boolean).length / 5) * 100}%`,
                                     }}
                                   ></div>
                                 </div>
@@ -511,7 +586,7 @@ export default function DashboardPage() {
                               onClick={() => window.open(site.url, '_blank')}
                               disabled={!site.url}
                             >
-                              <Globe className="w-4 h-4 mr-1" />
+                              <Globe className="mr-1 h-4 w-4" />
                               View Site
                             </Button>
                             <Button

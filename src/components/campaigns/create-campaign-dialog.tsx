@@ -149,11 +149,17 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
     }
   }
 
-  const updateFormData = (field: keyof CampaignFormData, value: any) => {
+  const updateFormData = (
+    field: keyof CampaignFormData,
+    value: CampaignFormData[keyof CampaignFormData]
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const updateSegment = (field: keyof CampaignSegmentation, value: any) => {
+  const updateSegment = (
+    field: keyof CampaignSegmentation,
+    value: CampaignSegmentation[keyof CampaignSegmentation]
+  ) => {
     setFormData((prev) => ({
       ...prev,
       segment: { ...prev.segment, [field]: value },

@@ -48,7 +48,7 @@ export interface CommunicationLog {
   content: string
   status: 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked'
   message_id?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   created_at: string
 }
 

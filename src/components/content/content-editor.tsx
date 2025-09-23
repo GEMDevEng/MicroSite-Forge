@@ -59,7 +59,11 @@ export default function ContentEditor({
     setEditedContent(content)
   }, [content])
 
-  const handleContentChange = (index: number, field: keyof ContentItem, value: any) => {
+  const handleContentChange = (
+    index: number,
+    field: keyof ContentItem,
+    value: string | string[]
+  ) => {
     const updated = [...editedContent]
     updated[index] = { ...updated[index], [field]: value }
     setEditedContent(updated)

@@ -57,7 +57,7 @@ export function SubscriptionOverview() {
     label: string
     used: number
     limit: number
-    icon: any
+    icon: React.ComponentType<{ className?: string }>
   }) => {
     const percentage = calculateUsagePercentage(used, limit)
 

@@ -18,12 +18,14 @@ const signInSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters'),
 })
 
-const signUpSchema = signInSchema.extend({
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-})
+const signUpSchema = signInSchema
+  .extend({
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ['confirmPassword'],
+  })
 
 type SignInFormData = z.infer<typeof signInSchema>
 type SignUpFormData = z.infer<typeof signUpSchema>
@@ -51,7 +53,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
     resolver: zodResolver(schema),
   })
 
-  const formErrors = errors as any // Type assertion for easier access
+  const formErrors = errors as { confirmPassword?: { message?: string } }
 
   const onSubmit = async (data: SignInFormData | SignUpFormData) => {
     try {
@@ -66,8 +68,8 @@ export function AuthForm({ mode, className }: AuthFormProps) {
         await signIn(data.email, data.password)
         router.push('/dashboard')
       }
-    } catch (err: any) {
-      setError(err.message || 'An error occurred. Please try again.')
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An error occurred. Please try again.')
     }
   }
 
@@ -78,21 +80,21 @@ export function AuthForm({ mode, className }: AuthFormProps) {
           {isSignUp ? 'Create your account' : 'Sign in to your account'}
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-        {isSignUp ? (
-          <>
-            Already have an account?{' '}
-            <Link href="/auth/login" className="text-primary hover:underline">
-              Sign in
-            </Link>
-          </>
-        ) : (
-          <>
-            Don&#39;t have an account?{' '}
-            <Link href="/auth/signup" className="text-primary hover:underline">
-              Sign up
-            </Link>
-          </>
-        )}
+          {isSignUp ? (
+            <>
+              Already have an account?{' '}
+              <Link href="/auth/login" className="text-primary hover:underline">
+                Sign in
+              </Link>
+            </>
+          ) : (
+            <>
+              Don&#39;t have an account?{' '}
+              <Link href="/auth/signup" className="text-primary hover:underline">
+                Sign up
+              </Link>
+            </>
+          )}
         </p>
       </div>
 
@@ -106,9 +108,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
             {...register('email')}
             className={errors.email ? 'border-destructive' : ''}
           />
-          {errors.email && (
-            <p className="text-sm text-destructive">{errors.email.message}</p>
-          )}
+          {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
         </div>
 
         <div className="space-y-2">
@@ -120,9 +120,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
             {...register('password')}
             className={errors.password ? 'border-destructive' : ''}
           />
-          {errors.password && (
-            <p className="text-sm text-destructive">{errors.password.message}</p>
-          )}
+          {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
         </div>
 
         {isSignUp && (
@@ -136,9 +134,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
               className={formErrors.confirmPassword ? 'border-destructive' : ''}
             />
             {formErrors.confirmPassword && (
-              <p className="text-sm text-destructive">
-                {formErrors.confirmPassword.message}
-              </p>
+              <p className="text-sm text-destructive">{formErrors.confirmPassword.message}</p>
             )}
           </div>
         )}
@@ -161,9 +157,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
             <span className="w-full border-t" />
           </div>
           <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              Or continue with
-            </span>
+            <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
           </div>
         </div>
 
@@ -202,7 +196,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
             disabled={loading}
           >
             <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
             <span className="ml-2 hidden sm:inline">Facebook</span>
           </Button>
@@ -214,10 +208,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
 
         {!isSignUp && (
           <div className="text-center">
-            <Link
-              href="/auth/forgot-password"
-              className="text-sm text-primary hover:underline"
-            >
+            <Link href="/auth/forgot-password" className="text-sm text-primary hover:underline">
               Forgot your password?
             </Link>
           </div>

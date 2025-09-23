@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { performNicheResearch, KeywordSuggestion } from '@/lib/grok'
+import { performNicheResearch, KeywordSuggestion, NicheResearchResponse } from '@/lib/grok'
 import { findAvailableDomains, DomainCheckResult } from '@/lib/porkbun'
 import { researchRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Validate request body
     const validated = NicheResearchSchema.parse(body)
 
-    const researchPromises: (Promise<any> | Promise<DomainCheckResult[]>)[] = []
+    const researchPromises: (Promise<NicheResearchResponse> | Promise<DomainCheckResult[]>)[] = []
 
     // Perform niche research with Grok
     const nicheResearchPromise = performNicheResearch({
@@ -62,9 +62,15 @@ export async function POST(request: NextRequest) {
     // Wait for all research to complete
     const results = await Promise.allSettled(researchPromises)
 
-    const nicheResearch = results[0].status === 'fulfilled' ? results[0].value : null
-    const availableDomains =
-      validated.domainSearch && results[1]?.status === 'fulfilled' ? results[1].value : []
+    const nicheResearch =
+      results[0].status === 'fulfilled' ? (results[0].value as NicheResearchResponse) : null
+    const availableDomains: DomainCheckResult[] = []
+    if (validated.domainSearch && results[1]?.status === 'fulfilled') {
+      const domainResult = results[1].value
+      if (Array.isArray(domainResult)) {
+        availableDomains.push(...domainResult)
+      }
+    }
 
     if (!nicheResearch) {
       return NextResponse.json({ error: 'Failed to perform niche research' }, { status: 500 })

@@ -1,6 +1,6 @@
 import { createServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
-import { createSiteSchema, sitesFilterSchema } from '@/lib/validations'
+import { createSiteSchema, sitesFilterSchema, type SitesFilters } from '@/lib/validations'
 
 export async function GET(request: NextRequest) {
   try {
@@ -23,14 +23,14 @@ export async function GET(request: NextRequest) {
       status: searchParams.get('status'),
       limit: parseInt(searchParams.get('limit') || '50'),
       offset: parseInt(searchParams.get('offset') || '0'),
-    })
+    }) as SitesFilters
 
     let query = supabase
       .from('sites')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .range(filters.offset!, filters.offset! + filters.limit! - 1)
+      .range(filters.offset, filters.offset + filters.limit - 1)
 
     if (filters.status) {
       query = query.eq('status', filters.status)
@@ -49,11 +49,12 @@ export async function GET(request: NextRequest) {
       offset: filters.offset,
       limit: filters.limit,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sites API error:', error)
-    if (error.name === 'ZodError') {
+    if (error instanceof Error && error.name === 'ZodError') {
+      const zodError = error as any // ZodError has errors property
       return NextResponse.json(
-        { error: 'Invalid request parameters', details: error.errors },
+        { error: 'Invalid request parameters', details: zodError.errors },
         { status: 400 }
       )
     }
@@ -98,11 +99,12 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ site }, { status: 201 })
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Sites creation API error:', error)
-    if (error.name === 'ZodError') {
+    if (error instanceof Error && error.name === 'ZodError') {
+      const zodError = error as any // ZodError has errors property
       return NextResponse.json(
-        { error: 'Invalid request data', details: error.errors },
+        { error: 'Invalid request data', details: zodError.errors },
         { status: 400 }
       )
     }

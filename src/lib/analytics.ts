@@ -138,9 +138,12 @@ export class AnalyticsEngine {
       const contacted = leads?.filter((lead) => lead.status === 'contacted').length || 0
       const converted = leads?.filter((lead) => lead.status === 'converted').length || 0
 
+      interface ScoreData {
+        total_score?: number
+      }
       const scores = leads
-        ?.map((lead) => (lead.score_data as any)?.total_score)
-        .filter(Boolean) as number[]
+        ?.map((lead) => (lead.score_data as ScoreData)?.total_score)
+        .filter((score): score is number => score !== undefined)
       const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
       const conversionRate = totalLeads > 0 ? (converted / totalLeads) * 100 : 0
 
@@ -271,15 +274,24 @@ export class AnalyticsEngine {
   }
 }
 
+type CustomReportData = Partial<
+  Pick<AnalyticsData, 'overview' | 'leadAnalytics' | 'revenueTracking' | 'sitePerformance'> & {
+    campaignMetrics?: AnalyticsData['campaignMetrics']
+  }
+>
+
 export class ReportBuilder {
-  static async generateCustomReport(report: CustomReport, userId: string): Promise<any> {
+  static async generateCustomReport(
+    report: CustomReport,
+    userId: string
+  ): Promise<CustomReportData> {
     try {
       // This would build a custom report based on filters and metrics
       logger.info('Generating custom report', { reportId: report.id, userId })
 
       const analytics = new AnalyticsEngine()
 
-      const data: any = {}
+      const data: CustomReportData = {}
 
       if (report.metrics.includes('dashboard')) {
         data.overview = await analytics.getDashboardData(userId)
