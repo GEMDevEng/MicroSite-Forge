@@ -3,7 +3,7 @@
 import { NextRequest } from 'next/server'
 
 // Mock Supabase at the top level
-jest.mock('../src/lib/supabase-server', () => ({
+jest.mock('../../src/lib/supabase-server.ts', () => ({
   createServerClient: jest.fn(() => ({
     auth: {
       getSession: jest.fn().mockResolvedValue({
@@ -14,30 +14,103 @@ jest.mock('../src/lib/supabase-server', () => ({
 }))
 
 // Mock Analytics
-jest.mock('../src/lib/analytics', () => ({
+jest.mock('../../src/lib/analytics.ts', () => ({
   AnalyticsEngine: jest.fn().mockImplementation(() => ({
     getDashboardData: jest.fn().mockResolvedValue({
       totalSites: 5,
       totalLeads: 25,
       totalRevenue: 1250.0,
       conversionRate: 2.1,
+      activeSites: 5,
+      qualifiedLeads: 10,
     }),
+    getLeadAnalytics: jest.fn().mockResolvedValue({
+      totalLeads: 25,
+      newLeads: 5,
+      qualified: 10,
+      contacted: 8,
+      converted: 3,
+      avgScore: 75,
+      conversionRate: 12,
+      costPerLead: 25.5,
+      leadSources: [
+        { source: 'organic', count: 15, conversionRate: 15 },
+        { source: 'paid', count: 10, conversionRate: 10 },
+      ],
+    }),
+    getRevenueTracking: jest.fn().mockResolvedValue({
+      monthlyRecurring: 1250.0,
+      oneTimeServices: 500.0,
+      churnRate: 5.2,
+      lifetimeValue: 15000.0,
+      monthlyRevenue: [
+        { month: 'Jan 2025', revenue: 1200, leads: 24 },
+        { month: 'Feb 2025', revenue: 1350, leads: 27 },
+        { month: 'Mar 2025', revenue: 1180, leads: 22 },
+      ],
+    }),
+    getSitePerformance: jest.fn().mockResolvedValue([
+      {
+        site_id: 'site-1',
+        name: 'Test Site 1',
+        views: 1250,
+        leads_generated: 5,
+        conversion_rate: 2.1,
+        revenue: 125.0,
+        bounce_rate: 45.2,
+        avg_session_duration: 185,
+      },
+      {
+        site_id: 'site-2',
+        name: 'Test Site 2',
+        views: 980,
+        leads_generated: 3,
+        conversion_rate: 1.8,
+        revenue: 95.0,
+        bounce_rate: 52.1,
+        avg_session_duration: 145,
+      },
+    ]),
   })),
 }))
 
 // Mock GitHub
-jest.mock('../src/lib/github', () => ({
+jest.mock('../../src/lib/github.ts', () => ({
   createSiteRepo: jest.fn().mockResolvedValue({
+    githubUrl: 'https://github.com/test/repo',
+    deployUrl: 'https://test-site.com',
+  }),
+  generateHugoSite: jest.fn().mockResolvedValue({
+    githubUrl: 'https://github.com/test/repo',
+    deployUrl: 'https://test-site.com',
+  }),
+  createHugoTemplateRepository: jest.fn().mockResolvedValue({
     githubUrl: 'https://github.com/test/repo',
     deployUrl: 'https://test-site.com',
   }),
 }))
 
 // Mock OpenAI
-jest.mock('../src/lib/openai', () => ({
+jest.mock('../../src/lib/openai.ts', () => ({
   generateContent: jest.fn().mockResolvedValue({
     content: 'Generated content',
     success: true,
+  }),
+  generateWebsiteContent: jest.fn().mockResolvedValue([
+    {
+      title: 'Test Title',
+      content: 'Test content',
+      metaDescription: 'Test meta description',
+      seoKeywords: ['test', 'content'],
+      suggestedImages: ['test-image.jpg'],
+      contentScore: 85,
+    },
+  ]),
+  validateContentQuality: jest.fn().mockReturnValue({
+    score: 85,
+    issues: [],
+    wordCount: 350,
+    passed: true,
   }),
 }))
 
@@ -80,7 +153,7 @@ describe('API Integration Tests', () => {
 
     it('should return 401 for unauthenticated requests', async () => {
       // Temporarily modify the mock to return unauthenticated session
-      const createServerClientMock = require('../src/lib/supabase-server').createServerClient
+      const createServerClientMock = require('../../src/lib/supabase-server.ts').createServerClient
       const authMock = createServerClientMock.mock.results[0].value.auth
       authMock.getSession.mockResolvedValueOnce({
         data: { session: null },
@@ -100,7 +173,7 @@ describe('API Integration Tests', () => {
   describe('Sites API', () => {
     it('should handle site generation requests with proper validation', async () => {
       // Mock dependencies
-      jest.mock('../src/lib/supabase-server', () => ({
+      jest.mock('../../src/lib/supabase-server.ts', () => ({
         createServerClient: jest.fn(() => ({
           auth: {
             getSession: jest.fn().mockResolvedValue({
@@ -110,7 +183,7 @@ describe('API Integration Tests', () => {
         })),
       }))
 
-      jest.mock('../src/lib/github', () => ({
+      jest.mock('../../src/lib/github.ts', () => ({
         createSiteRepo: jest.fn().mockResolvedValue({
           githubUrl: 'https://github.com/test/repo',
           deployUrl: 'https://test-site.com',
@@ -136,7 +209,7 @@ describe('API Integration Tests', () => {
 
     it('should require authentication', async () => {
       // Mock unauthenticated session
-      jest.mock('../src/lib/supabase-server', () => ({
+      jest.mock('../../src/lib/supabase-server.ts', () => ({
         createServerClient: jest.fn(() => ({
           auth: {
             getSession: jest.fn().mockResolvedValue({
@@ -162,7 +235,7 @@ describe('API Integration Tests', () => {
   describe('Content API', () => {
     it('should handle content generation requests', async () => {
       // Mock dependencies for content API
-      jest.mock('../src/lib/supabase-server', () => ({
+      jest.mock('../../src/lib/supabase-server.ts', () => ({
         createServerClient: jest.fn(() => ({
           auth: {
             getSession: jest.fn().mockResolvedValue({
@@ -172,7 +245,7 @@ describe('API Integration Tests', () => {
         })),
       }))
 
-      jest.mock('../src/lib/openai', () => ({
+      jest.mock('../../src/lib/openai.ts', () => ({
         generateContent: jest.fn().mockResolvedValue({
           content: 'Generated content',
           success: true,
