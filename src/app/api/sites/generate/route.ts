@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { generateWebsiteContent } from '@/lib/openai'
 import { generateHugoSite, createHugoTemplateRepository } from '@/lib/github'
 import { createHugoSite as createNetlifyHugoSite } from '@/lib/netlify'
+import { createServerClient } from '@/lib/supabase-server'
 import { z } from 'zod'
 
 // Validation schema for site generation request
@@ -56,6 +57,17 @@ interface SiteGenerationResponse {
 // POST /api/sites/generate - Generate a complete microsite
 export async function POST(request: NextRequest) {
   try {
+    // Get authenticated user first before parsing body
+    const supabase = createServerClient()
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     const body = await request.json()
 
     // Validate request body

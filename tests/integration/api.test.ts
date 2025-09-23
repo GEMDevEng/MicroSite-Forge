@@ -85,8 +85,33 @@ jest.mock('../../src/lib/github.ts', () => ({
     deployUrl: 'https://test-site.com',
   }),
   createHugoTemplateRepository: jest.fn().mockResolvedValue({
-    githubUrl: 'https://github.com/test/repo',
-    deployUrl: 'https://test-site.com',
+    name: 'test-repo',
+    full_name: 'test-owner/test-repo',
+    html_url: 'https://github.com/test-owner/test-repo',
+    clone_url: 'https://github.com/test-owner/test-repo.git',
+    default_branch: 'main',
+    visibility: 'public',
+  }),
+}))
+
+// Mock Netlify
+jest.mock('../../src/lib/netlify.ts', () => ({
+  createHugoSite: jest.fn().mockResolvedValue({
+    id: 'test-netlify-site-id',
+    name: 'test-site-name',
+    url: 'https://test-site-name.netlify.app',
+    ssl_url: 'https://test-site-name.netlify.app',
+    admin_url: 'https://app.netlify.com/sites/test-site-name',
+    custom_domain: null,
+    state: 'current',
+    build_settings: {
+      repo_type: 'git',
+      repo_url: 'https://github.com/test-owner/test-repo.git',
+      repo_branch: 'main',
+      base: '/',
+      dir: 'public',
+      cmd: 'hugo --minify',
+    },
   }),
 }))
 
@@ -140,7 +165,7 @@ describe('API Integration Tests', () => {
 
   describe('Analytics API', () => {
     it('should return mock analytics data for authenticated requests', async () => {
-      const { GET } = await import('app/api/analytics/route')
+      const { GET } = await import('@/app/api/analytics/route')
 
       const request = new NextRequest('http://localhost:3000/api/analytics')
       const response = await GET(request)
@@ -150,16 +175,24 @@ describe('API Integration Tests', () => {
       expect(data).toHaveProperty('overview')
       expect(data.overview).toHaveProperty('totalSites')
     })
+  })
+
+  describe('Analytics API - Unauthenticated', () => {
+    beforeAll(() => {
+      jest.resetModules()
+      jest.mock('../../src/lib/supabase-server.ts', () => ({
+        createServerClient: jest.fn(() => ({
+          auth: {
+            getSession: jest.fn().mockResolvedValue({
+              data: { session: null },
+            }),
+          },
+        })),
+      }))
+    })
 
     it('should return 401 for unauthenticated requests', async () => {
-      // Temporarily modify the mock to return unauthenticated session
-      const createServerClientMock = require('../../src/lib/supabase-server.ts').createServerClient
-      const authMock = createServerClientMock.mock.results[0].value.auth
-      authMock.getSession.mockResolvedValueOnce({
-        data: { session: null },
-      })
-
-      const { GET } = await import('app/api/analytics/route')
+      const { GET } = await import('@/app/api/analytics/route')
 
       const request = new NextRequest('http://localhost:3000/api/analytics')
       const response = await GET(request)
@@ -172,25 +205,7 @@ describe('API Integration Tests', () => {
 
   describe('Sites API', () => {
     it('should handle site generation requests with proper validation', async () => {
-      // Mock dependencies
-      jest.mock('../../src/lib/supabase-server.ts', () => ({
-        createServerClient: jest.fn(() => ({
-          auth: {
-            getSession: jest.fn().mockResolvedValue({
-              data: { session: { user: { id: 'test-user-id' } } },
-            }),
-          },
-        })),
-      }))
-
-      jest.mock('../../src/lib/github.ts', () => ({
-        createSiteRepo: jest.fn().mockResolvedValue({
-          githubUrl: 'https://github.com/test/repo',
-          deployUrl: 'https://test-site.com',
-        }),
-      }))
-
-      const { POST } = await import('app/api/sites/generate/route')
+      const { POST } = await import('@/app/api/sites/generate/route')
 
       const request = new NextRequest('http://localhost:3000/api/sites/generate', {
         method: 'POST',
@@ -206,9 +221,11 @@ describe('API Integration Tests', () => {
       const response = await POST(request)
       expect([200, 400, 500]).toContain(response.status) // Any of these statuses indicate the API is properly structured
     })
+  })
 
-    it('should require authentication', async () => {
-      // Mock unauthenticated session
+  describe('Sites API - Unauthenticated', () => {
+    beforeAll(() => {
+      jest.resetModules()
       jest.mock('../../src/lib/supabase-server.ts', () => ({
         createServerClient: jest.fn(() => ({
           auth: {
@@ -218,8 +235,10 @@ describe('API Integration Tests', () => {
           },
         })),
       }))
+    })
 
-      const { POST } = await import('app/api/sites/generate/route')
+    it('should require authentication', async () => {
+      const { POST } = await import('@/app/api/sites/generate/route')
 
       const request = new NextRequest('http://localhost:3000/api/sites/generate', {
         method: 'POST',
@@ -252,7 +271,7 @@ describe('API Integration Tests', () => {
         }),
       }))
 
-      const { POST } = await import('app/api/content/route')
+      const { POST } = await import('@/app/api/content/route')
 
       const request = new NextRequest('http://localhost:3000/api/content', {
         method: 'POST',

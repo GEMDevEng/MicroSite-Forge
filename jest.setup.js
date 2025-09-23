@@ -1,6 +1,9 @@
 import 'whatwg-fetch'
 import '@testing-library/jest-dom'
 
+// Enable fetch mocking in tests
+require('jest-fetch-mock').enableMocks()
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
