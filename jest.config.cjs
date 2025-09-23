@@ -7,7 +7,7 @@ const createJestConfig = nextJest({
 
 // Add any custom config to be passed to Jest
 const customJestConfig = {
-  setupFilesAfterEnv: ['<rootDir>/src/setupTests.ts'],
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   testEnvironment: 'jsdom',
   maxWorkers: 2, // Reduce workers to prevent child process exceptions
   testPathIgnorePatterns: ['<rootDir>/.next/', '<rootDir>/node_modules/'],

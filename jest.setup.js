@@ -43,7 +43,29 @@ jest.mock('@/lib/supabase', () => ({
   },
 }))
 
-global.fetch = jest.fn(() => Promise.resolve({ json: () => Promise.resolve({ data: [] }) }))
+// Mock fetch with specific handlers for different endpoints
+global.fetch = jest.fn((url) => {
+  if (url.includes('/api/analytics')) {
+    // Return mock analytics data matching the expected structure
+    return Promise.resolve({
+      ok: true,
+      json: () => Promise.resolve({
+        overview: {
+          totalSites: 0,
+          totalLeads: 0,
+          totalRevenue: 0,
+          conversionRate: 0
+        }
+      })
+    })
+  }
+
+  // Default mock for other endpoints
+  return Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({ data: [] })
+  })
+})
 
 // Mock environment variables
 process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co'
