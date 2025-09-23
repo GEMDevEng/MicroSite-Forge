@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function createMiddlewareClient(request: NextRequest) {
@@ -19,7 +19,9 @@ export async function createMiddlewareClient(request: NextRequest) {
   return { supabase, session, response }
 }
 
-export function requireAuth(callback: (request: NextRequest, session: any) => Promise<NextResponse>) {
+export function requireAuth(
+  callback: (request: NextRequest, session: any) => Promise<NextResponse>
+) {
   return async (request: NextRequest) => {
     const { session } = await createMiddlewareClient(request)
 

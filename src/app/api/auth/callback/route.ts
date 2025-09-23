@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -13,7 +13,9 @@ export async function GET(request: NextRequest) {
 
       if (!error) {
         // Create user profile if it doesn't exist
-        const { data: { user } } = await supabase.auth.getUser()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
         if (user) {
           const { data: existingProfile } = await supabase
@@ -24,21 +26,17 @@ export async function GET(request: NextRequest) {
 
           if (!existingProfile) {
             // Create new user profile
-            await supabase
-              .from('users')
-              .insert({
-                id: user.id,
-                email: user.email!,
-              })
+            await supabase.from('users').insert({
+              id: user.id,
+              email: user.email!,
+            })
           }
         }
 
         const forwardedHost = request.headers.get('x-forwarded-host')
         const isLocalEnv = process.env.NODE_ENV === 'development'
 
-        return NextResponse.redirect(
-          `${isLocalEnv ? origin : `https://${forwardedHost}`}${next}`
-        )
+        return NextResponse.redirect(`${isLocalEnv ? origin : `https://${forwardedHost}`}${next}`)
       }
     }
 

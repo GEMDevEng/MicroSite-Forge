@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { performNicheResearch } from '@/lib/grok'
-import { findAvailableDomains } from '@/lib/porkbun'
+import { performNicheResearch, KeywordSuggestion } from '@/lib/grok'
+import { findAvailableDomains, DomainCheckResult } from '@/lib/porkbun'
 import { researchRateLimit } from '@/lib/rate-limit'
 import { z } from 'zod'
 
@@ -18,11 +18,11 @@ const NicheResearchSchema = z.object({
 // Combined response type
 interface ResearchResponse {
   niche: string
-  keywords: any[]
+  keywords: KeywordSuggestion[]
   trendingTopics: string[]
   contentOpportunities: string[]
   competitorInsights?: string[]
-  availableDomains: any[]
+  availableDomains: DomainCheckResult[]
   recommendedDomain?: string
   estimatedCost?: number
 }
@@ -30,7 +30,7 @@ interface ResearchResponse {
 // POST /api/research - Perform comprehensive market research
 export async function POST(request: NextRequest) {
   // Apply rate limiting
-  const rateLimitResponse = researchRateLimit(request as any)
+  const rateLimitResponse = researchRateLimit(request)
   if (rateLimitResponse) {
     return rateLimitResponse
   }
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
     // Validate request body
     const validated = NicheResearchSchema.parse(body)
 
-    const researchPromises: Promise<any>[] = []
+    const researchPromises: (Promise<any> | Promise<DomainCheckResult[]>)[] = []
 
     // Perform niche research with Grok
     const nicheResearchPromise = performNicheResearch({
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
     researchPromises.push(nicheResearchPromise)
 
     // Check domains if requested
-    let availableDomainsPromise = null
+    let availableDomainsPromise: Promise<DomainCheckResult[]> | null = null
     if (validated.domainSearch) {
       availableDomainsPromise = findAvailableDomains(validated.niche, validated.maxDomainBudget)
       researchPromises.push(availableDomainsPromise)
@@ -83,8 +83,11 @@ export async function POST(request: NextRequest) {
     // Find best domain recommendation (shortest available domain with lowest cost)
     if (availableDomains.length > 0) {
       const bestDomain = availableDomains
-        .filter((domain: any) => domain.price && domain.price > 0)
-        .sort((a: any, b: any) => a.domain.length - b.domain.length || a.price - b.price)[0]
+        .filter((domain: DomainCheckResult) => domain.price && domain.price > 0)
+        .sort(
+          (a: DomainCheckResult, b: DomainCheckResult) =>
+            a.domain.length - b.domain.length || a.price! - b.price!
+        )[0]
 
       if (bestDomain) {
         response.recommendedDomain = bestDomain.domain

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { AnalyticsEngine, ReportBuilder, ReportScheduler } from '@/lib/analytics'
 import { logger } from '@/lib/logger'
 
@@ -65,10 +65,7 @@ export async function GET(request: NextRequest) {
     }
   } catch (error) {
     logger.error('Analytics API error', error instanceof Error ? error : new Error('Unknown error'))
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -99,10 +96,10 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
-    logger.error('Analytics API POST error', error instanceof Error ? error : new Error('Unknown error'))
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    logger.error(
+      'Analytics API POST error',
+      error instanceof Error ? error : new Error('Unknown error')
     )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

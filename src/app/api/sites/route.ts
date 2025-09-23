@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSiteSchema, sitesFilterSchema } from '@/lib/validations'
 
@@ -7,13 +7,13 @@ export async function GET(request: NextRequest) {
     const supabase = createServerClient()
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
@@ -40,17 +40,14 @@ export async function GET(request: NextRequest) {
 
     if (sitesError) {
       console.error('Sites fetch error:', sitesError)
-      return NextResponse.json(
-        { error: 'Failed to fetch sites' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch sites' }, { status: 500 })
     }
 
     return NextResponse.json({
       sites: sites || [],
       total: count || 0,
       offset: filters.offset,
-      limit: filters.limit
+      limit: filters.limit,
     })
   } catch (error: any) {
     console.error('Sites API error:', error)
@@ -60,10 +57,7 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       )
     }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -72,13 +66,13 @@ export async function POST(request: NextRequest) {
     const supabase = createServerClient()
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const body = await request.json()
@@ -93,17 +87,14 @@ export async function POST(request: NextRequest) {
         user_id: user.id,
         name: validatedData.name,
         domain: validatedData.domain || null,
-        status: 'pending'
+        status: 'pending',
       })
       .select()
       .single()
 
     if (siteError) {
       console.error('Site creation error:', siteError)
-      return NextResponse.json(
-        { error: 'Failed to create site' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to create site' }, { status: 500 })
     }
 
     return NextResponse.json({ site }, { status: 201 })
@@ -115,9 +106,6 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       )
     }
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

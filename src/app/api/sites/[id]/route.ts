@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase'
+import { createServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface RouteParams {
@@ -12,13 +12,13 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const supabase = createServerClient()
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const siteId = params.id
@@ -35,25 +35,16 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       console.error('Site fetch error:', siteError)
 
       if (siteError.code === 'PGRST116') {
-        return NextResponse.json(
-          { error: 'Site not found' },
-          { status: 404 }
-        )
+        return NextResponse.json({ error: 'Site not found' }, { status: 404 })
       }
 
-      return NextResponse.json(
-        { error: 'Failed to fetch site' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to fetch site' }, { status: 500 })
     }
 
     return NextResponse.json({ site })
   } catch (error) {
     console.error('Site GET API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -62,13 +53,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const supabase = createServerClient()
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const siteId = params.id
@@ -84,10 +75,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
       .single()
 
     if (checkError || !existingSite) {
-      return NextResponse.json(
-        { error: 'Site not found or access denied' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Site not found or access denied' }, { status: 404 })
     }
 
     // Update site
@@ -98,7 +86,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         domain,
         status,
         github_repo,
-        netlify_url
+        netlify_url,
       })
       .eq('id', siteId)
       .eq('user_id', user.id)
@@ -107,19 +95,13 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 
     if (siteError) {
       console.error('Site update error:', siteError)
-      return NextResponse.json(
-        { error: 'Failed to update site' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to update site' }, { status: 500 })
     }
 
     return NextResponse.json({ site })
   } catch (error) {
     console.error('Site PUT API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
@@ -128,13 +110,13 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const supabase = createServerClient()
 
     // Get authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser()
 
     if (authError || !user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const siteId = params.id
@@ -148,10 +130,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       .single()
 
     if (checkError || !existingSite) {
-      return NextResponse.json(
-        { error: 'Site not found or access denied' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'Site not found or access denied' }, { status: 404 })
     }
 
     // Delete site (this will cascade to leads due to FK constraints)
@@ -163,18 +142,12 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
 
     if (siteError) {
       console.error('Site deletion error:', siteError)
-      return NextResponse.json(
-        { error: 'Failed to delete site' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: 'Failed to delete site' }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Site DELETE API error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }

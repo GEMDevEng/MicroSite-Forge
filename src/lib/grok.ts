@@ -8,7 +8,7 @@ interface NicheResearchRequest {
   competitorAnalysis?: boolean
 }
 
-interface KeywordSuggestion {
+export interface KeywordSuggestion {
   keyword: string
   searchVolume: number
   competition: 'high' | 'medium' | 'low'
@@ -16,7 +16,7 @@ interface KeywordSuggestion {
   trending: boolean
 }
 
-interface NicheResearchResponse {
+export interface NicheResearchResponse {
   niche: string
   keywords: KeywordSuggestion[]
   trendingTopics: string[]

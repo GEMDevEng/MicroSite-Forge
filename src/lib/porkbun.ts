@@ -2,7 +2,7 @@ const PORKBUN_API_BASE = 'https://api.porkbun.com/api/json/v3'
 const API_KEY = process.env.PORKBUN_API_KEY
 const SECRET_KEY = process.env.PORKBUN_SECRET_KEY
 
-interface DomainCheckResult {
+export interface DomainCheckResult {
   domain: string
   status: 'available' | 'registered' | 'error'
   price?: number
