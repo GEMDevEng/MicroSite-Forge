@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabaseClient, getSupabaseConfigError } from './supabase'
 import { logger } from './logger'
 
 export interface AnalyticsData {
@@ -74,6 +74,22 @@ export interface CustomReport {
 
 export class AnalyticsEngine {
   async getDashboardData(userId: string): Promise<AnalyticsData['overview']> {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      logger.error(
+        'Supabase not configured for analytics',
+        new Error(getSupabaseConfigError() ?? 'Unknown error')
+      )
+      return {
+        totalSites: 0,
+        totalLeads: 0,
+        totalRevenue: 0,
+        conversionRate: 0,
+        activeSites: 0,
+        qualifiedLeads: 0,
+      }
+    }
+
     try {
       // Get total sites
       const { data: sites, error: sitesError } = await supabase
@@ -93,9 +109,10 @@ export class AnalyticsEngine {
       if (sitesError) logger.error('Failed to fetch sites count', sitesError)
       if (leadsError) logger.error('Failed to fetch leads count', leadsError)
 
-      const totalSites = sites?.length || 0
-      const totalLeads = leads?.length || 0
-      const qualifiedLeads = leads?.filter((lead) => lead.status === 'qualified').length || 0
+      const totalSites = (sites as any[])?.length || 0
+      const totalLeads = (leads as any[])?.length || 0
+      const qualifiedLeads =
+        (leads as any[])?.filter((lead: any) => lead.status === 'qualified').length || 0
       const activeSites = totalSites // Assume all sites are active
       const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0
 
@@ -124,6 +141,25 @@ export class AnalyticsEngine {
   }
 
   async getLeadAnalytics(userId: string): Promise<AnalyticsData['leadAnalytics']> {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      logger.error(
+        'Supabase not configured for analytics',
+        new Error(getSupabaseConfigError() ?? 'Unknown error')
+      )
+      return {
+        totalLeads: 0,
+        newLeads: 0,
+        qualified: 0,
+        contacted: 0,
+        converted: 0,
+        avgScore: 0,
+        conversionRate: 0,
+        costPerLead: 0,
+        leadSources: [],
+      }
+    }
+
     try {
       const { data: leads, error } = await supabase
         .from('leads')
@@ -132,17 +168,18 @@ export class AnalyticsEngine {
 
       if (error) throw error
 
-      const totalLeads = leads?.length || 0
-      const newLeads = leads?.filter((lead) => lead.status === 'new').length || 0
-      const qualified = leads?.filter((lead) => lead.status === 'qualified').length || 0
-      const contacted = leads?.filter((lead) => lead.status === 'contacted').length || 0
-      const converted = leads?.filter((lead) => lead.status === 'converted').length || 0
+      const typedLeads = leads as any[]
+      const totalLeads = typedLeads?.length || 0
+      const newLeads = typedLeads?.filter((lead: any) => lead.status === 'new').length || 0
+      const qualified = typedLeads?.filter((lead: any) => lead.status === 'qualified').length || 0
+      const contacted = typedLeads?.filter((lead: any) => lead.status === 'contacted').length || 0
+      const converted = typedLeads?.filter((lead: any) => lead.status === 'converted').length || 0
 
       interface ScoreData {
         total_score?: number
       }
-      const scores = leads
-        ?.map((lead) => (lead.score_data as ScoreData)?.total_score)
+      const scores = typedLeads
+        ?.map((lead: any) => (lead.score_data as ScoreData)?.total_score)
         .filter((score): score is number => score !== undefined)
       const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
       const conversionRate = totalLeads > 0 ? (converted / totalLeads) * 100 : 0
@@ -154,7 +191,7 @@ export class AnalyticsEngine {
       const sourceMap = new Map<string, number>()
       const sourceConversions = new Map<string, number>()
 
-      leads?.forEach((lead) => {
+      typedLeads?.forEach((lead: any) => {
         const source = lead.source || 'unknown'
         sourceMap.set(source, (sourceMap.get(source) || 0) + 1)
         if (lead.status === 'converted') {
@@ -242,6 +279,15 @@ export class AnalyticsEngine {
   }
 
   async getSitePerformance(userId: string): Promise<AnalyticsData['sitePerformance']> {
+    const supabase = getSupabaseClient()
+    if (!supabase) {
+      logger.error(
+        'Supabase not configured for analytics',
+        new Error(getSupabaseConfigError() ?? 'Unknown error')
+      )
+      return []
+    }
+
     try {
       const { data: sites, error } = await supabase
         .from('sites')
@@ -252,7 +298,7 @@ export class AnalyticsEngine {
 
       // Mock performance data for each site
       const sitePerformance =
-        sites?.map((site) => ({
+        (sites as any[])?.map((site: any) => ({
           site_id: site.id,
           name: site.name || site.domain,
           views: Math.floor(Math.random() * 10000) + 1000,
