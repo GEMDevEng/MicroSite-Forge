@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { getSupabaseClient } from './supabase'
 import { logger } from './logger'
 
 export interface EmailTemplate {
@@ -131,18 +131,18 @@ export class EmailSender {
       const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.apiKey}`,
-          'Content-Type': 'application/json'
+          Authorization: `Bearer ${this.apiKey}`,
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           personalizations: [{ to: [{ email: to }] }],
           from: { email: this.fromEmail, name: this.fromName },
           subject: processedSubject,
           content: [
-            { type: "text/plain", value: processedText || processedHtml.replace(/<[^>]*>/g, '') },
-            { type: "text/html", value: processedHtml }
-          ]
-        })
+            { type: 'text/plain', value: processedText || processedHtml.replace(/<[^>]*>/g, '') },
+            { type: 'text/html', value: processedHtml },
+          ],
+        }),
       })
 
       if (!response.ok) {
@@ -151,7 +151,11 @@ export class EmailSender {
 
       return { success: true, messageId: response.headers.get('X-Message-Id') || 'unknown' }
     } catch (error) {
-      logger.error('Failed to send email', error instanceof Error ? error : new Error('Unknown error'), { to })
+      logger.error(
+        'Failed to send email',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { to }
+      )
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   }
@@ -184,18 +188,21 @@ export class SMSSender {
       logger.info('Sending SMS', { to, messageLength: processedMessage.length })
 
       // Mock Twilio implementation
-      const response = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_SID}/Messages.json`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Basic ${btoa(`${process.env.TWILIO_SID}:${this.apiKey}`)}`,
-          'Content-Type': 'application/x-www-form-urlencoded'
-        },
-        body: new URLSearchParams({
-          To: to,
-          From: this.fromNumber,
-          Body: processedMessage
-        })
-      })
+      const response = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${process.env.TWILIO_SID}/Messages.json`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${btoa(`${process.env.TWILIO_SID}:${this.apiKey}`)}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            To: to,
+            From: this.fromNumber,
+            Body: processedMessage,
+          }),
+        }
+      )
 
       if (!response.ok) {
         throw new Error(`SMS service error: ${response.statusText}`)
@@ -204,7 +211,11 @@ export class SMSSender {
       const data = await response.json()
       return { success: true, messageId: data.sid }
     } catch (error) {
-      logger.error('Failed to send SMS', error instanceof Error ? error : new Error('Unknown error'), { to })
+      logger.error(
+        'Failed to send SMS',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { to }
+      )
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' }
     }
   }
@@ -243,6 +254,12 @@ export class CommunicationManager {
 
   async sendLeadWelcomeEmail(leadId: string): Promise<boolean> {
     try {
+      const supabase = getSupabaseClient()
+      if (!supabase) {
+        logger.warn('Supabase not configured for communication', { leadId })
+        return false
+      }
+
       const { data: lead, error } = await supabase
         .from('leads')
         .select('*')
@@ -264,7 +281,7 @@ export class CommunicationManager {
 
       const variables = {
         firstName: lead.name.split(' ')[0],
-        company
+        company,
       }
 
       const subject = `Welcome to MicroSite Forge, ${variables.firstName}!`
@@ -290,13 +307,23 @@ export class CommunicationManager {
 
       return result.success
     } catch (error) {
-      logger.error('Failed to send welcome email', error instanceof Error ? error : new Error('Unknown error'), { leadId })
+      logger.error(
+        'Failed to send welcome email',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId }
+      )
       return false
     }
   }
 
   async sendFollowUpSMS(leadId: string, message?: string): Promise<boolean> {
     try {
+      const supabase = getSupabaseClient()
+      if (!supabase) {
+        logger.warn('Supabase not configured for communication', { leadId })
+        return false
+      }
+
       const { data: lead, error } = await supabase
         .from('leads')
         .select('*')
@@ -313,7 +340,9 @@ export class CommunicationManager {
         return false
       }
 
-      const smsMessage = message || `Hi ${lead.name.split(' ')[0]}! Following up on your recent inquiry. How can we help you today?`
+      const smsMessage =
+        message ||
+        `Hi ${lead.name.split(' ')[0]}! Following up on your recent inquiry. How can we help you today?`
 
       const result = await this.smsSender.sendSMS(lead.phone, smsMessage)
 
@@ -324,7 +353,11 @@ export class CommunicationManager {
 
       return result.success
     } catch (error) {
-      logger.error('Failed to send follow-up SMS', error instanceof Error ? error : new Error('Unknown error'), { leadId })
+      logger.error(
+        'Failed to send follow-up SMS',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId }
+      )
       return false
     }
   }
@@ -339,17 +372,15 @@ export class CommunicationManager {
     metadata?: Record<string, any>
   ): Promise<void> {
     try {
-      const { error } = await supabase
-        .from('communications')
-        .insert({
-          lead_id: leadId,
-          type,
-          direction,
-          content,
-          status: status as 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked',
-          message_id: messageId,
-          metadata: metadata || null
-        })
+      const { error } = await supabase.from('communications').insert({
+        lead_id: leadId,
+        type,
+        direction,
+        content,
+        status: status as 'sent' | 'failed' | 'delivered' | 'opened' | 'clicked',
+        message_id: messageId,
+        metadata: metadata || null,
+      })
 
       if (error) {
         logger.error('Failed to log communication to database', error, { leadId, type })
@@ -357,21 +388,32 @@ export class CommunicationManager {
         logger.info('Communication logged to database', { leadId, type, direction, status })
       }
     } catch (error) {
-      logger.error('Failed to log communication', error instanceof Error ? error : new Error('Unknown error'), { leadId, type })
+      logger.error(
+        'Failed to log communication',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId, type }
+      )
     }
   }
 
-  private async updateLeadStatus(leadId: string, status: 'new' | 'qualified' | 'contacted' | 'converted'): Promise<void> {
+  private async updateLeadStatus(
+    leadId: string,
+    status: 'new' | 'qualified' | 'contacted' | 'converted'
+  ): Promise<void> {
     try {
       await supabase
         .from('leads')
         .update({
           status,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
         .eq('id', leadId)
     } catch (error) {
-      logger.error('Failed to update lead status', error instanceof Error ? error : new Error('Unknown error'), { leadId, status })
+      logger.error(
+        'Failed to update lead status',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { leadId, status }
+      )
     }
   }
 
@@ -388,7 +430,7 @@ export class CommunicationManager {
         const variables = {
           firstName: lead.name.split(' ')[0],
           company: this.getSafeCompany(lead.contact_info),
-          score: this.getSafeTotalScore(lead.score_data)
+          score: this.getSafeTotalScore(lead.score_data),
         }
 
         const result = await this.emailSender.sendEmail(
@@ -400,7 +442,14 @@ export class CommunicationManager {
         )
 
         if (result.success) {
-          await this.logCommunication(lead.id, 'email', 'outbound', campaign.emailTemplate.htmlContent, 'sent', result.messageId)
+          await this.logCommunication(
+            lead.id,
+            'email',
+            'outbound',
+            campaign.emailTemplate.htmlContent,
+            'sent',
+            result.messageId
+          )
 
           // Update campaign metrics
           await this.incrementCampaignMetrics(campaign.id, 'email')
@@ -409,9 +458,16 @@ export class CommunicationManager {
 
       await Promise.all(promises)
 
-      logger.info('Email campaign executed successfully', { campaignId: campaign.id, leadsCount: leads.length })
+      logger.info('Email campaign executed successfully', {
+        campaignId: campaign.id,
+        leadsCount: leads.length,
+      })
     } catch (error) {
-      logger.error('Failed to execute email campaign', error instanceof Error ? error : new Error('Unknown error'), { campaignId: campaign.id })
+      logger.error(
+        'Failed to execute email campaign',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { campaignId: campaign.id }
+      )
       throw error
     }
   }
@@ -425,17 +481,28 @@ export class CommunicationManager {
 
       // Send SMS to each lead with phone number
       const promises = leads
-        .filter(lead => lead.phone)
+        .filter((lead) => lead.phone)
         .map(async (lead) => {
           const variables = {
             firstName: lead.name.split(' ')[0],
-            company: this.getSafeCompany(lead.contact_info)
+            company: this.getSafeCompany(lead.contact_info),
           }
 
-          const result = await this.smsSender.sendSMS(lead.phone!, campaign.smsTemplate.content, variables)
+          const result = await this.smsSender.sendSMS(
+            lead.phone!,
+            campaign.smsTemplate.content,
+            variables
+          )
 
           if (result.success) {
-            await this.logCommunication(lead.id, 'sms', 'outbound', campaign.smsTemplate.content, 'sent', result.messageId)
+            await this.logCommunication(
+              lead.id,
+              'sms',
+              'outbound',
+              campaign.smsTemplate.content,
+              'sent',
+              result.messageId
+            )
 
             // Update campaign metrics
             await this.incrementCampaignMetrics(campaign.id, 'sms')
@@ -444,9 +511,16 @@ export class CommunicationManager {
 
       await Promise.all(promises)
 
-      logger.info('SMS campaign executed successfully', { campaignId: campaign.id, leadsCount: leads.filter(l => l.phone).length })
+      logger.info('SMS campaign executed successfully', {
+        campaignId: campaign.id,
+        leadsCount: leads.filter((l) => l.phone).length,
+      })
     } catch (error) {
-      logger.error('Failed to execute SMS campaign', error instanceof Error ? error : new Error('Unknown error'), { campaignId: campaign.id })
+      logger.error(
+        'Failed to execute SMS campaign',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { campaignId: campaign.id }
+      )
       throw error
     }
   }
@@ -490,7 +564,11 @@ export class CommunicationManager {
       // For now, we'll just log it
       logger.info(`Campaign metric updated: ${type} sent for campaign ${campaignId}`)
     } catch (error) {
-      logger.error('Failed to update campaign metrics', error instanceof Error ? error : new Error('Unknown error'), { campaignId })
+      logger.error(
+        'Failed to update campaign metrics',
+        error instanceof Error ? error : new Error('Unknown error'),
+        { campaignId }
+      )
     }
   }
 }
