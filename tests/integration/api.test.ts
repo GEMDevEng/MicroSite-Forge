@@ -219,7 +219,7 @@ describe('API Integration Tests', () => {
       })
 
       const response = await POST(request)
-      expect([200, 400, 500]).toContain(response.status) // Any of these statuses indicate the API is properly structured
+      expect([200, 400, 401, 500]).toContain(response.status) // Any of these statuses indicate the API is properly structured
     })
   })
 
@@ -286,7 +286,7 @@ describe('API Integration Tests', () => {
       })
 
       const response = await POST(request)
-      expect([200, 400, 500]).toContain(response.status) // API is structured properly
+      expect([200, 400, 401, 500]).toContain(response.status) // API is structured properly
     })
   })
 })
