@@ -1,6 +1,8 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
-import { ChevronDown } from "lucide-react"
+'use client'
+
+import * as React from 'react'
+import { cn } from '@/lib/utils'
+import { ChevronDown } from 'lucide-react'
 
 interface SelectContextType {
   value: string
@@ -28,12 +30,14 @@ const Select: React.FC<SelectProps> = ({ children, value, onValueChange }) => {
   }
 
   return (
-    <SelectContext.Provider value={{
-      value: selectedValue,
-      onValueChange: handleValueChange,
-      open,
-      setOpen
-    }}>
+    <SelectContext.Provider
+      value={{
+        value: selectedValue,
+        onValueChange: handleValueChange,
+        open,
+        setOpen,
+      }}
+    >
       {children}
     </SelectContext.Provider>
   )
@@ -54,7 +58,7 @@ const SelectTrigger: React.FC<SelectTriggerProps> = ({ children, className }) =>
     <button
       type="button"
       className={cn(
-        "flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
         className
       )}
       onClick={() => setOpen(!open)}
@@ -75,11 +79,7 @@ const SelectValue: React.FC<SelectValueProps> = ({ placeholder }) => {
 
   const { value } = context
 
-  return (
-    <span className="text-sm font-normal">
-      {value || placeholder || 'Select...'}
-    </span>
-  )
+  return <span className="text-sm font-normal">{value || placeholder || 'Select...'}</span>
 }
 
 interface SelectContentProps {
@@ -96,14 +96,9 @@ const SelectContent: React.FC<SelectContentProps> = ({ children }) => {
 
   return (
     <>
-      <div
-        className="fixed inset-0 z-40"
-        onClick={() => setOpen(false)}
-      />
-      <div className="absolute top-full left-0 right-0 z-50 mt-1 max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
-        <div className="p-1">
-          {children}
-        </div>
+      <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+      <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-60 overflow-auto rounded-md border bg-popover text-popover-foreground shadow-md">
+        <div className="p-1">{children}</div>
       </div>
     </>
   )
@@ -133,10 +128,4 @@ const SelectItem: React.FC<SelectItemProps> = ({ children, value }) => {
   )
 }
 
-export {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem
-}
+export { Select, SelectTrigger, SelectValue, SelectContent, SelectItem }

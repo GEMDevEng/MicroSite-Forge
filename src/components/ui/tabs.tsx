@@ -1,5 +1,7 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+'use client'
+
+import * as React from 'react'
+import { cn } from '@/lib/utils'
 
 interface TabsProps {
   defaultValue?: string
@@ -32,9 +34,7 @@ const Tabs: React.FC<TabsProps> = ({ defaultValue, value, onValueChange, childre
 
   return (
     <TabsContext.Provider value={{ activeTab, setActiveTab: handleSetActiveTab }}>
-      <div className={className}>
-        {children}
-      </div>
+      <div className={className}>{children}</div>
     </TabsContext.Provider>
   )
 }
@@ -46,7 +46,12 @@ interface TabsListProps {
 
 const TabsList: React.FC<TabsListProps> = ({ children, className }) => {
   return (
-    <div className={cn("inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground", className)}>
+    <div
+      className={cn(
+        'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+        className
+      )}
+    >
       {children}
     </div>
   )
@@ -68,10 +73,10 @@ const TabsTrigger: React.FC<TabsTriggerProps> = ({ value, children, className })
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+        'inline-flex items-center justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
         isActive
-          ? "bg-background text-foreground shadow-sm"
-          : "text-muted-foreground hover:text-foreground",
+          ? 'bg-background text-foreground shadow-sm'
+          : 'text-muted-foreground hover:text-foreground',
         className
       )}
       onClick={() => setActiveTab(value)}
@@ -97,11 +102,7 @@ const TabsContent: React.FC<TabsContentProps> = ({ value, children, className })
     return null
   }
 
-  return (
-    <div className={cn("mt-2", className)}>
-      {children}
-    </div>
-  )
+  return <div className={cn('mt-2', className)}>{children}</div>
 }
 
 export { Tabs, TabsList, TabsTrigger, TabsContent }
