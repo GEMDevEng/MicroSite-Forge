@@ -9,11 +9,11 @@ export default function HomePage() {
           <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
             🚀 MicroSite Forge
           </h1>
-          <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
-            The AI-Powered Microsite Factory for Local Lead Generation. 
-            Build, deploy, and manage 100+ exact-match microsites in under 60 seconds.
+          <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-gray-600">
+            The AI-Powered Microsite Factory for Local Lead Generation. Build, deploy, and manage
+            100+ exact-match microsites in under 60 seconds.
           </p>
-          
+
           <div className="mt-10 flex items-center justify-center gap-x-6">
             <Link href="/auth/signup">
               <Button size="lg" className="px-8 py-3">
@@ -28,43 +28,39 @@ export default function HomePage() {
           </div>
 
           <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+            <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="text-2xl font-bold text-blue-600">🤖</div>
               <h3 className="mt-2 font-semibold">AI-Powered Research</h3>
               <p className="mt-1 text-sm text-gray-600">
                 Automated niche discovery and keyword analysis
               </p>
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+
+            <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="text-2xl font-bold text-green-600">⚡</div>
               <h3 className="mt-2 font-semibold">Instant Deployment</h3>
               <p className="mt-1 text-sm text-gray-600">
                 One-click batch launches with Hugo + Netlify
               </p>
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+
+            <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="text-2xl font-bold text-purple-600">📞</div>
               <h3 className="mt-2 font-semibold">Smart Lead Capture</h3>
               <p className="mt-1 text-sm text-gray-600">
                 Multi-channel routing with AI call handling
               </p>
             </div>
-            
-            <div className="bg-white p-6 rounded-lg shadow-sm">
+
+            <div className="rounded-lg bg-white p-6 shadow-sm">
               <div className="text-2xl font-bold text-orange-600">📊</div>
               <h3 className="mt-2 font-semibold">Real-time Analytics</h3>
-              <p className="mt-1 text-sm text-gray-600">
-                Comprehensive dashboards and reporting
-              </p>
+              <p className="mt-1 text-sm text-gray-600">Comprehensive dashboards and reporting</p>
             </div>
           </div>
 
-          <div className="mt-16 bg-white p-8 rounded-lg shadow-sm">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Business Impact
-            </h2>
+          <div className="mt-16 rounded-lg bg-white p-8 shadow-sm">
+            <h2 className="mb-4 text-2xl font-bold text-gray-900">Business Impact</h2>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div>
                 <div className="text-3xl font-bold text-blue-600">$19K</div>
@@ -75,7 +71,9 @@ export default function HomePage() {
                 <div className="text-sm text-gray-600">Time Savings</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-purple-600">100+</div>
+                <div data-testid="metric-sites" className="text-3xl font-bold text-purple-600">
+                  100+
+                </div>
                 <div className="text-sm text-gray-600">Sites per User</div>
               </div>
             </div>
