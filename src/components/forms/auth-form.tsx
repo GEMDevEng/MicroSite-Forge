@@ -186,7 +186,7 @@ export function AuthForm({ mode, className }: AuthFormProps) {
                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
               />
             </svg>
-            <span className="ml-2 hidden sm:inline">Google</span>
+            <span className="ml-2 hidden sm:inline">{isSignUp ? 'Google' : 'Google'}</span>
           </Button>
 
           <Button
@@ -200,6 +200,14 @@ export function AuthForm({ mode, className }: AuthFormProps) {
             </svg>
             <span className="ml-2 hidden sm:inline">Facebook</span>
           </Button>
+        </div>
+
+        <div className="text-center text-xs text-muted-foreground">
+          <p>
+            {isSignUp
+              ? "OAuth accounts don't need passwords - use Google for instant access."
+              : 'Use the same method you used to sign up (email/password or Google).'}
+          </p>
         </div>
 
         <Button type="submit" className="w-full" loading={loading}>

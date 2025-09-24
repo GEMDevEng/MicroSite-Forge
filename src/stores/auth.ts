@@ -81,6 +81,15 @@ export const useAuthStore = create<AuthState>()(
           })
 
           if (error) {
+            // Improve error message for OAuth users trying email/password
+            if (
+              error.message === 'Invalid login credentials' ||
+              error.message.includes('Email not confirmed')
+            ) {
+              throw new Error(
+                'Invalid email or password. If you signed up with Google, use the "Continue with Google" button instead.'
+              )
+            }
             throw error
           }
 
@@ -109,6 +118,12 @@ export const useAuthStore = create<AuthState>()(
           })
 
           if (error) {
+            // Improved error message for existing OAuth users
+            if (error.message === 'User already registered') {
+              throw new Error(
+                'An account with this email already exists. If you signed up with Google, use "Continue with Google" instead.'
+              )
+            }
             throw error
           }
 
