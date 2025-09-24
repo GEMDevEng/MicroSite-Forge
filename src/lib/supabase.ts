@@ -12,18 +12,11 @@ export const createClient = () => {
   return createSupabaseClient<Database>(url, key)
 }
 
-// For backwards compatibility, export a browser client (lazy)
-export const supabase = (() => {
-  // Only create client if env vars are available
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!url || !key) {
-    return null
-  }
-
-  return createSupabaseClient<Database>(url, key)
-})()
+// For backwards compatibility, export a browser client
+export const supabase = createSupabaseClient<Database>(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // Server-side client for API routes with service role for database operations
 let client: ReturnType<typeof createSupabaseClient> | null = null

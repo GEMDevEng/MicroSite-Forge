@@ -12,7 +12,7 @@ export type Database = {
           lead_id: string
           message_id: string | null
           metadata: Json | null
-          status: 'new' | 'qualified' | 'contacted' | 'converted'
+          status: 'sent' | 'delivered' | 'opened' | 'clicked' | 'failed'
           type: string
         }
         Insert: {

@@ -1,13 +1,14 @@
-import { getSupabaseClient } from './supabase'
+import { supabase } from './supabase'
 import { logger } from './logger'
+import type { Database } from '../../types/supabase'
 
 interface Lead {
   id: string
   name: string
   email: string
-  phone?: string
-  contact_info?: Record<string, any>
-  score_data?: Record<string, any>
+  phone?: string | null
+  contact_info?: Database['public']['Tables']['leads']['Row']['contact_info']
+  score_data?: Database['public']['Tables']['leads']['Row']['score_data']
 }
 
 export interface EmailTemplate {
@@ -263,12 +264,6 @@ export class CommunicationManager {
 
   async sendLeadWelcomeEmail(leadId: string): Promise<boolean> {
     try {
-      const supabase = getSupabaseClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for communication', { leadId })
-        return false
-      }
-
       const { data: lead, error } = await supabase
         .from('leads')
         .select('*')
@@ -327,12 +322,6 @@ export class CommunicationManager {
 
   async sendFollowUpSMS(leadId: string, message?: string): Promise<boolean> {
     try {
-      const supabase = getSupabaseClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for communication', { leadId })
-        return false
-      }
-
       const { data: lead, error } = await supabase
         .from('leads')
         .select('*')
@@ -381,12 +370,6 @@ export class CommunicationManager {
     metadata?: Record<string, any>
   ): Promise<void> {
     try {
-      const supabase = getSupabaseClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for logging communication', { leadId })
-        return
-      }
-
       const { error } = await supabase.from('communications').insert({
         lead_id: leadId,
         type,
@@ -416,12 +399,6 @@ export class CommunicationManager {
     status: 'new' | 'qualified' | 'contacted' | 'converted'
   ): Promise<void> {
     try {
-      const supabase = getSupabaseClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for updating lead status', { leadId, status })
-        return
-      }
-
       await supabase
         .from('leads')
         .update({
@@ -547,11 +524,6 @@ export class CommunicationManager {
   }
 
   private async getLeadsForCampaign(segment: CampaignSegmentation): Promise<Lead[]> {
-    const supabase = getSupabaseClient()
-    if (!supabase) {
-      throw new Error('Supabase not configured for campaign lead fetching')
-    }
-
     let query = supabase.from('leads').select('*')
 
     if (segment.tags?.length) {
