@@ -167,7 +167,7 @@ export function CreateCampaignDialog({ children }: CreateCampaignDialogProps) {
   }
 
   const selectPredefinedSegment = (segment: (typeof leadSegments)[0]) => {
-    updateSegment('tags', segment.tags ? [segment.tags] : [])
+    updateSegment('tags', segment.tags || [])
     updateSegment('status', segment.status ? [segment.status] : [])
     updateSegment('daysSinceContact', segment.daysSinceContact)
   }

@@ -12,8 +12,8 @@ describe('Utils', () => {
     })
 
     it('should handle conditional classes', () => {
-      const isActive = true
-      const isInactive = false
+      const isActive = !!1
+      const isInactive = !!0
       expect(cn('base', isActive && 'active', isInactive && 'inactive')).toBe('base active')
     })
   })

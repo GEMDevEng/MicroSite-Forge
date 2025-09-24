@@ -25,12 +25,16 @@ export async function GET(request: NextRequest) {
       offset: parseInt(searchParams.get('offset') || '0'),
     }) as SitesFilters
 
+    // Ensure offset and limit are numbers, never undefined
+    const offset = filters.offset ?? 0
+    const limit = filters.limit ?? 10
+
     let query = supabase
       .from('sites')
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false })
-      .range(filters.offset, filters.offset + filters.limit - 1)
+      .range(offset, offset + limit - 1)
 
     if (filters.status) {
       query = query.eq('status', filters.status)
