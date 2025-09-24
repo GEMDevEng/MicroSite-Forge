@@ -3,15 +3,15 @@ import { createMiddlewareClient } from '@/lib/middleware'
 import { LeadManager } from '@/lib/lead-manager'
 import { logger } from '@/lib/logger'
 
-interface Params {
-  params: {
+interface RouteParams {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
-export async function POST(request: NextRequest, { params }: Params) {
+export async function POST(request: NextRequest, { params }: RouteParams) {
   try {
-    const leadId = params.id
+    const { id: leadId } = await params
     const { assignTo } = await request.json()
 
     if (!assignTo || typeof assignTo !== 'string') {
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest, { params }: Params) {
     })
 
   } catch (error) {
-    logger.error('Lead assignment API error', error instanceof Error ? error : new Error('Unknown error'), { leadId: params.id })
+    logger.error('Lead assignment API error', error instanceof Error ? error : new Error('Unknown error'), { leadId })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
@@ -67,9 +67,10 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: Params) {
+export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const { id: leadId } = await params
+
   try {
-    const leadId = params.id
 
     // Auth check
     const { supabase, session } = await createMiddlewareClient(request)
@@ -120,7 +121,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
     })
 
   } catch (error) {
-    logger.error('Lead unassignment API error', error instanceof Error ? error : new Error('Unknown error'), { leadId: params.id })
+    logger.error('Lead unassignment API error', error instanceof Error ? error : new Error('Unknown error'), { leadId })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
