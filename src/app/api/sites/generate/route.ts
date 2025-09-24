@@ -279,21 +279,28 @@ Discover the latest strategies and best practices in ${niche}.
       return total + (page.content.split(/\s+/).length || 0)
     }, 0)
 
+    console.log('Site created successfully:', {
+      id: netlifySite.id,
+      url: netlifySite.ssl_url,
+      domain: netlifySite.custom_domain || netlifySite.url,
+      state: netlifySite.state,
+    })
+
     const response: SiteGenerationResponse = {
       success: true,
       site: {
-        id: netlifySite.id,
+        id: netlifySite.id, // Use site ID, not deployment ID
         name: netlifySite.name,
-        url: netlifySite.ssl_url,
+        url: netlifySite.ssl_url, // Only if site is ready
         domain: netlifySite.custom_domain || netlifySite.url,
         githubUrl: githubRepo.html_url,
         netlifyUrl: netlifySite.admin_url,
-        status: 'completed',
+        status: netlifySite.state === 'current' ? 'completed' : 'deploying', // Check actual Netlify state
         progress: {
           research: true,
           content: true,
           github: true,
-          netlify: true,
+          netlify: netlifySite.state === 'current',
           domain: !!netlifySite.custom_domain,
         },
       },
