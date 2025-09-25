@@ -2,16 +2,19 @@ import { cookies } from 'next/headers'
 import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '../../types/supabase'
 
-// Create a Supabase client that has access to server-side cookies
+/**
+ * Create a Supabase client configured for server-side usage.
+ * Reads cookies from Next.js headers API.
+ */
 export function createClient() {
-  const cookieStore = cookies() as any
-
-  // If you need to log cookies (just for debugging):
-  cookieStore.getAll().forEach(({ name, value }: { name: string; value: string }) => {
-    console.log(`Cookie: ${name}=${value}`)
-  })
+  const cookieStore = cookies(); // ✅ not async, returns ReadonlyRequestCookies
 
   return createServerComponentClient<Database>({
     cookies: () => cookieStore,
-  })
+  });
 }
+
+/**
+ * Alias for backward compatibility
+ */
+export const createServerClient = createClient;

@@ -10,8 +10,9 @@ interface RouteParams {
 }
 
 export async function POST(request: NextRequest, { params }: RouteParams) {
+  const { id: leadId } = await params
+
   try {
-    const { id: leadId } = await params
     const { assignTo } = await request.json()
 
     if (!assignTo || typeof assignTo !== 'string') {
