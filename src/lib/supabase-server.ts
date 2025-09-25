@@ -1,24 +1,17 @@
-import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
-import { Database } from '../../types/supabase'
+import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import type { Database } from '../../types/supabase'
 
-// Server-side client for API routes
-export const createServerClient = () => {
-  const cookieStore = cookies()
-  return createSupabaseServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
-    {
-      cookies: {
-        getAll: () => {
-          return cookieStore.getAll().map(({ name, value }) => ({ name, value }))
-        },
-        setAll: (cookiesToSet) => {
-          for (const { name, value, options } of cookiesToSet) {
-            cookieStore.set(name, value, options)
-          }
-        },
-      },
-    }
-  )
+// Create a Supabase client that has access to server-side cookies
+export function createClient() {
+  const cookieStore = cookies() as any
+
+  // If you need to log cookies (just for debugging):
+  cookieStore.getAll().forEach(({ name, value }: { name: string; value: string }) => {
+    console.log(`Cookie: ${name}=${value}`)
+  })
+
+  return createServerComponentClient<Database>({
+    cookies: () => cookieStore,
+  })
 }

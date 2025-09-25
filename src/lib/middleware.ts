@@ -1,4 +1,4 @@
-import { createServerClient } from '@/lib/supabase-server'
+import { createClient } from '@/lib/supabase-server'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function createMiddlewareClient(request: NextRequest) {
@@ -8,7 +8,7 @@ export async function createMiddlewareClient(request: NextRequest) {
     },
   })
 
-  const supabase = createServerClient()
+  const supabase = createClient()
 
   // Refresh session if expired - required for Server Components
   // https://supabase.com/docs/guides/auth/server-side/nextjs
