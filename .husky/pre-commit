@@ -1,10 +1,1 @@
-#!/usr/bin/env sh
-
-# If package.json changed, sync lock file
-if git diff --cached --name-only | grep -q '^package.json$'; then
-  echo "package.json changed—syncing package-lock.json..."
-  npm install
-  git add package-lock.json
-fi
-
-npx lint-staged
+npm test
