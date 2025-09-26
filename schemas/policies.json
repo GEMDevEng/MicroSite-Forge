@@ -1,0 +1,99 @@
+{
+  "users": [
+    {
+      "name": "Users can view own profile",
+      "action": "SELECT",
+      "condition": "auth.uid() = id"
+    },
+    {
+      "name": "Users can update own profile",
+      "action": "UPDATE",
+      "condition": "auth.uid() = id"
+    }
+  ],
+  "sites": [
+    {
+      "name": "Users can view own sites",
+      "action": "SELECT",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can insert own sites",
+      "action": "INSERT",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can update own sites",
+      "action": "UPDATE",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can delete own sites",
+      "action": "DELETE",
+      "condition": "auth.uid() = user_id"
+    }
+  ],
+  "leads": [
+    {
+      "name": "Users can view leads from own sites",
+      "action": "SELECT",
+      "condition": "EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid())"
+    },
+    {
+      "name": "Users can insert leads for own sites",
+      "action": "INSERT",
+      "condition": "EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid())"
+    },
+    {
+      "name": "Users can update leads from own sites",
+      "action": "UPDATE",
+      "condition": "EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid())"
+    },
+    {
+      "name": "Users can delete leads from own sites",
+      "action": "DELETE",
+      "condition": "EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid())"
+    }
+  ],
+  "communications": [
+    {
+      "name": "Users can view communications for own leads",
+      "action": "SELECT",
+      "condition": "EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid())"
+    },
+    {
+      "name": "Users can insert communications for own leads",
+      "action": "INSERT",
+      "condition": "EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid())"
+    },
+    {
+      "name": "Users can update communications for own leads",
+      "action": "UPDATE",
+      "condition": "EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid())"
+    }
+  ],
+  "jobs": [
+    {
+      "name": "Users can view own jobs",
+      "action": "SELECT",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can insert own jobs",
+      "action": "INSERT",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can update own jobs",
+      "action": "UPDATE",
+      "condition": "auth.uid() = user_id"
+    }
+  ],
+  "invoices": [
+    {
+      "name": "Users can view own invoices",
+      "action": "SELECT",
+      "condition": "auth.uid() = user_id"
+    }
+  ]
+}

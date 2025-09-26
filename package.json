@@ -30,7 +30,15 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky",
-    "fix:imports": "npx replace-in-file '../../types/supabase' '../../types/database.types' \"src/**/*.ts\" \"src/**/*.tsx\""
+    "fix:imports": "npx replace-in-file '../../types/supabase' '../../types/database.types' \"src/**/*.ts\" \"src/**/*.tsx\"",
+    "db:build": "node scripts/automated-schema-builder.js",
+    "db:generate": "node scripts/generate-migration.js",
+    "db:generate:rls": "node scripts/generate-rls.js",
+    "db:deploy:local": "node scripts/deploy-schema.js deploy",
+    "db:reset": "node scripts/deploy-schema.js reset",
+    "db:status": "supabase status",
+    "db:studio": "supabase studio",
+    "db:types": "supabase gen types typescript --local > src/types/database.types.ts"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [

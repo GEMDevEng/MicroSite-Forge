@@ -1,0 +1,333 @@
+{
+  "users": {
+    "columns": {
+      "id": {
+        "type": "uuid",
+        "primary_key": true,
+        "not_null": true,
+        "references": "auth.users(id)"
+      },
+      "email": {
+        "type": "text",
+        "not_null": true
+      },
+      "stripe_id": {
+        "type": "text",
+        "nullable": true
+      },
+      "twilio_sid": {
+        "type": "text",
+        "nullable": true
+      },
+      "preferred_gateway": {
+        "type": "text",
+        "nullable": true
+      },
+      "gateway_credentials": {
+        "type": "jsonb",
+        "nullable": true
+      },
+      "created_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      },
+      "updated_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      }
+    },
+    "indexes": [
+      "CREATE UNIQUE INDEX idx_users_email ON users(email)",
+      "CREATE INDEX idx_users_stripe_id ON users(stripe_id)"
+    ]
+  },
+  "sites": {
+    "columns": {
+      "id": {
+        "type": "uuid",
+        "primary_key": true,
+        "not_null": true,
+        "default": "uuid_generate_v4()"
+      },
+      "user_id": {
+        "type": "uuid",
+        "not_null": true,
+        "references": "users(id)"
+      },
+      "name": {
+        "type": "text",
+        "not_null": true
+      },
+      "domain": {
+        "type": "text",
+        "nullable": true
+      },
+      "status": {
+        "type": "text",
+        "nullable": true
+      },
+      "github_repo": {
+        "type": "text",
+        "nullable": true
+      },
+      "netlify_url": {
+        "type": "text",
+        "nullable": true
+      },
+      "leads_count": {
+        "type": "bigint",
+        "nullable": true
+      },
+      "created_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      },
+      "updated_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      }
+    },
+    "indexes": [
+      "CREATE INDEX idx_sites_user_id ON sites(user_id)",
+      "CREATE INDEX idx_sites_domain ON sites(domain)",
+      "CREATE INDEX idx_sites_status ON sites(status)"
+    ]
+  },
+  "leads": {
+    "columns": {
+      "id": {
+        "type": "uuid",
+        "primary_key": true,
+        "not_null": true,
+        "default": "uuid_generate_v4()"
+      },
+      "site_id": {
+        "type": "uuid",
+        "not_null": true,
+        "references": "sites(id)"
+      },
+      "name": {
+        "type": "text",
+        "not_null": true
+      },
+      "email": {
+        "type": "text",
+        "not_null": true
+      },
+      "phone": {
+        "type": "text",
+        "nullable": true
+      },
+      "message": {
+        "type": "text",
+        "nullable": true
+      },
+      "source": {
+        "type": "text",
+        "nullable": true
+      },
+      "status": {
+        "type": "text",
+        "nullable": true
+      },
+      "score_data": {
+        "type": "jsonb",
+        "nullable": true
+      },
+      "contact_info": {
+        "type": "jsonb",
+        "nullable": true
+      },
+      "tags": {
+        "type": "jsonb",
+        "nullable": true
+      },
+      "assigned_to": {
+        "type": "text",
+        "nullable": true
+      },
+      "follow_up_date": {
+        "type": "timestamptz",
+        "nullable": true
+      },
+      "marketing_campaign": {
+        "type": "text",
+        "nullable": true
+      },
+      "enriched_at": {
+        "type": "timestamptz",
+        "nullable": true
+      },
+      "created_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      },
+      "updated_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      }
+    },
+    "indexes": [
+      "CREATE INDEX idx_leads_site_id ON leads(site_id)",
+      "CREATE INDEX idx_leads_email ON leads(email)",
+      "CREATE INDEX idx_leads_status ON leads(status)",
+      "CREATE INDEX idx_leads_assigned_to ON leads(assigned_to)",
+      "CREATE INDEX idx_leads_follow_up_date ON leads(follow_up_date)",
+      "CREATE INDEX idx_leads_created_at ON leads(created_at)"
+    ]
+  },
+  "communications": {
+    "columns": {
+      "id": {
+        "type": "uuid",
+        "primary_key": true,
+        "not_null": true,
+        "default": "uuid_generate_v4()"
+      },
+      "lead_id": {
+        "type": "uuid",
+        "not_null": true,
+        "references": "leads(id)"
+      },
+      "type": {
+        "type": "text",
+        "not_null": true,
+        "check": "type IN ('email', 'sms', 'call', 'note')"
+      },
+      "direction": {
+        "type": "text",
+        "not_null": true,
+        "check": "direction IN ('inbound', 'outbound')"
+      },
+      "content": {
+        "type": "text",
+        "not_null": true
+      },
+      "status": {
+        "type": "text",
+        "nullable": true
+      },
+      "message_id": {
+        "type": "text",
+        "nullable": true
+      },
+      "metadata": {
+        "type": "jsonb",
+        "nullable": true
+      },
+      "created_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      }
+    },
+    "indexes": [
+      "CREATE INDEX idx_communications_lead_id ON communications(lead_id)",
+      "CREATE INDEX idx_communications_type ON communications(type)",
+      "CREATE INDEX idx_communications_created_at ON communications(created_at)"
+    ]
+  },
+  "jobs": {
+    "columns": {
+      "id": {
+        "type": "uuid",
+        "primary_key": true,
+        "not_null": true,
+        "default": "uuid_generate_v4()"
+      },
+      "user_id": {
+        "type": "uuid",
+        "not_null": true,
+        "references": "users(id)"
+      },
+      "type": {
+        "type": "text",
+        "not_null": true
+      },
+      "status": {
+        "type": "text",
+        "nullable": true
+      },
+      "data": {
+        "type": "jsonb",
+        "not_null": true
+      },
+      "result": {
+        "type": "jsonb",
+        "nullable": true
+      },
+      "error": {
+        "type": "text",
+        "nullable": true
+      },
+      "created_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      },
+      "updated_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      }
+    },
+    "indexes": [
+      "CREATE INDEX idx_jobs_user_id ON jobs(user_id)",
+      "CREATE INDEX idx_jobs_status ON jobs(status)",
+      "CREATE INDEX idx_jobs_type ON jobs(type)",
+      "CREATE INDEX idx_jobs_created_at ON jobs(created_at)"
+    ]
+  },
+  "invoices": {
+    "columns": {
+      "id": {
+        "type": "uuid",
+        "primary_key": true,
+        "not_null": true,
+        "default": "uuid_generate_v4()"
+      },
+      "user_id": {
+        "type": "uuid",
+        "not_null": true,
+        "references": "users(id)"
+      },
+      "stripe_invoice_id": {
+        "type": "text",
+        "not_null": true
+      },
+      "amount": {
+        "type": "numeric",
+        "not_null": true
+      },
+      "currency": {
+        "type": "text",
+        "nullable": true
+      },
+      "status": {
+        "type": "text",
+        "nullable": true
+      },
+      "created_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      },
+      "updated_at": {
+        "type": "timestamptz",
+        "not_null": true,
+        "default": "now()"
+      }
+    },
+    "indexes": [
+      "CREATE INDEX idx_invoices_user_id ON invoices(user_id)",
+      "CREATE UNIQUE INDEX idx_invoices_stripe_id ON invoices(stripe_invoice_id)",
+      "CREATE INDEX idx_invoices_status ON invoices(status)"
+    ]
+  }
+}
