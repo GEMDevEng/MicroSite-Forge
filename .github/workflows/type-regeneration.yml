@@ -1,0 +1,86 @@
+name: Daily Type Regeneration
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  regenerate-types:
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for database connectivity
+        run: |
+          npm run db:status || echo "Database not available locally"
+
+      - name: Sync types from remote
+        run: npm run types:sync:pull
+        if: env.SUPABASE_PROJECT_ID != ''
+
+      - name: Generate local types
+        run: npm run types:generate
+        if: env.SUPABASE_PROJECT_ID == ''
+
+      - name: Validate generated types
+        run: npm run type-check
+
+      - name: Check for type changes
+        id: check_changes
+        run: |
+          if [ -n "$(git status --porcelain schemas/ src/types/)" ]; then
+            echo "changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "changes=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create pull request with type updates
+        if: steps.check_changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "🤖 Automated Type Updates - $(date +'%Y-%m-%d')"
+          body: |
+            ## 🤖 Automated Type Regeneration
+
+            This PR contains automatically regenerated TypeScript types from the Supabase database schema.
+
+            ### Changes:
+            - Updated database types to match current schema
+            - Separated types by schema (public, auth, storage)
+            - Auto-generated from database introspection
+
+            ### ⚠️ Important:
+            - Review the type changes carefully
+            - Ensure no breaking changes to your application logic
+            - Run tests locally before merging
+
+            **Generated on:** $(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          branch: automated-type-updates/$(date +%Y%m%d%H%M%S)
+          delete-branch: true
+          commit-message: |
+            🤖 Auto-generated types update [$(date +'%Y-%m-%d')]
+
+            - Updated from Supabase schema introspection
+            - Separated by schema for cleaner commits
+            - Maintains type safety across the application
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Type regeneration failed. Manual intervention may be required."
+          # Could add Slack/Discord notification here

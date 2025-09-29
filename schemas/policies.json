@@ -6,6 +6,11 @@
       "condition": "auth.uid() = id"
     },
     {
+      "name": "Users can insert own profile",
+      "action": "INSERT",
+      "condition": "auth.uid() = id"
+    },
+    {
       "name": "Users can update own profile",
       "action": "UPDATE",
       "condition": "auth.uid() = id"
@@ -70,6 +75,11 @@
       "name": "Users can update communications for own leads",
       "action": "UPDATE",
       "condition": "EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid())"
+    },
+    {
+      "name": "Users can delete communications for own leads",
+      "action": "DELETE",
+      "condition": "EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid())"
     }
   ],
   "jobs": [
@@ -87,12 +97,27 @@
       "name": "Users can update own jobs",
       "action": "UPDATE",
       "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can delete own jobs",
+      "action": "DELETE",
+      "condition": "auth.uid() = user_id"
     }
   ],
   "invoices": [
     {
       "name": "Users can view own invoices",
       "action": "SELECT",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can insert own invoices",
+      "action": "INSERT",
+      "condition": "auth.uid() = user_id"
+    },
+    {
+      "name": "Users can update own invoices",
+      "action": "UPDATE",
       "condition": "auth.uid() = user_id"
     }
   ]

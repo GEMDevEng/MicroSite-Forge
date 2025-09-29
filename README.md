@@ -5,9 +5,9 @@
 A fully automated web application that builds, deploys, and manages a scalable network of 100+ exact-match microsites per client. No coding, no manual research, no ops team required.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-Backend-green)](https://supabase.com/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.2-blue)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6.3-blue)](https://www.typescriptlang.org/)
 
 ## 🎯 Project Overview
 
@@ -86,7 +86,7 @@ Our documentation is organized into four main categories:
 ## 🛠️ Technology Stack
 
 ### Frontend
-- **Framework**: Next.js 14 (App Router) with TypeScript
+- **Framework**: Next.js 15 (App Router) with TypeScript
 - **Styling**: Tailwind CSS v3 with Headless UI components
 - **State Management**: Zustand for lightweight state management
 - **Data Fetching**: SWR for caching and real-time updates
@@ -124,7 +124,7 @@ Our documentation is organized into four main categories:
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-org/MicroSite-Forge.git
+   git clone https://github.com/GEMDevEng/MicroSite-Forge.git
    cd MicroSite-Forge
    ```
 

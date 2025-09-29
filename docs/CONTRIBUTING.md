@@ -28,7 +28,7 @@ Thank you for your interest in contributing to MicroSite Forge! This document pr
 ### Local Development
 1. **Fork and clone the repository**
    ```bash
-   git clone https://github.com/your-username/MicroSite-Forge.git
+   git clone https://github.com/GEMDevEng/MicroSite-Forge.git
    cd MicroSite-Forge
    ```
 
@@ -263,8 +263,8 @@ chore: update dependencies to latest versions
 
 ### Resources
 - **[Documentation](docs/README.md)**: Comprehensive project documentation
-- **[GitHub Issues](https://github.com/your-org/MicroSite-Forge/issues)**: Bug reports and feature requests
-- **[GitHub Discussions](https://github.com/your-org/MicroSite-Forge/discussions)**: Community Q&A
+- **[GitHub Issues](https://github.com/GEMDevEng/MicroSite-Forge/issues)**: Bug reports and feature requests
+- **[GitHub Discussions](https://github.com/GEMDevEng/MicroSite-Forge/discussions)**: Community Q&A
 
 ### Contact
 - **Email**: [contributors@micrositeforge.com](mailto:contributors@micrositeforge.com)

@@ -15,7 +15,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run types:check-freshness && next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=60",
     "lint:fix": "eslint . --fix --max-warnings=60",
@@ -25,6 +25,7 @@
     "test:coverage": "jest --coverage",
     "test:integration": "jest --config jest.integration.config.cjs",
     "test:e2e": "playwright test",
+    "test:e2e:ci": "next build && playwright test",
     "deploy:staging": "vercel --scope your-org",
     "deploy:production": "vercel --prod --scope your-org",
     "format": "prettier --write .",
@@ -38,7 +39,15 @@
     "db:reset": "node scripts/deploy-schema.js reset",
     "db:status": "supabase status",
     "db:studio": "supabase studio",
-    "db:types": "supabase gen types typescript --local > src/types/database.types.ts"
+    "db:types": "supabase gen types typescript --local > src/types/database.types.ts",
+    "types:generate": "node scripts/generate-types.js",
+    "types:check-freshness": "node scripts/generate-types.js check-freshness",
+    "types:sync": "node scripts/sync-types.js",
+    "types:sync:pull": "node scripts/sync-types.js pull",
+    "types:sync:push": "node scripts/sync-types.js push",
+    "types:sync:status": "node scripts/sync-types.js status",
+    "types:validate": "npm run types:check-freshness && npm run type-check",
+    "prebuild": "npm run types:validate"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [

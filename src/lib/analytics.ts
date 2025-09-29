@@ -1,4 +1,4 @@
-import { getSupabaseClient, getSupabaseConfigError } from './supabase'
+import { supabase } from './supabase'
 import { logger } from './logger'
 
 export interface AnalyticsData {
@@ -74,21 +74,6 @@ export interface CustomReport {
 
 export class AnalyticsEngine {
   async getDashboardData(userId: string): Promise<AnalyticsData['overview']> {
-    const supabase = getSupabaseClient()
-    if (!supabase) {
-      logger.error(
-        'Supabase not configured for analytics',
-        new Error(getSupabaseConfigError() ?? 'Unknown error')
-      )
-      return {
-        totalSites: 0,
-        totalLeads: 0,
-        totalRevenue: 0,
-        conversionRate: 0,
-        activeSites: 0,
-        qualifiedLeads: 0,
-      }
-    }
 
     try {
       // Get total sites
@@ -141,24 +126,6 @@ export class AnalyticsEngine {
   }
 
   async getLeadAnalytics(userId: string): Promise<AnalyticsData['leadAnalytics']> {
-    const supabase = getSupabaseClient()
-    if (!supabase) {
-      logger.error(
-        'Supabase not configured for analytics',
-        new Error(getSupabaseConfigError() ?? 'Unknown error')
-      )
-      return {
-        totalLeads: 0,
-        newLeads: 0,
-        qualified: 0,
-        contacted: 0,
-        converted: 0,
-        avgScore: 0,
-        conversionRate: 0,
-        costPerLead: 0,
-        leadSources: [],
-      }
-    }
 
     try {
       const { data: leads, error } = await supabase
@@ -279,14 +246,6 @@ export class AnalyticsEngine {
   }
 
   async getSitePerformance(userId: string): Promise<AnalyticsData['sitePerformance']> {
-    const supabase = getSupabaseClient()
-    if (!supabase) {
-      logger.error(
-        'Supabase not configured for analytics',
-        new Error(getSupabaseConfigError() ?? 'Unknown error')
-      )
-      return []
-    }
 
     try {
       const { data: sites, error } = await supabase

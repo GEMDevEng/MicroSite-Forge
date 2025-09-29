@@ -35,7 +35,7 @@ import {
   Users,
   Send,
 } from 'lucide-react'
-import { createClient } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
 import { logger } from '@/lib/logger'
 import { LeadData, ContactInfo, LeadScore } from '@/types/database'
 
@@ -67,12 +67,6 @@ const CommunicationDialog: React.FC<CommunicationDialogProps> = ({
     setLoading(true)
 
     try {
-      const supabase = createClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for communication', { leadId })
-        alert('Service unavailable. Please try again later.')
-        return
-      }
 
       const { error } = await supabase.from('communications').insert({
         lead_id: leadId,
@@ -288,11 +282,6 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
   const fetchLeads = useCallback(async () => {
     try {
       setLoading(true)
-      const supabase = createClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for lead management', { userId, siteId })
-        return
-      }
 
       let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
 
@@ -314,7 +303,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       }
 
       // Transform the data to match LeadData interface
-      const transformedLeads: LeadData[] = data.map((lead) => {
+      const transformedLeads: LeadData[] = data.map((lead: any) => {
         // Type guard functions
         function isContactInfo(obj: any): obj is ContactInfo {
           return (
@@ -423,12 +412,6 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
 
   const handleStatusChange = async (leadId: string, status: Status) => {
     try {
-      const supabase = createClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for lead status update', { leadId, status })
-        alert('Service unavailable. Please try again later.')
-        return
-      }
 
       const { error } = await supabase
         .from('leads')
@@ -453,12 +436,6 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
 
   const handleAssign = async (leadId: string, assignee: string) => {
     try {
-      const supabase = createClient()
-      if (!supabase) {
-        logger.warn('Supabase not configured for lead assignment', { leadId, assignee })
-        alert('Service unavailable. Please try again later.')
-        return
-      }
 
       const { error } = await supabase
         .from('leads')

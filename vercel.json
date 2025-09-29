@@ -3,6 +3,10 @@
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
+  "env": {
+    "TYPES_CHECK_ENABLED": "true",
+    "TYPE_MAX_AGE": "24"
+  },
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 30
@@ -22,5 +26,11 @@
         }
       ]
     }
-  ]
+  ],
+  "build": {
+    "env": {
+      "TYPES_CHECK_ENABLED": "true",
+      "TYPE_MAX_AGE": "24"
+    }
+  }
 }

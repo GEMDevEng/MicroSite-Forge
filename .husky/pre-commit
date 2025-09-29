@@ -1,1 +1,19 @@
+
+
+echo "🔍 Running pre-commit checks..."
+
+# Check type freshness
+echo "📅 Checking type freshness..."
+npm run types:check-freshness
+
+# Run type checking
+echo "✅ Running type checks..."
+npm run type-check
+
+# Run linter
+echo "🔍 Running linter..."
+npm run lint
+
+# Run tests
+echo "🧪 Running tests..."
 npm test

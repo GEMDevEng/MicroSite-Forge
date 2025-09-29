@@ -12,6 +12,7 @@ interface AuthState {
   signUp: (email: string, password: string) => Promise<void>
   signInWithGoogle: () => Promise<void>
   signInWithFacebook: () => Promise<void>
+  signInWithGithub: () => Promise<void>
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updateProfile: (data: { email?: string; password?: string }) => Promise<void>
@@ -228,6 +229,30 @@ export const useAuthStore = create<AuthState>()(
           // OAuth popup will handle the auth flow
         } catch (error) {
           console.error('Facebook sign in error:', error)
+          throw error
+        } finally {
+          set({ loading: false })
+        }
+      },
+
+      signInWithGithub: async () => {
+        try {
+          set({ loading: true })
+
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'github',
+            options: {
+              redirectTo: `${window.location.origin}/auth/callback`,
+            },
+          })
+
+          if (error) {
+            throw error
+          }
+
+          // OAuth popup will handle the auth flow
+        } catch (error) {
+          console.error('GitHub sign in error:', error)
           throw error
         } finally {
           set({ loading: false })

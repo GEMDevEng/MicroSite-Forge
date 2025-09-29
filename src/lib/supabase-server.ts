@@ -1,20 +1,18 @@
 import { cookies } from 'next/headers'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import type { Database } from '../../types/database.types'
+import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
+import type { Database } from '@/types/database.types'
 
-/**
- * Create a Supabase client configured for server-side usage.
- * Reads cookies from Next.js headers API.
- */
-export function createClient() {
-  const cookieStore = cookies() // ✅ not async, returns ReadonlyRequestCookies
-
-  return createServerComponentClient<Database>({
-    cookies: () => cookieStore,
-  })
+export function getServerClient() {
+  return createSupabaseServerClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: cookies as any,
+    }
+  )
 }
 
 /**
  * Alias for backward compatibility
  */
-export const createServerClient = createClient
+export const createServerClient = getServerClient

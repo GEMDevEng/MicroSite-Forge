@@ -7,6 +7,28 @@ This guide will help you configure OAuth authentication with Google and Facebook
 - A Supabase project (already configured)
 - Developer accounts for each OAuth provider you want to enable
 
+## 🔐 GitHub OAuth Setup
+
+### 1. GitHub OAuth App Setup
+
+1. **Visit GitHub Developer Settings**: https://github.com/settings/developers
+2. **Click "OAuth Apps"** → **"New OAuth App"**
+
+### 2. Configure OAuth App
+
+1. **Application name**: "MicroSite Forge" (or your app name)
+2. **Homepage URL**: Your website URL (e.g., `https://your-domain.com`)
+3. **Application description**: Brief description of your app
+4. **Authorization callback URL**:
+   - **Important**: `https://your-project.supabase.co/auth/v1/callback`
+
+### 3. Get Credentials
+
+1. **Click "Register application"**
+2. **Copy the Client ID** (public - safe to share)
+3. **Generate and copy Client Secret** (sensitive - keep secure!)
+4. **Note**: Keep your Client Secret private and secure
+
 ## 🔐 Google OAuth Setup
 
 ### 1. Google Cloud Console Setup
@@ -83,6 +105,11 @@ This guide will help you configure OAuth authentication with Google and Facebook
 1. **Go to your Supabase project dashboard**
 2. **Navigate to "Authentication"** → **"Providers"**
 3. **Enable each provider you want to support**:
+
+#### GitHub Configuration
+- **Provider**: GitHub
+- **Client ID**: Your GitHub OAuth App client ID
+- **Client Secret**: Your GitHub OAuth App client secret
 
 #### Google Configuration
 - **Provider**: Google
@@ -220,6 +247,12 @@ FACEBOOK_APP_ID=your-facebook-app-id
 - **Domain verification**: Some providers require domain verification
 - **App review**: Facebook and Apple may require app review for production use
 - **Rate limits**: Monitor OAuth provider rate limits
+
+### GitHub OAuth Notes
+- **No additional environment variables needed**: GitHub OAuth is configured purely through Supabase Dashboard
+- **Callback URL**: Must be exactly `https://your-project.supabase.co/auth/v1/callback`
+- **Scopes**: GitHub automatically provides basic profile and email information
+- **Public repositories**: OAuth App can request additional permissions for accessing public repositories if needed
 
 ## 📞 Support
 

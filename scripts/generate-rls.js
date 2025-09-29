@@ -54,7 +54,9 @@ function generateRLS() {
       rlsSQL += `-- Policy: ${policy.name}\n`;
       rlsSQL += `CREATE POLICY "${policy.name}" ON ${tableName}\n`;
       rlsSQL += `  FOR ${policy.action}\n`;
-      rlsSQL += `  USING (${policy.condition});\n\n`;
+      // INSERT policies require WITH CHECK instead of USING
+      const conditionKeyword = policy.action === 'INSERT' ? 'WITH CHECK' : 'USING';
+      rlsSQL += `  ${conditionKeyword} (${policy.condition});\n\n`;
     });
   }
 

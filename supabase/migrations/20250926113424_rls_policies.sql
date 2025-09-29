@@ -54,7 +54,7 @@ CREATE POLICY "Users can view own sites" ON sites
 -- Policy: Users can insert own sites
 CREATE POLICY "Users can insert own sites" ON sites
   FOR INSERT
-  USING (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = user_id);
 
 -- Policy: Users can update own sites
 CREATE POLICY "Users can update own sites" ON sites
@@ -74,7 +74,7 @@ CREATE POLICY "Users can view leads from own sites" ON leads
 -- Policy: Users can insert leads for own sites
 CREATE POLICY "Users can insert leads for own sites" ON leads
   FOR INSERT
-  USING (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
+  WITH CHECK (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
 
 -- Policy: Users can update leads from own sites
 CREATE POLICY "Users can update leads from own sites" ON leads
@@ -94,7 +94,7 @@ CREATE POLICY "Users can view communications for own leads" ON communications
 -- Policy: Users can insert communications for own leads
 CREATE POLICY "Users can insert communications for own leads" ON communications
   FOR INSERT
-  USING (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
+  WITH CHECK (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
 
 -- Policy: Users can update communications for own leads
 CREATE POLICY "Users can update communications for own leads" ON communications
@@ -109,7 +109,7 @@ CREATE POLICY "Users can view own jobs" ON jobs
 -- Policy: Users can insert own jobs
 CREATE POLICY "Users can insert own jobs" ON jobs
   FOR INSERT
-  USING (auth.uid() = user_id);
+  WITH CHECK (auth.uid() = user_id);
 
 -- Policy: Users can update own jobs
 CREATE POLICY "Users can update own jobs" ON jobs
@@ -120,4 +120,3 @@ CREATE POLICY "Users can update own jobs" ON jobs
 CREATE POLICY "Users can view own invoices" ON invoices
   FOR SELECT
   USING (auth.uid() = user_id);
-

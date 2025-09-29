@@ -1,5 +1,5 @@
 -- RLS Policies Migration
--- Generated on: 2025-09-26T12:15:54.762Z
+-- Generated on: 2025-09-27T11:45:48.154Z
 
 -- Enable Row Level Security on all tables
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
@@ -40,6 +40,11 @@ DROP POLICY IF EXISTS "Users can delete own invoices" ON invoices;
 CREATE POLICY "Users can view own profile" ON users
   FOR SELECT
   USING (auth.uid() = id);
+
+-- Policy: Users can insert own profile
+CREATE POLICY "Users can insert own profile" ON users
+  FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 -- Policy: Users can update own profile
 CREATE POLICY "Users can update own profile" ON users
@@ -101,6 +106,11 @@ CREATE POLICY "Users can update communications for own leads" ON communications
   FOR UPDATE
   USING (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
 
+-- Policy: Users can delete communications for own leads
+CREATE POLICY "Users can delete communications for own leads" ON communications
+  FOR DELETE
+  USING (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
+
 -- Policy: Users can view own jobs
 CREATE POLICY "Users can view own jobs" ON jobs
   FOR SELECT
@@ -116,7 +126,23 @@ CREATE POLICY "Users can update own jobs" ON jobs
   FOR UPDATE
   USING (auth.uid() = user_id);
 
+-- Policy: Users can delete own jobs
+CREATE POLICY "Users can delete own jobs" ON jobs
+  FOR DELETE
+  USING (auth.uid() = user_id);
+
 -- Policy: Users can view own invoices
 CREATE POLICY "Users can view own invoices" ON invoices
   FOR SELECT
   USING (auth.uid() = user_id);
+
+-- Policy: Users can insert own invoices
+CREATE POLICY "Users can insert own invoices" ON invoices
+  FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+-- Policy: Users can update own invoices
+CREATE POLICY "Users can update own invoices" ON invoices
+  FOR UPDATE
+  USING (auth.uid() = user_id);
+

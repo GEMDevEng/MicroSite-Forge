@@ -2,7 +2,7 @@
 
 ## Document Information
 - **Version**: 1.0
-- **Date**: September 18, 2025
+- **Date**: September 28, 2025
 - **Purpose**: Comprehensive technical specification of all technologies, frameworks, and tools used in MicroSite Forge MVP
 - **Scope**: Complete technology stack from frontend to deployment and integrations
 
@@ -17,15 +17,15 @@ MicroSite Forge follows a **serverless-first, API-driven architecture** with the
 ## 🎨 Frontend Technologies
 
 ### Core Framework
-- **Next.js 14** (App Router)
-  - Version: `^14.0.0`
+- **Next.js 15** (App Router)
+  - Version: `^15.5.4`
   - Purpose: React framework with SSR/SSG capabilities
   - Key Features: App Router, Server Components, Image Optimization
   - Deployment: Vercel platform
 
 ### UI & Styling
 - **React 18**
-  - Version: `^18.0.0`
+  - Version: `^18.3.1`
   - Purpose: Component-based UI library
   - Features: Hooks, Concurrent Features, Suspense
 
@@ -90,12 +90,12 @@ MicroSite Forge follows a **serverless-first, API-driven architecture** with the
 
 ### Development Tools
 - **TypeScript**
-  - Version: `^5.2.0`
+  - Version: `^5.6.3`
   - Purpose: Type safety and developer experience
   - Configuration: Strict mode enabled
 
 - **ESLint**
-  - Version: `^8.49.0`
+  - Version: `^9.14.0`
   - Purpose: Code linting and formatting
   - Configuration: Next.js recommended rules
 
@@ -343,9 +343,9 @@ MicroSite Forge follows a **serverless-first, API-driven architecture** with the
 | Technology | Minimum Version | Recommended | Purpose |
 |------------|----------------|-------------|---------|
 | Node.js | 20.6.0 | 20.8.0 | Runtime |
-| Next.js | 14.0.0 | 14.0.3 | Frontend Framework |
-| React | 18.0.0 | 18.2.0 | UI Library |
-| TypeScript | 5.2.0 | 5.2.2 | Type Safety |
+| Next.js | 15.5.4 | 15.5.4 | Frontend Framework |
+| React | 18.3.1 | 18.3.1 | UI Library |
+| TypeScript | 5.6.3 | 5.6.3 | Type Safety |
 | PostgreSQL | 15.0 | 15.4 | Database |
 | Hugo | 0.111.3 | 0.111.3 | Static Site Generator |
 
