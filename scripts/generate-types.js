@@ -19,7 +19,7 @@ import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 
-const ROOT_DIR = path.join(process.argv[1], '../..');
+const ROOT_DIR = process.cwd();
 
 /**
  * Configuration for schema generation

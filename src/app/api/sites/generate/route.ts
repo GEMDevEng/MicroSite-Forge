@@ -355,14 +355,15 @@ Discover the latest strategies and best practices in ${niche}.
 }
 
 // GET /api/sites/generate/:id - Get generation status
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params
   // Implementation for checking generation status
   // This would be stored in database in full implementation
 
   return NextResponse.json({
     success: true,
     site: {
-      id: params.id,
+      id: id,
       status: 'completed',
       progress: {
         research: true,

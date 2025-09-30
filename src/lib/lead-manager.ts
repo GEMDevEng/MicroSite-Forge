@@ -1,7 +1,9 @@
 import { supabase } from './supabase'
-import { LeadData, LeadScore, ContactInfo, Json } from '../types/database'
+import { LeadData, LeadScore, Json } from '../types/database'
 import { logger } from './logger'
 import { IncomingLead, EnrichedLeadData, LeadStatus } from '../types/leads'
+import type { Lead, ContactInfo } from '../types/app'
+import { mapDbLeadToLead, mapLeadToContactInfo } from './mappers'
 
 // Team member interface for lead assignment
 interface TeamMember {
@@ -112,15 +114,15 @@ export class LeadEnrichment {
 
       // Simple mock enrichment for now - in production, integrate with Clearbit, Hunter.io, etc.
       const enrichedData: EnrichedLeadData = {
-        company: this.extractCompanyFromEmail(lead.email),
+        company: this.extractCompanyFromEmail(lead.email ?? ''),
         location: 'Unknown', // Would use IP geolocation
         industry: 'Unknown', // Would use company data APIs
       }
 
       // Update lead with enriched data
       const contactInfo: ContactInfo = {
-        name: lead.name,
-        email: lead.email,
+        name: lead.name ?? '',
+        email: lead.email ?? '',
         phone: lead.phone || undefined,
         company: enrichedData.company,
       }
@@ -148,17 +150,22 @@ export class LeadEnrichment {
   }
 
   private extractCompanyFromEmail(email: string): string | undefined {
-    const domain = email.split('@')[1]
-    if (!domain) return undefined
+    const domainPart = email.split('@')[1]
+    if (!domainPart) return undefined
 
-    // Remove common prefixes
-    const cleanDomain = domain
-      .replace(/^(www\.|mail\.|contact\.)/, '')
-      .replace(/\.(com|org|net|edu|gov)$/, '')
-      .replace(/[.-]/g, ' ')
+    // Strip TLDs like .com, .co.uk, etc. and return lowercase
+    const parts = domainPart.split('.')
+    if (parts.length <= 2) {
+      // simple domain: "openai.com" → "openai"
+      return parts[0].toLowerCase()
+    }
 
-    return cleanDomain.charAt(0).toUpperCase() + cleanDomain.slice(1)
+    // complex domain: "research.google.co.uk" → "research.google"
+    const base = parts.slice(0, -2).join('.')
+    return base.toLowerCase()
   }
+
+
 }
 
 export class LeadRouter {
@@ -648,7 +655,7 @@ export class LeadManager {
     logger.info('Lead assigned successfully', { leadId, assignTo })
   }
 
-  async getLeads(siteId?: string, status?: string): Promise<LeadData[]> {
+  async getLeads(siteId?: string, status?: string): Promise<Lead[]> {
     let query = supabase.from('leads').select('*').order('created_at', { ascending: false })
 
     const validStatuses = ['new', 'qualified', 'contacted', 'converted'] as const
@@ -668,65 +675,46 @@ export class LeadManager {
       throw new Error('Failed to fetch leads')
     }
 
-    return data.map((lead) => {
-      // Type guard functions
-      function isContactInfo(obj: unknown): obj is ContactInfo {
-        return (
-          obj !== null &&
-          typeof obj === 'object' &&
-          'name' in obj &&
-          typeof (obj as Record<string, unknown>).name === 'string' &&
-          'email' in obj &&
-          typeof (obj as Record<string, unknown>).email === 'string'
-        )
+    return data.map(mapDbLeadToLead)
+  }
+
+  buildContact(lead: Lead): ContactInfo {
+    return mapLeadToContactInfo(lead)
+  }
+
+  buildCompanyInfo(lead: Lead): { company: string; name: string; email: string } {
+    if (!lead.email || !lead.email.includes('@')) {
+      return { company: '', name: lead.name, email: lead.email };
+    }
+
+    try {
+      const domainPart = lead.email.split('@')[1]; // e.g. "research.google.co.uk"
+      if (!domainPart) {
+        return { company: '', name: lead.name, email: lead.email };
       }
 
-      function isLeadScore(obj: unknown): obj is LeadScore {
-        return (
-          obj !== null &&
-          typeof obj === 'object' &&
-          'total_score' in obj &&
-          typeof (obj as Record<string, unknown>).total_score === 'number' &&
-          'source' in obj &&
-          typeof (obj as Record<string, unknown>).source === 'string'
-        )
+      // Strip TLDs like .com, .co.uk, etc.
+      const parts = domainPart.split('.');
+      if (parts.length <= 2) {
+        // simple domain: "openai.com" → "openai"
+        return {
+          company: parts[0].toLowerCase(),
+          name: lead.name,
+          email: lead.email
+        };
       }
 
-      const contact = isContactInfo(lead.contact_info)
-        ? lead.contact_info
-        : {
-            name: lead.name || 'Unknown',
-            email: lead.email,
-            phone: lead.phone || undefined,
-          }
-
-      const score = isLeadScore(lead.score_data)
-        ? lead.score_data
-        : {
-            source: 'organic' as const,
-            engagement: 0,
-            intent_level: 0,
-            budget_indicators: 0,
-            timeline_signals: 0,
-            total_score: 0,
-          }
-
+      // full string without the last one or two TLD segments
+      // e.g. "research.google.co.uk" → "research.google"
+      const base = parts.slice(0, -2).join('.');
       return {
-        id: lead.id,
-        contact,
-        score,
-        tags: Array.isArray(lead.tags) ? (lead.tags as string[]) : [],
-        status: lead.status,
-        assigned_to: lead.assigned_to,
-        follow_up_date: lead.follow_up_date,
-        marketing_campaign: lead.marketing_campaign,
-        enriched_at: lead.enriched_at,
-        created_at: lead.created_at,
-        updated_at: lead.updated_at,
-      }
-    })
+        company: base.toLowerCase(),
+        name: lead.name,
+        email: lead.email
+      };
+
+    } catch {
+      return { company: '', name: lead.name, email: lead.email };
+    }
   }
 }
-
-// Re-export IncomingLead for API usage
-export type { IncomingLead }

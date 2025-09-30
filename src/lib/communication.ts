@@ -271,7 +271,7 @@ export class CommunicationManager {
         .single()
 
       if (error || !lead) {
-        logger.error('Lead not found for welcome email', error, { leadId })
+        logger.error('Lead not found for welcome email', error || new Error('Unknown error'), { leadId })
         return false
       }
 
@@ -329,7 +329,7 @@ export class CommunicationManager {
         .single()
 
       if (error || !lead) {
-        logger.error('Lead not found for SMS follow-up', error, { leadId })
+        logger.error('Lead not found for SMS follow-up', error || new Error('Unknown error'), { leadId })
         return false
       }
 

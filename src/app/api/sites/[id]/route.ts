@@ -2,12 +2,13 @@ import { createServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export async function GET(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = createServerClient()
 
@@ -21,13 +22,11 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const siteId = params.id
-
     // Get site and verify ownership
     const { data: site, error: siteError } = await supabase
       .from('sites')
       .select('*')
-      .eq('id', siteId)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -49,6 +48,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function PUT(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = createServerClient()
 
@@ -61,8 +61,6 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     if (authError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-
-    const siteId = params.id
     const body = await request.json()
     const { name, domain, status, github_repo, netlify_url } = body
 
@@ -70,7 +68,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     const { data: existingSite, error: checkError } = await supabase
       .from('sites')
       .select('id')
-      .eq('id', siteId)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -88,7 +86,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
         github_repo,
         netlify_url,
       })
-      .eq('id', siteId)
+      .eq('id', id)
       .eq('user_id', user.id)
       .select()
       .single()
@@ -106,6 +104,7 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
 }
 
 export async function DELETE(request: NextRequest, { params }: RouteParams) {
+  const { id } = await params
   try {
     const supabase = createServerClient()
 
@@ -119,13 +118,11 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const siteId = params.id
-
     // First verify ownership
     const { data: existingSite, error: checkError } = await supabase
       .from('sites')
       .select('id')
-      .eq('id', siteId)
+      .eq('id', id)
       .eq('user_id', user.id)
       .single()
 
@@ -137,7 +134,7 @@ export async function DELETE(request: NextRequest, { params }: RouteParams) {
     const { error: siteError } = await supabase
       .from('sites')
       .delete()
-      .eq('id', siteId)
+      .eq('id', id)
       .eq('user_id', user.id)
 
     if (siteError) {

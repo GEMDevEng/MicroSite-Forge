@@ -1,0 +1,18 @@
+{
+  "lastGenerated": "2025-09-29T10:37:00.000Z",
+  "schemas": {
+    "public": {
+      "generatedAt": "2025-09-29T10:37:00.000Z",
+      "checksum": null
+    },
+    "auth": {
+      "generatedAt": "2025-09-29T10:37:00.000Z",
+      "checksum": null
+    },
+    "storage": {
+      "generatedAt": "2025-09-29T10:37:00.000Z",
+      "checksum": null
+    }
+  },
+  "version": "1.0.0"
+}
