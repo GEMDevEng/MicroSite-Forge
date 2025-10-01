@@ -354,24 +354,14 @@ Discover the latest strategies and best practices in ${niche}.
   }
 }
 
-// GET /api/sites/generate/:id - Get generation status
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
-  // Implementation for checking generation status
+// GET /api/sites/generate - List all generated sites or general info
+export async function GET(_request: NextRequest) {
+  // Implementation for listing generated sites
   // This would be stored in database in full implementation
 
   return NextResponse.json({
     success: true,
-    site: {
-      id: id,
-      status: 'completed',
-      progress: {
-        research: true,
-        content: true,
-        github: true,
-        netlify: true,
-        domain: true,
-      },
-    },
+    sites: [],
+    message: 'Site generation status endpoint - use POST to generate new sites'
   })
 }

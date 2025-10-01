@@ -5,7 +5,7 @@ import type { Database } from '../src/types/database.types';
 import type { AuthTypes } from './auth.types';
 import type { StorageTypes } from './storage.types';
 
-export type { Database, Tables, TablesInsert, TablesUpdate, Enums, CompositeTypes } from '../src/types/database.types';
+export type { Database } from '../src/types/database.types';
 export type { AuthTypes } from './auth.types';
 export type { StorageTypes } from './storage.types';
 

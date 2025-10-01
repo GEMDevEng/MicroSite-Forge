@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { logger } from './logger'
-import type { Database } from '../../types/database.types'
+import type { Database } from '../types/database'
 
 interface Lead {
   id: string

@@ -1,9 +1,27 @@
 import { supabase } from './supabase'
-import { LeadData, LeadScore, Json } from '../types/database'
+import type { Database, ContactInfo, LeadData, LeadScore, Json } from '../types/database'
 import { logger } from './logger'
-import { IncomingLead, EnrichedLeadData, LeadStatus } from '../types/leads'
-import type { Lead, ContactInfo } from '../types/app'
-import { mapDbLeadToLead, mapLeadToContactInfo } from './mappers'
+import type { IncomingLead, EnrichedLeadData, LeadStatus } from '../types/leads'
+
+// Define Lead type as the database row type
+export type Lead = Database['public']['Tables']['leads']['Row']
+
+// Temporary mapper functions until mappers.ts is created
+export const mapDbLeadToLead = (dbLead: any): Lead => dbLead
+export const mapLeadToContactInfo = (lead: Lead): ContactInfo => {
+  try {
+    const contactInfoStr = typeof lead.contact_info === 'string' ? lead.contact_info : '{}'
+    return JSON.parse(contactInfoStr) as ContactInfo
+  } catch {
+    return {
+      name: lead.name,
+      email: lead.email,
+      phone: lead.phone || undefined
+    }
+  }
+}
+
+export type { IncomingLead } from '../types/leads'
 
 // Team member interface for lead assignment
 interface TeamMember {

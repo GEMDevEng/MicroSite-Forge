@@ -1,7 +1,7 @@
 
-// Make this a proper module
-export {};
+// Auto-generated Supabase types - temporarily populated manually until Supabase is running
+// Generated from database.ts definitions
 
+export * from './database'
 
-export { Database };
-export { Database, Tables, TablesInsert, TablesUpdate, Enums, CompositeTypes };
+export type { Database } from './database'
