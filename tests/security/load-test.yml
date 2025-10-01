@@ -1,0 +1,66 @@
+config:
+  target: 'http://localhost:3000'
+  phases:
+    - duration: 30
+      arrivalRate: 5
+      name: 'Warm up phase'
+    - duration: 60
+      arrivalRate: 20
+      name: 'Load phase'
+    - duration: 30
+      arrivalRate: 50
+      name: 'Stress phase'
+  defaults:
+    headers:
+      Content-Type: 'application/json'
+
+scenarios:
+  - name: 'Authentication endpoints rate limiting'
+    weight: 20
+    flow:
+      - post:
+          url: '/api/auth/login'
+          json:
+            email: 'test@example.com'
+            password: 'invalid'
+          expect:
+            - statusCode: 429
+
+  - name: 'AI API endpoint protection'
+    weight: 30
+    flow:
+      - post:
+          url: '/api/generate'
+          json:
+            prompt: 'Test prompt'
+          expect:
+            - statusCode: 429
+      - think: 2
+
+  - name: 'Content generation rate limiting'
+    weight: 25
+    flow:
+      - post:
+          url: '/api/content/generate'
+          json:
+            template: 'test'
+          expect:
+            - statusCode: 429
+
+  - name: 'Site creation limiting'
+    weight: 15
+    flow:
+      - post:
+          url: '/api/sites/create'
+          json:
+            name: 'test-site'
+          expect:
+            - statusCode: 429
+
+  - name: 'Domain checking protection'
+    weight: 10
+    flow:
+      - get:
+          url: '/api/domains/check?domain=test.com'
+          expect:
+            - statusCode: 429
