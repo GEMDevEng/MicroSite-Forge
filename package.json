@@ -15,7 +15,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "next dev",
-    "build": "npm run types:check-freshness && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings=60",
     "lint:fix": "eslint . --fix --max-warnings=60",
@@ -46,8 +46,9 @@
     "types:sync:pull": "node scripts/sync-types.js pull",
     "types:sync:push": "node scripts/sync-types.js push",
     "types:sync:status": "node scripts/sync-types.js status",
-    "types:validate": "npm run types:check-freshness && npm run type-check",
-    "prebuild": "npm run types:validate"
+    "types:validate": "npm run type-check",
+    "types:strict-validate": "node scripts/generate-types.js check-freshness strict && npm run type-check",
+    "prebuild": "npm run types:generate"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [

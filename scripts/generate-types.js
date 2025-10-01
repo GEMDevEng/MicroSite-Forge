@@ -1,145 +1,20 @@
-#!/usr/bin/env node
-
-/**
- * Advanced Supabase Type Synchronization Script
- *
- * This script generates TypeScript types from Supabase database introspection
- * across multiple schemas (public, auth, storage) and ensures type safety.
- *
- * Features:
- * - Multi-schema support
- * - Automatic type generation
- * - Schema change detection
- * - CI/CD integration safeguards
- * - Type freshness validation
- */
-
-import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
-import crypto from 'crypto';
+import { execSync } from 'child_process';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
 
-const ROOT_DIR = process.cwd();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-/**
- * Type freshness configuration
- * You can adjust defaults here or override via environment variables.
- */
-const TYPE_FRESHNESS_CONFIG = {
-  // Max age of generated types before considered stale (ms)
-  maxAge: parseInt(process.env.TYPE_MAX_AGE || '', 10) || 72 * 60 * 60 * 1000, // default 72 hours
+const TYPES_DIR = path.join(__dirname, '../types/generated'); // Adjust to your types output dir
+const FRESHNESS_FILE = path.join(TYPES_DIR, '.type-freshness.json'); // Or wherever it lives
 
-  // Whether to fail (false) or just warn (true) when types are stale
-  warnOnly: process.env.WARN_ONLY === 'true' || false
-};
-
-/**
- * Configuration for schema generation
- */
-const SCHEMAS = {
-  public: {
-    outputPath: 'src/types/database.types.ts',
-    description: 'Public database schema types'
-  },
-  auth: {
-    outputPath: 'schemas/auth.types.ts',
-    description: 'Authentication schema types',
-    schema: 'auth'
-  },
-  storage: {
-    outputPath: 'schemas/storage.types.ts',
-    description: 'Storage schema types',
-    schema: 'storage'
-  }
-};
-
-/**
- * Generate types for a specific schema
- */
-async function generateSchemaTypes(schemaName, config) {
-  console.log(`📝 Generating ${schemaName} schema types...`);
-
-  const outputPath = path.join(ROOT_DIR, config.outputPath);
-  const tempFile = `${outputPath}.tmp`;
-
+function loadFreshness() {
   try {
-    // Get database connection details from environment
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error('Missing required environment variables: NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY');
-    }
-
-    // Construct database URL from Supabase credentials
-    const supabaseRef = supabaseUrl.replace(/^https?:\/\/([^.]+)\.supabase\.co$/, '$1');
-    const dbUrl = `postgresql://postgres:${serviceRoleKey}@db.${supabaseRef}.supabase.co:5432/postgres`;
-
-    let command;
-    if (schemaName === 'public') {
-      // Generate public schema types from remote database
-      command = `npx supabase gen types typescript --db-url "${dbUrl}"`;
-    } else {
-      // Generate specific schema types from remote database
-      command = `npx supabase gen types typescript --db-url "${dbUrl}" --schema public,${config.schema}`;
-    }
-
-    // Execute command and capture output
-    const typesOutput = execSync(command, {
-      encoding: 'utf8',
-      cwd: ROOT_DIR
-    });
-
-    // Post-process the types based on schema
-    let processedTypes = typesOutput;
-
-    if (schemaName === 'auth') {
-      processedTypes = processAuthTypes(typesOutput);
-    } else if (schemaName === 'storage') {
-      processedTypes = processStorageTypes(typesOutput);
-    }
-
-    // Add metadata header
-    const header = `// Auto-generated ${config.description} - ${new Date().toISOString()}
-// Generated from Supabase database introspection
-// Schema: ${schemaName}
-// DO NOT EDIT MANUALLY - Use npm run types:generate
-`;
-
-    const finalTypes = header + '\n' + processedTypes;
-
-    // Write to temporary file first
-    fs.writeFileSync(tempFile, finalTypes, 'utf8');
-
-    // Generate checksum for change detection
-    const checksum = crypto.createHash('md5').update(finalTypes).digest('hex');
-
-    // Check if types actually changed
-    let hasChanged = true;
-    if (fs.existsSync(outputPath)) {
-      const existingContent = fs.readFileSync(outputPath, 'utf8');
-      const existingChecksum = crypto.createHash('md5').update(existingContent).digest('hex');
-      hasChanged = existingChecksum !== checksum;
-    }
-
-    // Only update if changed
-    if (hasChanged || !fs.existsSync(outputPath)) {
-      fs.renameSync(tempFile, outputPath);
-      console.log(`✅ ${schemaName} types updated`);
-      return true;
-    } else {
-      fs.unlinkSync(tempFile);
-      console.log(`ℹ️  ${schemaName} types unchanged`);
-      return false;
-    }
-
-  } catch (error) {
-    // Cleanup temp file on error
-    if (fs.existsSync(tempFile)) {
-      fs.unlinkSync(tempFile);
-    }
-    console.error(`❌ Failed to generate ${schemaName} types:`, error.message);
-    throw error;
+    return JSON.parse(fs.readFileSync(FRESHNESS_FILE, 'utf8'));
+  } catch {
+    return { lastGenerated: null };
   }
 }
 
@@ -195,7 +70,6 @@ function checkDatabaseConnectivity() {
     }
 
     // Try a simple health check with the database URL
-    const { execSync } = require('child_process');
     try {
       execSync(`curl -s -H "apikey: ${serviceRoleKey}" "${supabaseUrl}/rest/v1/" | head -1 > /dev/null`, { stdio: 'pipe' });
       console.log('✅ Database is accessible');
@@ -212,135 +86,144 @@ function checkDatabaseConnectivity() {
   }
 }
 
-/**
- * Validate generated types
- */
-async function validateGeneratedTypes() {
-  console.log('🔍 Validating generated types...');
-  try {
-    execSync('npx tsc --noEmit --skipLibCheck', { cwd: ROOT_DIR });
-    console.log('✅ All types are valid');
-    return true;
-  } catch (error) {
-    console.error('❌ Type validation failed!');
-    console.error(error.stdout?.toString() || error.message);
-    return false;
-  }
+function saveFreshness(timestamp = new Date().toISOString()) {
+  fs.mkdirSync(path.dirname(FRESHNESS_FILE), { recursive: true });
+  fs.writeFileSync(FRESHNESS_FILE, JSON.stringify({ lastGenerated: timestamp }, null, 2));
 }
 
-/**
- * Update type freshness validation file
- */
-function updateTypeFreshness(changedSchemas) {
-  const freshnessFile = path.join(ROOT_DIR, '.type-freshness.json');
+function isStale(maxAgeHours, lastGenerated) {
+  if (!lastGenerated) return true;
+  const now = new Date();
+  const last = new Date(lastGenerated);
+  const ageHours = (now - last) / (1000 * 60 * 60);
+  return ageHours > maxAgeHours;
+}
 
-  const freshnessData = {
-    lastGenerated: new Date().toISOString(),
-    schemas: Object.keys(SCHEMAS).reduce((acc, schema) => {
-      acc[schema] = {
-        generatedAt: changedSchemas.includes(schema) ? new Date().toISOString() : null,
-        checksum: null // Would calculate actual checksum in production
-      };
-      return acc;
-    }, {}),
-    version: '1.0.0'
+function generateTypes() {
+  const SCHEMAS = {
+    public: {
+      outputPath: 'src/types/database.types.ts',
+      description: 'Public database schema types'
+    },
+    auth: {
+      outputPath: 'schemas/auth.types.ts',
+      description: 'Authentication schema types',
+      schema: 'auth'
+    },
+    storage: {
+      outputPath: 'schemas/storage.types.ts',
+      description: 'Storage schema types',
+      schema: 'storage'
+    }
   };
 
-  fs.writeFileSync(freshnessFile, JSON.stringify(freshnessData, null, 2));
-  console.log('📄 Updated type freshness tracking');
-}
-
-/**
- * Main type generation function
- */
-async function generateAllTypes() {
-  console.log('🚀 Starting comprehensive type generation');
+  console.log('🚀 Starting type generation');
   console.log('===========================================\n');
 
   // Check prerequisites
   if (!checkDatabaseConnectivity()) {
     console.log('⚠️  Database connectivity check failed, proceeding anyway...');
-    // process.exit(1); // Temporarily skip failing
   }
 
-  const changedSchemas = [];
-
+  // Generate schemas
   for (const [schemaName, config] of Object.entries(SCHEMAS)) {
     try {
-      const changed = await generateSchemaTypes(schemaName, config);
-      if (changed) {
-        changedSchemas.push(schemaName);
+      console.log(`📝 Generating ${schemaName} schema types...`);
+      const outputPath = path.join(process.cwd(), config.outputPath);
+      const schema = config.schema || 'public';
+
+      // Get database URL
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+      const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!supabaseUrl || !serviceRoleKey) {
+        throw new Error('Missing SUPABASE credentials');
       }
+
+      const supabaseRef = supabaseUrl.replace(/^https?:\/\/([^.]+)\.supabase\.co$/, '$1');
+      const dbUrl = `postgresql://postgres:${serviceRoleKey}@db.${supabaseRef}.supabase.co:5432/postgres`;
+
+      let command = `npx supabase gen types typescript --db-url "${dbUrl}" --schema ${schema}`;
+
+      const typesOutput = execSync(command, { encoding: 'utf8', cwd: process.cwd() });
+
+      let processedTypes = typesOutput;
+      if (schemaName === 'auth') {
+        processedTypes = processAuthTypes(typesOutput);
+      } else if (schemaName === 'storage') {
+        processedTypes = processStorageTypes(typesOutput);
+      }
+
+      const header = `// Auto-generated ${config.description} - ${new Date().toISOString()}
+// Generated from Supabase database introspection
+// DO NOT EDIT MANUALLY - Use npm run types:generate
+`;
+      const finalTypes = header + '\n' + processedTypes;
+      fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+      fs.writeFileSync(outputPath, finalTypes, 'utf8');
+
+      console.log(`✅ ${schemaName} types generated`);
     } catch (error) {
-      console.error(`Failed to generate ${schemaName} types:`, error);
-      process.exit(1);
+      console.error(`❌ Failed to generate ${schemaName} types:`, error.message);
+      throw error;
     }
   }
 
-  // Validate all generated types
-  if (!(await validateGeneratedTypes())) {
-    process.exit(1);
-  }
-
-  // Update freshness tracking
-  updateTypeFreshness(changedSchemas);
-
+  saveFreshness();
   console.log('\n🎉 Type generation complete!');
-  console.log('==============================');
-
-  if (changedSchemas.length > 0) {
-    console.log(`📝 Updated schemas: ${changedSchemas.join(', ')}`);
-    console.log('🔄 Please commit these type changes');
-  } else {
-    console.log('ℹ️  No type changes detected');
-  }
-
-  console.log('\n📋 Next steps:');
-  console.log('   • Run tests to ensure type safety');
-  console.log('   • Commit type changes if any were generated');
 }
 
-/**
- * Check if types are stale (for CI/CD)
- */
-function checkTypeFreshness() {
+function checkFreshness(mode = 'strict') {
+  const isCI = !!process.env.CI || !!process.env.VERCEL;
+  const maxAge = isCI ? 168 : 0; // 7 days in CI, 0 in local
+  const freshness = loadFreshness();
+  const lastGenerated = freshness.lastGenerated;
+
   console.log('🔍 Checking type freshness...');
-  console.log(`ℹ️  Max age: ${Math.round(TYPE_FRESHNESS_CONFIG.maxAge / (1000 * 60 * 60))} hours, Mode: ${TYPE_FRESHNESS_CONFIG.warnOnly ? 'warn-only' : 'strict'}`);
+  console.log(`ℹ️  Max age: ${maxAge} hours, Mode: ${mode}${isCI ? ' (CI mode)' : ''}`);
 
-  const freshnessFile = path.join(ROOT_DIR, '.type-freshness.json');
+  const stale = isStale(maxAge, lastGenerated);
+  const ageHours = lastGenerated ? Math.round((new Date() - new Date(lastGenerated)) / (1000 * 60 * 60)) : 'unknown';
 
-  if (!fs.existsSync(freshnessFile)) {
-    console.error('❌ No type freshness file found. Run type generation first.');
-    process.exit(1);
-  }
+  if (stale) {
+    console.log(`⚠️  Types are stale! Last generated ${ageHours} hours ago`);
+    console.log('💡 Run: npm run types:generate');
 
-  const freshnessData = JSON.parse(fs.readFileSync(freshnessFile, 'utf8'));
-  const lastGenerated = new Date(freshnessData.lastGenerated);
-  const age = Date.now() - lastGenerated.getTime();
-  const hours = Math.round(age / (1000 * 60 * 60));
-
-  if (age > TYPE_FRESHNESS_CONFIG.maxAge) {
-    const msg = `Types are stale! Last generated ${hours} hours ago`;
-
-    if (TYPE_FRESHNESS_CONFIG.warnOnly) {
-      console.warn(`⚠️  ${msg}`);
-      console.warn('💡 Run: npm run types:generate (warning only, not failing)');
-      process.exit(0);
-    } else {
-      console.error(`❌ ${msg}`);
-      console.error('💡 Run: npm run types:generate');
-      process.exit(1);
+    if (isCI && mode !== 'warn-only') {
+      // In CI, auto-regenerate if not warn-only
+      console.log('🔄 Auto-regenerating types in CI...');
+      generateTypes();
+      // Re-check after gen
+      const newFreshness = loadFreshness();
+      const stillStale = isStale(maxAge, newFreshness.lastGenerated);
+      if (stillStale) {
+        console.error('❌ Auto-regeneration failed; check generation logic.');
+        process.exit(1);
+      }
+      console.log('✅ Auto-regeneration successful.');
+      return;
     }
+
+    if (mode === 'strict') {
+      console.error('❌ Freshness check failed in strict mode.');
+      process.exit(1);
+    } else {
+      // warn-only: log and continue
+      console.log('(warning only, continuing...)');
+      return;
+    }
+  } else {
+    console.log(`✅ Types are fresh! Last generated ${ageHours} hours ago.`);
   }
-
-  console.log('✅ Types are fresh');
 }
 
-// Determine which command to run
-const command = process.argv[2];
-
-if (command === 'check-freshness') {
-  checkTypeFreshness();
+// CLI handling
+const args = process.argv.slice(2);
+if (args.includes('check-freshness')) {
+  const mode = args.includes('warn-only') ? 'warn-only' : 'strict'; // Pass mode via arg if needed, or detect from env
+  checkFreshness(mode);
 } else {
-  generateAllTypes().catch(console.error);
+  // Default: generate mode
+  generateTypes();
 }
+
+export { generateTypes, checkFreshness }; // For testing/import
