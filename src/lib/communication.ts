@@ -115,7 +115,7 @@ export class EmailSender {
     subject: string,
     htmlContent: string,
     textContent?: string,
-    variables?: Record<string, any>
+    variables?: Record<string, string | number>
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
       // Replace variables in content
@@ -183,7 +183,7 @@ export class SMSSender {
   async sendSMS(
     to: string,
     message: string,
-    variables?: Record<string, any>
+    variables?: Record<string, string | number>
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     try {
       let processedMessage = message
@@ -240,22 +240,22 @@ export class CommunicationManager {
     this.smsSender = new SMSSender()
   }
 
-  private isContactInfoWithCompany(obj: any): obj is { company?: string } {
+  private isContactInfoWithCompany(obj: unknown): obj is { company?: string } {
     return obj !== null && typeof obj === 'object' && !Array.isArray(obj)
   }
 
-  private isScoreDataWithTotalScore(obj: any): obj is { total_score?: number } {
+  private isScoreDataWithTotalScore(obj: unknown): obj is { total_score?: number } {
     return obj !== null && typeof obj === 'object' && !Array.isArray(obj)
   }
 
-  private getSafeCompany(contactInfo: any): string {
+  private getSafeCompany(contactInfo: unknown): string {
     if (this.isContactInfoWithCompany(contactInfo) && contactInfo.company) {
       return contactInfo.company
     }
     return 'your company'
   }
 
-  private getSafeTotalScore(scoreData: any): number {
+  private getSafeTotalScore(scoreData: unknown): number {
     if (this.isScoreDataWithTotalScore(scoreData) && scoreData.total_score) {
       return scoreData.total_score
     }
@@ -367,7 +367,7 @@ export class CommunicationManager {
     content: string,
     status: string,
     messageId?: string,
-    metadata?: Record<string, any>
+    metadata?: Record<string, unknown>
   ): Promise<void> {
     try {
       const { error } = await supabase.from('communications').insert({

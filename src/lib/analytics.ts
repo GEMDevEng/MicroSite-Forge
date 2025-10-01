@@ -94,10 +94,13 @@ export class AnalyticsEngine {
       if (sitesError) logger.error('Failed to fetch sites count', sitesError)
       if (leadsError) logger.error('Failed to fetch leads count', leadsError)
 
-      const totalSites = (sites as any[])?.length || 0
-      const totalLeads = (leads as any[])?.length || 0
+      interface Lead {
+        status?: string
+      }
+      const totalSites = (sites as unknown[])?.length || 0
+      const totalLeads = (leads as unknown[])?.length || 0
       const qualifiedLeads =
-        (leads as any[])?.filter((lead: any) => lead.status === 'qualified').length || 0
+        (leads as Lead[])?.filter((lead) => lead.status === 'qualified').length || 0
       const activeSites = totalSites // Assume all sites are active
       const conversionRate = totalLeads > 0 ? (qualifiedLeads / totalLeads) * 100 : 0
 
@@ -135,18 +138,20 @@ export class AnalyticsEngine {
 
       if (error) throw error
 
-      const typedLeads = leads as any[]
-      const totalLeads = typedLeads?.length || 0
-      const newLeads = typedLeads?.filter((lead: any) => lead.status === 'new').length || 0
-      const qualified = typedLeads?.filter((lead: any) => lead.status === 'qualified').length || 0
-      const contacted = typedLeads?.filter((lead: any) => lead.status === 'contacted').length || 0
-      const converted = typedLeads?.filter((lead: any) => lead.status === 'converted').length || 0
-
-      interface ScoreData {
-        total_score?: number
+      interface LeadData {
+        status?: string
+        score_data?: { total_score?: number }
+        source?: string
       }
+      const typedLeads = (leads as LeadData[]) || []
+      const totalLeads = typedLeads?.length || 0
+      const newLeads = typedLeads?.filter((lead) => lead.status === 'new').length || 0
+      const qualified = typedLeads?.filter((lead) => lead.status === 'qualified').length || 0
+      const contacted = typedLeads?.filter((lead) => lead.status === 'contacted').length || 0
+      const converted = typedLeads?.filter((lead) => lead.status === 'converted').length || 0
+
       const scores = typedLeads
-        ?.map((lead: any) => (lead.score_data as ScoreData)?.total_score)
+        ?.map((lead) => lead.score_data?.total_score)
         .filter((score): score is number => score !== undefined)
       const avgScore = scores.length > 0 ? scores.reduce((a, b) => a + b, 0) / scores.length : 0
       const conversionRate = totalLeads > 0 ? (converted / totalLeads) * 100 : 0
@@ -158,7 +163,7 @@ export class AnalyticsEngine {
       const sourceMap = new Map<string, number>()
       const sourceConversions = new Map<string, number>()
 
-      typedLeads?.forEach((lead: any) => {
+      typedLeads?.forEach((lead) => {
         const source = lead.source || 'unknown'
         sourceMap.set(source, (sourceMap.get(source) || 0) + 1)
         if (lead.status === 'converted') {
@@ -255,11 +260,16 @@ export class AnalyticsEngine {
 
       if (error) throw error
 
+      interface SiteData {
+        id: string
+        name?: string
+        domain?: string
+      }
       // Mock performance data for each site
       const sitePerformance =
-        (sites as any[])?.map((site: any) => ({
+        (sites as SiteData[])?.map((site) => ({
           site_id: site.id,
-          name: site.name || site.domain,
+          name: site.name || site.domain || null,
           views: Math.floor(Math.random() * 10000) + 1000,
           leads_generated: Math.floor(Math.random() * 100) + 10,
           conversion_rate: Math.random() * 10,

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import Image from 'next/image'
 import { useAuthStore } from '@/stores/auth'
 
 import { Button } from '@/components/ui/button'
@@ -116,7 +117,7 @@ export function MFASetup({ onSetupComplete }: MFASetupProps) {
             {/* QR Code placeholder - in a real app, you'd use a QR code library */}
             <div className="p-4 bg-white border-2 border-dashed border-gray-300 rounded">
               <p className="text-sm text-center text-gray-600">QR Code</p>
-              <img src={qrCodeUrl} alt="MFA QR Code" className="w-48 h-48" />
+              <Image src={qrCodeUrl} alt="MFA QR Code" width={192} height={192} className="w-48 h-48" />
             </div>
           </div>
         )}

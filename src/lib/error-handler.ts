@@ -9,7 +9,7 @@ import { logger } from './logger'
 export interface ErrorResponse {
   error: string
   message?: string
-  details?: any
+  details?: Record<string, unknown>
   code?: string
   timestamp: string
 }
@@ -19,7 +19,7 @@ export class AppError extends Error {
     message: string,
     public statusCode: number = 500,
     public code?: string,
-    public details?: any
+    public details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'AppError'
@@ -27,7 +27,7 @@ export class AppError extends Error {
 }
 
 export class ValidationError extends AppError {
-  constructor(message: string, details?: any) {
+  constructor(message: string, details?: Record<string, unknown>) {
     super(message, 400, 'VALIDATION_ERROR', details)
     this.name = 'ValidationError'
   }
@@ -69,7 +69,7 @@ export class RateLimitError extends AppError {
 }
 
 export class ExternalServiceError extends AppError {
-  constructor(service: string, message: string, details?: any) {
+  constructor(service: string, message: string, details?: Record<string, unknown>) {
     super(`${service} service error: ${message}`, 502, 'EXTERNAL_SERVICE_ERROR', details)
     this.name = 'ExternalServiceError'
   }
@@ -86,11 +86,13 @@ export function handleApiError(error: unknown, context?: string): NextResponse {
     const errorResponse: ErrorResponse = {
       error: 'Validation error',
       message: 'Invalid request data',
-      details: error.errors.map(err => ({
-        field: err.path.join('.'),
-        message: err.message,
-        code: err.code,
-      })),
+      details: {
+        errors: error.errors.map(err => ({
+          field: err.path.join('.'),
+          message: err.message,
+          code: err.code,
+        }))
+      },
       code: 'VALIDATION_ERROR',
       timestamp,
     }
@@ -145,7 +147,7 @@ export function handleApiError(error: unknown, context?: string): NextResponse {
 /**
  * Async error wrapper for API routes
  */
-export function withErrorHandler<T extends any[], R>(
+export function withErrorHandler<T extends unknown[], R>(
   handler: (...args: T) => Promise<R>,
   context?: string
 ) {

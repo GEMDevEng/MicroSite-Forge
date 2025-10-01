@@ -4,18 +4,18 @@
 
 import { logger } from './logger'
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean
   data?: T
   error?: string
   message?: string
-  details?: any
+  details?: Record<string, unknown>
 }
 
 export interface ApiRequestConfig {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
   headers?: Record<string, string>
-  body?: any
+  body?: unknown
   timeout?: number
   retries?: number
   retryDelay?: number
@@ -25,7 +25,7 @@ export class ApiError extends Error {
   constructor(
     message: string,
     public status: number,
-    public response?: any
+    public response?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'ApiError'
@@ -123,7 +123,7 @@ export class ApiClient {
     throw new ApiError(
       lastError?.message || 'Request failed',
       0,
-      lastError
+      lastError ? { message: lastError.message, name: lastError.name } : undefined
     )
   }
 
@@ -142,15 +142,15 @@ export class ApiClient {
     return this.makeRequest<T>(endpoint, { ...config, method: 'GET' })
   }
 
-  async post<T>(endpoint: string, body?: any, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  async post<T>(endpoint: string, body?: unknown, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...config, method: 'POST', body })
   }
 
-  async put<T>(endpoint: string, body?: any, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  async put<T>(endpoint: string, body?: unknown, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...config, method: 'PUT', body })
   }
 
-  async patch<T>(endpoint: string, body?: any, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
+  async patch<T>(endpoint: string, body?: unknown, config?: Omit<ApiRequestConfig, 'method'>): Promise<ApiResponse<T>> {
     return this.makeRequest<T>(endpoint, { ...config, method: 'PATCH', body })
   }
 
@@ -183,62 +183,62 @@ export const apiClient = new ApiClient()
 export const api = {
   // Sites
   sites: {
-    list: (params?: Record<string, any>) => {
+    list: (params?: Record<string, string>) => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : ''
       return apiClient.get(`/sites${query}`)
     },
     get: (id: string) => apiClient.get(`/sites/${id}`),
-    create: (data: any) => apiClient.post('/sites', data),
-    update: (id: string, data: any) => apiClient.put(`/sites/${id}`, data),
+    create: (data: Record<string, unknown>) => apiClient.post('/sites', data),
+    update: (id: string, data: Record<string, unknown>) => apiClient.put(`/sites/${id}`, data),
     delete: (id: string) => apiClient.delete(`/sites/${id}`),
-    generate: (data: any) => apiClient.post('/sites/generate', data),
+    generate: (data: Record<string, unknown>) => apiClient.post('/sites/generate', data),
   },
 
   // Leads
   leads: {
-    list: (params?: Record<string, any>) => {
+    list: (params?: Record<string, string>) => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : ''
       return apiClient.get(`/leads${query}`)
     },
     get: (id: string) => apiClient.get(`/leads/${id}`),
-    create: (data: any) => apiClient.post('/leads', data),
-    update: (id: string, data: any) => apiClient.put(`/leads/${id}`, data),
+    create: (data: Record<string, unknown>) => apiClient.post('/leads', data),
+    update: (id: string, data: Record<string, unknown>) => apiClient.put(`/leads/${id}`, data),
     enrich: (id: string) => apiClient.post(`/leads/${id}/enrich`),
   },
 
   // Research
   research: {
-    niche: (data: any) => apiClient.post('/research', data),
+    niche: (data: Record<string, unknown>) => apiClient.post('/research', data),
   },
 
   // Content
   content: {
-    generate: (data: any) => apiClient.post('/content', data),
-    generateWebsite: (data: any) => apiClient.put('/content/website', data),
+    generate: (data: Record<string, unknown>) => apiClient.post('/content', data),
+    generateWebsite: (data: Record<string, unknown>) => apiClient.put('/content/website', data),
   },
 
   // Analytics
   analytics: {
-    dashboard: (params?: Record<string, any>) => {
+    dashboard: (params?: Record<string, string>) => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : ''
       return apiClient.get(`/analytics${query}`)
     },
-    generateReport: (data: any) => apiClient.post('/analytics', { action: 'generateReport', ...data }),
-    scheduleReport: (data: any) => apiClient.post('/analytics', { action: 'scheduleReport', ...data }),
+    generateReport: (data: Record<string, unknown>) => apiClient.post('/analytics', { action: 'generateReport', ...data }),
+    scheduleReport: (data: Record<string, unknown>) => apiClient.post('/analytics', { action: 'scheduleReport', ...data }),
   },
 
   // User
   user: {
     profile: () => apiClient.get('/user/profile'),
-    updateProfile: (data: any) => apiClient.put('/user/profile', data),
+    updateProfile: (data: Record<string, unknown>) => apiClient.put('/user/profile', data),
   },
 
   // Jobs
   jobs: {
-    list: (params?: Record<string, any>) => {
+    list: (params?: Record<string, string>) => {
       const query = params ? `?${new URLSearchParams(params).toString()}` : ''
       return apiClient.get(`/jobs${query}`)
     },
-    create: (data: any) => apiClient.post('/jobs', data),
+    create: (data: Record<string, unknown>) => apiClient.post('/jobs', data),
   },
 }

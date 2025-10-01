@@ -136,7 +136,7 @@ class RateLimiter {
     return headers
   }
 
-  private isSuspiciousRequest(request: NextRequest | undefined, identifier: string): boolean {
+  private isSuspiciousRequest(request: NextRequest | undefined, _identifier: string): boolean {
     if (!request) return false
 
     // Check for suspicious patterns

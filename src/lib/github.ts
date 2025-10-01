@@ -119,7 +119,7 @@ export async function createOrUpdateFile(
   content: string,
   message: string,
   branch: string = 'main'
-): Promise<any> {
+): Promise<Record<string, unknown>> {
   if (!GITHUB_TOKEN) {
     throw new Error('GITHUB_TOKEN is not configured')
   }
@@ -143,7 +143,7 @@ export async function createOrUpdateFile(
       // File doesn't exist, which is fine for creation
     }
 
-    const body: any = {
+    const body: Record<string, unknown> = {
       message,
       content: Buffer.from(content).toString('base64'),
       branch,

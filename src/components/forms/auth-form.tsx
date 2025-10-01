@@ -38,7 +38,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode, className }: AuthFormProps) {
   const router = useRouter()
-  const { signIn, signUp, loading, mfaEnabled } = useAuthStore()
+  const { signIn, signUp, loading } = useAuthStore()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [mfaRequired, setMfaRequired] = useState<boolean>(false)
@@ -82,11 +82,6 @@ export function AuthForm({ mode, className }: AuthFormProps) {
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred. Please try again.')
     }
-  }
-
-  const handleMfaCompleted = () => {
-    setMfaRequired(false)
-    router.push('/dashboard')
   }
 
   const handleMfaCancel = () => {

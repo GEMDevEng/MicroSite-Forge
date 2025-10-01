@@ -1,7 +1,7 @@
 import { createServerClient } from '@/lib/supabase-server'
 import { NextRequest, NextResponse } from 'next/server'
 import { createSiteSchema, sitesFilterSchema, type SitesFilters } from '@/lib/validations'
-import { handleApiError, withErrorHandler, AuthenticationError } from '@/lib/error-handler'
+import { withErrorHandler, AuthenticationError } from '@/lib/error-handler'
 
 export const GET = withErrorHandler(async (request: NextRequest) => {
   const supabase = await createServerClient()

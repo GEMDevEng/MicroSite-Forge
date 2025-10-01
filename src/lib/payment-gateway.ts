@@ -22,7 +22,7 @@ export interface SubscriptionParams {
   gateway: PaymentGatewayType
   currency: string
   interval: 'month' | 'year'
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 export interface SubscriptionResult {
@@ -150,7 +150,7 @@ abstract class AbstractPaymentGateway {
   abstract createSubscription(params: SubscriptionParams): Promise<SubscriptionResult>
   abstract meterUsage(params: MeterUsageParams): Promise<boolean>
   abstract generateInvoice(subscriptionId: string): Promise<InvoiceData | null>
-  abstract handleWebhook(payload: any, signature: string): Promise<WebhookResult>
+  abstract handleWebhook(payload: Record<string, unknown>, signature: string): Promise<WebhookResult>
   abstract refund(paymentId: string, amount: number): Promise<RefundResult>
   abstract validateConfig(): Promise<boolean>
 
@@ -158,7 +158,7 @@ abstract class AbstractPaymentGateway {
     eventType: string,
     userId: string,
     gateway: PaymentGatewayType,
-    metadata: Record<string, any> = {}
+    metadata: Record<string, unknown> = {}
   ): Promise<void> {
     try {
       logger.info('Payment event logged', { eventType, userId, gateway, ...metadata })
@@ -191,10 +191,16 @@ class StripeGateway extends AbstractPaymentGateway {
           gatewaySubscriptionId: mockResponse.gatewaySubscriptionId,
         })
 
-        return mockResponse
+        return {
+          success: true,
+          subscriptionId: mockResponse.subscriptionId as string,
+          gatewaySubscriptionId: mockResponse.gatewaySubscriptionId as string,
+          amount: mockResponse.amount as number,
+          nextBillingDate: mockResponse.nextBillingDate as string,
+        }
       }
 
-      return { success: false, error: mockResponse.error }
+      return { success: false, error: mockResponse.error as string | undefined }
     } catch (error) {
       logger.error(
         'Stripe subscription creation failed',
@@ -210,7 +216,7 @@ class StripeGateway extends AbstractPaymentGateway {
       logger.info('Meter usage for Stripe', { userId: params.userId, amount: params.amount })
 
       const mockResponse = await this.mockStripeApi('meter_usage', params)
-      return mockResponse.success
+      return mockResponse.success as boolean
     } catch (error) {
       logger.error(
         'Stripe meter usage failed',
@@ -229,13 +235,13 @@ class StripeGateway extends AbstractPaymentGateway {
 
       if (mockResponse.success) {
         return {
-          id: mockResponse.invoiceId,
+          id: mockResponse.invoiceId as string,
           subscriptionId,
-          amount: mockResponse.amount,
+          amount: mockResponse.amount as number,
           currency: 'usd',
           status: 'open',
           dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-          downloadUrl: mockResponse.downloadUrl,
+          downloadUrl: mockResponse.downloadUrl as string,
         }
       }
 
@@ -250,17 +256,18 @@ class StripeGateway extends AbstractPaymentGateway {
     }
   }
 
-  async handleWebhook(payload: any, _signature: string): Promise<WebhookResult> {
+  async handleWebhook(payload: Record<string, unknown>, _signature: string): Promise<WebhookResult> {
     try {
       logger.info('Processing Stripe webhook', { eventType: payload.type })
 
       // Mock webhook processing
+      const payloadData = payload as { type?: string; data?: { object?: { subscription?: { id?: string }; id?: string; status?: string } } }
       return {
         processed: true,
-        eventType: payload.type,
-        subscriptionId: payload.data?.object?.subscription?.id,
-        invoiceId: payload.data?.object?.id,
-        status: payload.data?.object?.status,
+        eventType: payloadData.type as string,
+        subscriptionId: payloadData.data?.object?.subscription?.id,
+        invoiceId: payloadData.data?.object?.id,
+        status: payloadData.data?.object?.status,
       }
     } catch (error) {
       logger.error(
@@ -278,8 +285,8 @@ class StripeGateway extends AbstractPaymentGateway {
       const mockResponse = await this.mockStripeApi('create_refund', { paymentId, amount })
 
       return mockResponse.success
-        ? { success: true, refundId: mockResponse.refundId, amount }
-        : { success: false, error: mockResponse.error }
+        ? { success: true, refundId: mockResponse.refundId as string, amount }
+        : { success: false, error: mockResponse.error as string | undefined }
     } catch (error) {
       logger.error(
         'Stripe refund failed',
@@ -298,18 +305,26 @@ class StripeGateway extends AbstractPaymentGateway {
     return !!(apiKey && webhookSecret)
   }
 
-  private async mockStripeApi(_action: string, _params: any): Promise<any> {
+  private async mockStripeApi(action: string, _params: unknown): Promise<Record<string, unknown>> {
     // Simulate API delay
     await new Promise((resolve) => setTimeout(resolve, 500))
 
     // Mock successful response - replace with actual Stripe SDK calls
+    if (action === 'generate_invoice') {
+      return {
+        success: true,
+        invoiceId: `inv_${Date.now()}`,
+        amount: 4999,
+        downloadUrl: `https://example.com/invoice_${Date.now()}.pdf`,
+      }
+    }
+
     return {
       success: true,
       subscriptionId: `sub_${Date.now()}`,
       gatewaySubscriptionId: `stripe_sub_${Date.now()}`,
       amount: 4999, // $49.99
       nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      error: null,
     }
   }
 }
@@ -356,13 +371,14 @@ class PayPalGateway extends AbstractPaymentGateway {
     return null // PayPal has different invoice handling
   }
 
-  async handleWebhook(payload: any, _signature: string): Promise<WebhookResult> {
+  async handleWebhook(payload: Record<string, unknown>, _signature: string): Promise<WebhookResult> {
     try {
-      logger.info('Processing PayPal webhook', { eventType: payload.event_type })
+      const payloadData = payload as { event_type?: string; resource?: { subscription?: { id?: string } } }
+      logger.info('Processing PayPal webhook', { eventType: payloadData.event_type })
       return {
         processed: true,
-        eventType: payload.event_type,
-        subscriptionId: payload.resource?.subscription?.id,
+        eventType: payloadData.event_type as string,
+        subscriptionId: payloadData.resource?.subscription?.id,
       }
     } catch (error) {
       logger.error(
@@ -426,13 +442,14 @@ class AdyenGateway extends AbstractPaymentGateway {
     return null
   }
 
-  async handleWebhook(payload: any, _signature: string): Promise<WebhookResult> {
+  async handleWebhook(payload: Record<string, unknown>, _signature: string): Promise<WebhookResult> {
     try {
-      logger.info('Processing Adyen webhook', { eventType: payload.type })
+      const payloadData = payload as { type?: string; subscription?: { id?: string } }
+      logger.info('Processing Adyen webhook', { eventType: payloadData.type })
       return {
         processed: true,
-        eventType: payload.type,
-        subscriptionId: payload.subscription?.id,
+        eventType: payloadData.type as string,
+        subscriptionId: payloadData.subscription?.id,
       }
     } catch (error) {
       logger.error(
@@ -472,7 +489,7 @@ class SquareGateway extends AbstractPaymentGateway {
     return null
   }
 
-  async handleWebhook(_payload: any, _signature: string): Promise<WebhookResult> {
+  async handleWebhook(_payload: Record<string, unknown>, _signature: string): Promise<WebhookResult> {
     return { processed: false, eventType: 'unknown' }
   }
 
@@ -501,7 +518,7 @@ class AuthorizeNetGateway extends AbstractPaymentGateway {
     return null
   }
 
-  async handleWebhook(_payload: any, _signature: string): Promise<WebhookResult> {
+  async handleWebhook(_payload: Record<string, unknown>, _signature: string): Promise<WebhookResult> {
     return { processed: false, eventType: 'unknown' }
   }
 
@@ -582,7 +599,7 @@ export class PaymentGatewayManager {
 
   async handleWebhook(
     gatewayType: PaymentGatewayType,
-    payload: any,
+    payload: Record<string, unknown>,
     signature: string
   ): Promise<WebhookResult> {
     const gateway = this.getGateway(gatewayType)

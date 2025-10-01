@@ -14,7 +14,7 @@ interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  context?: Record<string, any>;
+  context?: Record<string, unknown>;
   error?: Error;
   userId?: string;
   ip?: string;
@@ -99,7 +99,7 @@ class Logger {
     }
   }
 
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: Record<string, unknown>): void {
     this.log({
       timestamp: new Date().toISOString(),
       level: LogLevel.DEBUG,
@@ -108,7 +108,7 @@ class Logger {
     });
   }
 
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: Record<string, unknown>): void {
     this.log({
       timestamp: new Date().toISOString(),
       level: LogLevel.INFO,
@@ -117,7 +117,7 @@ class Logger {
     });
   }
 
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: Record<string, unknown>): void {
     this.log({
       timestamp: new Date().toISOString(),
       level: LogLevel.WARN,
@@ -126,7 +126,7 @@ class Logger {
     });
   }
 
-  error(message: string, error?: Error, context?: Record<string, any>): void {
+  error(message: string, error?: Error, context?: Record<string, unknown>): void {
     this.log({
       timestamp: new Date().toISOString(),
       level: LogLevel.ERROR,
@@ -209,7 +209,7 @@ export const logger = new Logger();
 export function withTiming<T>(
   operation: () => Promise<T>,
   operationName: string,
-  context?: Record<string, any>
+  context?: Record<string, unknown>
 ): Promise<T> {
   const start = Date.now();
 
@@ -234,7 +234,7 @@ export function withTiming<T>(
 
 // Error tracking for external services
 export class ErrorTracker {
-  static track(error: Error, context?: Record<string, any>): void {
+  static track(error: Error, context?: Record<string, unknown>): void {
     logger.error('Error tracked', error, context);
 
     // Send to Sentry error tracking service
@@ -247,7 +247,7 @@ export class ErrorTracker {
     }
   }
 
-  static trackApiError(error: Error, endpoint: string, statusCode?: number, context?: Record<string, any>): void {
+  static trackApiError(error: Error, endpoint: string, statusCode?: number, context?: Record<string, unknown>): void {
     logger.error(`API Error: ${endpoint}`, error, {
       endpoint,
       statusCode,

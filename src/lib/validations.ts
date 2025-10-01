@@ -3,8 +3,7 @@ import { z } from 'zod'
 // Common validation patterns
 const uuidSchema = z.string().uuid('Invalid UUID format')
 const emailSchema = z.string().email('Invalid email address')
-const urlSchema = z.string().url('Invalid URL format')
-const phoneSchema = z.string().regex(/^\+?[\d\s\-\(\)]+$/, 'Invalid phone number format').optional()
+const phoneSchema = z.string().regex(/^\+?[\d\s\-()]+$/, 'Invalid phone number format').optional()
 
 // User validation schemas
 export const userProfileSchema = z.object({
