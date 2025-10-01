@@ -4,7 +4,7 @@ import { createSiteSchema, sitesFilterSchema, type SitesFilters } from '@/lib/va
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get authenticated user
     const {
@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get authenticated user
     const {

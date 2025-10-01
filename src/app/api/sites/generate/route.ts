@@ -58,7 +58,7 @@ interface SiteGenerationResponse {
 export async function POST(request: NextRequest) {
   try {
     // Get authenticated user first before parsing body
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     const {
       data: { session },

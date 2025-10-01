@@ -5,7 +5,7 @@ import { logger } from '@/lib/logger'
 
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get authenticated user
     const {
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Get sites owned by user for validation
     const { data: userSites } = await supabase.from('sites').select('id').eq('user_id', user.id)
 
-    const userSiteIds = userSites?.map((site) => site.id) || []
+    const userSiteIds = userSites?.map((site: { id: string }) => site.id) || []
 
     let query = supabase
       .from('leads')
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createServerClient()
+    const supabase = await createServerClient()
 
     // Get authenticated user
     const {
