@@ -129,7 +129,7 @@ export async function securityMiddleware(
       return createSecurityResponse(
         'Suspicious activity detected',
         429,
-        suspiciousCheck.reason || 'Suspicious activity detected'
+        suspiciousCheck.reason
       )
     }
   }
@@ -314,13 +314,13 @@ function getRateLimitForPath(path: string) {
 function createSecurityResponse(
   message: string,
   status: number,
-  details: string,
+  details?: string,
   headers: Record<string, string> = {}
 ): NextResponse {
   const response = NextResponse.json(
     {
       error: message,
-      message: details,
+      ...(details && { message: details }),
       timestamp: new Date().toISOString(),
       // Don't reveal sensitive information
     },
