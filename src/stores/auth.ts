@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase/client'
 import type { User, Session } from '@supabase/supabase-js'
 
 interface AuthState {
@@ -34,6 +34,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           // Get initial session
           const {
             data: { session },
@@ -76,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { data, error } = await supabase.auth.signInWithPassword({
             email,
             password,
@@ -110,6 +112,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { data, error } = await supabase.auth.signUp({
             email,
             password,
@@ -150,6 +153,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { error } = await supabase.auth.signOut()
 
           if (error) {
@@ -172,6 +176,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { error } = await supabase.auth.resetPasswordForEmail(email, {
             redirectTo: `${window.location.origin}/auth/reset-password`,
           })
@@ -191,6 +196,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
@@ -215,6 +221,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { error } = await supabase.auth.signInWithOAuth({
             provider: 'facebook',
             options: {
@@ -239,6 +246,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { error } = await supabase.auth.signInWithOAuth({
             provider: 'github',
             options: {
@@ -263,6 +271,7 @@ export const useAuthStore = create<AuthState>()(
         try {
           set({ loading: true })
 
+          const supabase = createClient()
           const { error } = await supabase.auth.updateUser(data)
 
           if (error) {

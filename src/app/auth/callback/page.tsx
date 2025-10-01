@@ -2,8 +2,7 @@
 
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserClient } from '@supabase/ssr'
-import { Database } from '../../../../types/database.types'
+import { createClient } from '@/lib/supabase/client'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
@@ -11,12 +10,41 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        const supabase = createBrowserClient<Database>(
-          process.env.NEXT_PUBLIC_SUPABASE_URL || '',
-          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-        )
+        const supabase = createClient()
 
-        // Handle the callback - this exchanges the code for a session
+        // Check for hash parameters (OAuth redirect)
+        const url = new URL(window.location.href)
+        const hash = url.hash.substring(1) // Remove the '#'
+
+        if (hash) {
+          // Parse hash parameters
+          const params = new URLSearchParams(hash)
+          const accessToken = params.get('access_token')
+          const refreshToken = params.get('refresh_token')
+
+          if (accessToken && refreshToken) {
+            // Set the session using the tokens from hash
+            const { error } = await supabase.auth.setSession({
+              access_token: accessToken,
+              refresh_token: refreshToken,
+            })
+
+            if (error) {
+              console.error('Session set error:', error)
+              router.push('/auth/login?error=session_error')
+              return
+            }
+
+            // Clear hash from URL
+            window.history.replaceState({}, document.title, window.location.pathname)
+
+            // Redirect to dashboard
+            router.push('/dashboard')
+            return
+          }
+        }
+
+        // Fallback: try to get session normally (for code exchange routes)
         const { data, error } = await supabase.auth.getSession()
 
         if (error) {
