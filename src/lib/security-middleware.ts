@@ -129,7 +129,7 @@ export async function securityMiddleware(
       return createSecurityResponse(
         'Suspicious activity detected',
         429,
-        suspiciousCheck.reason
+        suspiciousCheck.reason || 'Unknown reason'
       )
     }
   }
