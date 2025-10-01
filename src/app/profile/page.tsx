@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useAuthStore } from '@/stores/auth'
+import { MFASetup } from '@/components/forms/mfa-setup'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -31,9 +32,10 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>
 
 export default function ProfilePage() {
-  const { user, updateProfile, loading, initialized } = useAuthStore()
+  const { user, updateProfile, loading, initialized, mfaEnabled, listMFATickets } = useAuthStore()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [mfaSetupOpen, setMfaSetupOpen] = useState<boolean>(false)
 
   const {
     register,
@@ -61,6 +63,13 @@ export default function ProfilePage() {
       window.location.href = '/auth/login'
     }
   }, [initialized, user])
+
+  // Load MFA status on mount
+  useEffect(() => {
+    if (user) {
+      listMFATickets()
+    }
+  }, [user, listMFATickets])
 
   const hasNewPassword = (watch('newPassword')?.length ?? 0) > 0
 
@@ -235,6 +244,52 @@ export default function ProfilePage() {
               </form>
             </CardContent>
           </Card>
+
+          {mfaSetupOpen ? (
+            <MFASetup onSetupComplete={() => {
+              setMfaSetupOpen(false)
+              listMFATickets() // Refresh MFA status
+            }} />
+          ) : (
+            <Card>
+              <CardHeader>
+                <CardTitle>Two-Factor Authentication</CardTitle>
+                <CardDescription>
+                  Add an extra layer of security to your account with multi-factor authentication.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <h4 className="font-medium">
+                        {mfaEnabled ? 'Multi-Factor Authentication Enabled' : 'Enable Multi-Factor Authentication'}
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        {mfaEnabled
+                          ? 'Your account is protected with additional security. You\'ll be required to use MFA when signing in.'
+                          : 'Protect your account by adding an authenticator app for two-factor authentication.'
+                        }
+                      </p>
+                      {mfaEnabled && (
+                        <div className="mt-2 flex items-center">
+                          <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                          <span className="text-xs text-green-700">Enabled</span>
+                        </div>
+                      )}
+                    </div>
+                    <Button
+                      variant={mfaEnabled ? "outline" : "default"}
+                      onClick={() => setMfaSetupOpen(true)}
+                      disabled={loading}
+                    >
+                      {mfaEnabled ? 'Manage MFA' : 'Enable MFA'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>

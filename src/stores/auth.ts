@@ -6,6 +6,9 @@ import type { User, Session } from '@supabase/supabase-js'
 interface AuthState {
   user: User | null
   session: Session | null
+  mfaEnabled: boolean
+  mfaFactors: any[]
+  mfaChallenge: any | null
   loading: boolean
   initialized: boolean
   signIn: (email: string, password: string) => Promise<void>
@@ -16,9 +19,17 @@ interface AuthState {
   signOut: () => Promise<void>
   resetPassword: (email: string) => Promise<void>
   updateProfile: (data: { email?: string; password?: string }) => Promise<void>
+  // MFA methods
+  enableMFA: (friendlyName?: string) => Promise<{ qr_code_url: string; secret: string; uri: string }>
+  verifyMFA: (factorId: string, code: string) => Promise<void>
+  verifyMFAChallenge: (factorId: string, code: string) => Promise<void>
+  listMFATickets: () => Promise<void>
   initialize: () => Promise<void>
   setUser: (user: User | null) => void
   setSession: (session: Session | null) => void
+  setMFAEnabled: (enabled: boolean) => void
+  setMFATickets: (tickets: any[]) => void
+  setMFAChallenge: (challenge: any | null) => void
   setLoading: (loading: boolean) => void
 }
 
@@ -27,6 +38,9 @@ export const useAuthStore = create<AuthState>()(
     (set, _get) => ({
       user: null,
       session: null,
+      mfaEnabled: false,
+      mfaFactors: [],
+      mfaChallenge: null,
       loading: false,
       initialized: false,
 
@@ -291,8 +305,107 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
+      // MFA methods
+      enableMFA: async (friendlyName = 'Authenticator App') => {
+        try {
+          const supabase = createClient()
+          const { data, error } = await supabase.auth.mfa.enroll({
+            factorType: 'totp',
+            friendlyName,
+          })
+
+          if (error) {
+            throw error
+          }
+
+          set({
+            mfaChallenge: data
+          })
+
+          return {
+            qr_code_url: data.totp.qr_code,
+            secret: data.totp.secret,
+            uri: data.totp.uri
+          }
+        } catch (error) {
+          console.error('MFA enrollment error:', error)
+          throw error
+        }
+      },
+
+      verifyMFA: async (factorId: string, code: string) => {
+        try {
+          const supabase = createClient()
+          const challenge = _get().mfaChallenge
+          if (!challenge) {
+            throw new Error('No MFA challenge found. Please enroll first.')
+          }
+
+          const { error } = await supabase.auth.mfa.verify({
+            factorId,
+            code,
+            challengeId: challenge.id,
+          })
+
+          if (error) {
+            throw error
+          }
+
+          set({
+            mfaEnabled: true,
+            mfaChallenge: null
+          })
+        } catch (error) {
+          console.error('MFA verification error:', error)
+          throw error
+        }
+      },
+
+      verifyMFAChallenge: async (factorId: string, code: string) => {
+        try {
+          const supabase = createClient()
+          const { error } = await supabase.auth.mfa.challengeAndVerify({
+            factorId,
+            code,
+          })
+
+          if (error) {
+            throw error
+          }
+
+          set({
+            mfaEnabled: true
+          })
+        } catch (error) {
+          console.error('MFA challenge verification error:', error)
+          throw error
+        }
+      },
+
+      listMFATickets: async () => {
+        try {
+          const supabase = createClient()
+          const { data, error } = await supabase.auth.mfa.listFactors()
+
+          if (error) {
+            throw error
+          }
+
+          set({
+            mfaFactors: data.totp || [],
+            mfaEnabled: data.totp?.some(f => f.status === 'verified') || false
+          })
+        } catch (error) {
+          console.error('List MFA factors error:', error)
+          throw error
+        }
+      },
+
       setUser: (user: User | null) => set({ user }),
       setSession: (session: Session | null) => set({ session }),
+      setMFAEnabled: (mfaEnabled: boolean) => set({ mfaEnabled }),
+      setMFATickets: (mfaFactors: any[]) => set({ mfaFactors }),
+      setMFAChallenge: (mfaChallenge: any | null) => set({ mfaChallenge }),
       setLoading: (loading: boolean) => set({ loading }),
     }),
     {

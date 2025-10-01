@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { useAuthStore } from '@/stores/auth'
+import { MFAChallenge } from '@/components/forms/mfa-challenge'
 import { cn } from '@/lib/utils'
 
 const signInSchema = z.object({
@@ -37,9 +38,11 @@ interface AuthFormProps {
 
 export function AuthForm({ mode, className }: AuthFormProps) {
   const router = useRouter()
-  const { signIn, signUp, loading } = useAuthStore()
+  const { signIn, signUp, loading, mfaEnabled } = useAuthStore()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [mfaRequired, setMfaRequired] = useState<boolean>(false)
+  const [loginEmail, setLoginEmail] = useState<string>('')
 
   const isSignUp = mode === 'signup'
   const schema = isSignUp ? signUpSchema : signInSchema
@@ -65,12 +68,42 @@ export function AuthForm({ mode, className }: AuthFormProps) {
         setSuccess('Please check your email to confirm your account.')
         reset()
       } else {
+        setLoginEmail(data.email)
         await signIn(data.email, data.password)
-        router.push('/dashboard')
+
+        // Check if MFA is enabled and prompt for MFA challenge
+        const mfaEnabledForUser = useAuthStore.getState().mfaEnabled
+        if (mfaEnabledForUser) {
+          setMfaRequired(true)
+        } else {
+          router.push('/dashboard')
+        }
       }
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An error occurred. Please try again.')
     }
+  }
+
+  const handleMfaCompleted = () => {
+    setMfaRequired(false)
+    router.push('/dashboard')
+  }
+
+  const handleMfaCancel = () => {
+    setMfaRequired(false)
+    // Note: The MFA challenge component handles sign out internally
+  }
+
+  // If MFA is required, show MFA challenge instead of login form
+  if (mfaRequired && !isSignUp) {
+    return (
+      <div className={cn('w-full max-w-md space-y-6', className)}>
+        <MFAChallenge
+          email={loginEmail}
+          onCancel={handleMfaCancel}
+        />
+      </div>
+    )
   }
 
   return (

@@ -1,6 +1,8 @@
 // Simple logging utility for API operations and error tracking
 // In production, consider using a service like Winston or Pino
 
+import * as Sentry from '@sentry/nextjs'
+
 export enum LogLevel {
   DEBUG = 'debug',
   INFO = 'info',
@@ -76,10 +78,25 @@ class Logger {
       }
     }
 
-    // TODO: Send to external logging service (Sentry, LogRocket, etc.)
-    // if (process.env.SENTRY_DSN && entry.level === LogLevel.ERROR) {
-    //   // Send to Sentry
-    // }
+    // Send to external logging service (Sentry)
+    if (entry.level === LogLevel.ERROR && entry.error && process.env.SENTRY_DSN) {
+      try {
+        Sentry.captureException(entry.error, {
+          tags: {
+            userId: entry.userId,
+            ip: entry.ip,
+          },
+          extra: {
+            message: entry.message,
+            context: entry.context,
+            timestamp: entry.timestamp,
+          },
+        })
+      } catch (sentryError) {
+        // Prevent Sentry errors from breaking the logging
+        console.error('Failed to send error to Sentry:', sentryError)
+      }
+    }
   }
 
   debug(message: string, context?: Record<string, any>): void {
@@ -220,10 +237,14 @@ export class ErrorTracker {
   static track(error: Error, context?: Record<string, any>): void {
     logger.error('Error tracked', error, context);
 
-    // TODO: Send to error tracking service
-    // if (process.env.SENTRY_DSN) {
-    //   Sentry.captureException(error, { extra: context });
-    // }
+    // Send to Sentry error tracking service
+    if (process.env.SENTRY_DSN) {
+      try {
+        Sentry.captureException(error, { extra: context });
+      } catch (sentryError) {
+        console.error('Failed to send error to Sentry:', sentryError);
+      }
+    }
   }
 
   static trackApiError(error: Error, endpoint: string, statusCode?: number, context?: Record<string, any>): void {
@@ -232,5 +253,24 @@ export class ErrorTracker {
       statusCode,
       ...context,
     });
+
+    // Send to Sentry with additional API context
+    if (process.env.SENTRY_DSN) {
+      try {
+        Sentry.captureException(error, {
+          tags: {
+            endpoint,
+            statusCode: statusCode?.toString(),
+          },
+          extra: {
+            endpoint,
+            statusCode,
+            ...context,
+          },
+        });
+      } catch (sentryError) {
+        console.error('Failed to send API error to Sentry:', sentryError);
+      }
+    }
   }
 }
