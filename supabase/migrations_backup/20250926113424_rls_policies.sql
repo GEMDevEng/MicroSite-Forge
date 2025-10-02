@@ -14,6 +14,8 @@ DROP POLICY IF EXISTS "Users can view own users" ON users;
 DROP POLICY IF EXISTS "Users can insert own users" ON users;
 DROP POLICY IF EXISTS "Users can update own users" ON users;
 DROP POLICY IF EXISTS "Users can delete own users" ON users;
+DROP POLICY IF EXISTS "Users can view own profile" ON users;
+DROP POLICY IF EXISTS "Users can update own profile" ON users;
 DROP POLICY IF EXISTS "Users can view own sites" ON sites;
 DROP POLICY IF EXISTS "Users can insert own sites" ON sites;
 DROP POLICY IF EXISTS "Users can update own sites" ON sites;
@@ -34,6 +36,20 @@ DROP POLICY IF EXISTS "Users can view own invoices" ON invoices;
 DROP POLICY IF EXISTS "Users can insert own invoices" ON invoices;
 DROP POLICY IF EXISTS "Users can update own invoices" ON invoices;
 DROP POLICY IF EXISTS "Users can delete own invoices" ON invoices;
+DROP POLICY IF EXISTS "Users can view leads from own sites" ON leads;
+DROP POLICY IF EXISTS "Users can insert leads for own sites" ON leads;
+DROP POLICY IF EXISTS "Users can update leads for own sites" ON leads;
+DROP POLICY IF EXISTS "Users can update leads from own sites" ON leads;
+DROP POLICY IF EXISTS "Users can delete leads for own sites" ON leads;
+DROP POLICY IF EXISTS "Users can delete leads from own sites" ON leads;
+DROP POLICY IF EXISTS "Users can view communications for own leads" ON communications;
+DROP POLICY IF EXISTS "Users can view communications from own leads" ON communications;
+DROP POLICY IF EXISTS "Users can insert communications for own leads" ON communications;
+DROP POLICY IF EXISTS "Users can insert communications from own leads" ON communications;
+DROP POLICY IF EXISTS "Users can update communications for own leads" ON communications;
+DROP POLICY IF EXISTS "Users can update communications from own leads" ON communications;
+DROP POLICY IF EXISTS "Users can delete communications for own leads" ON communications;
+DROP POLICY IF EXISTS "Users can delete communications from own leads" ON communications;
 
 -- Create new RLS policies
 -- Policy: Users can view own profile

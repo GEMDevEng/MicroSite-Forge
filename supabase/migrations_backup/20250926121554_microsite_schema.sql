@@ -1,8 +1,7 @@
 -- Migration: MicroSite Database Schema
--- Generated on: 2025-09-26T11:34:24.596Z
+-- Generated on: 2025-09-26T12:15:54.481Z
 
 -- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create tables
 
@@ -27,7 +26,7 @@ CREATE INDEX idx_users_stripe_id ON users(stripe_id);
 
 -- Create sites table
 CREATE TABLE IF NOT EXISTS sites (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   name text NOT NULL,
   domain text,
@@ -48,7 +47,7 @@ CREATE INDEX idx_sites_status ON sites(status);
 
 -- Create leads table
 CREATE TABLE IF NOT EXISTS leads (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   site_id uuid NOT NULL,
   name text NOT NULL,
   email text NOT NULL,
@@ -79,7 +78,7 @@ CREATE INDEX idx_leads_created_at ON leads(created_at);
 
 -- Create communications table
 CREATE TABLE IF NOT EXISTS communications (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   lead_id uuid NOT NULL,
   type text NOT NULL,
   direction text NOT NULL,
@@ -99,7 +98,7 @@ CREATE INDEX idx_communications_created_at ON communications(created_at);
 
 -- Create jobs table
 CREATE TABLE IF NOT EXISTS jobs (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   type text NOT NULL,
   status text,
@@ -120,7 +119,7 @@ CREATE INDEX idx_jobs_created_at ON jobs(created_at);
 
 -- Create invoices table
 CREATE TABLE IF NOT EXISTS invoices (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   stripe_invoice_id text NOT NULL,
   amount numeric NOT NULL,
@@ -148,18 +147,18 @@ ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Users can view own profile" ON users FOR SELECT USING (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON users FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can view own sites" ON sites FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own sites" ON sites FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can insert own sites" ON sites FOR INSERT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update own sites" ON sites FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete own sites" ON sites FOR DELETE USING (auth.uid() = user_id);
 CREATE POLICY "Users can view leads from own sites" ON leads FOR SELECT USING (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
-CREATE POLICY "Users can insert leads for own sites" ON leads FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
+CREATE POLICY "Users can insert leads for own sites" ON leads FOR INSERT USING (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
 CREATE POLICY "Users can update leads from own sites" ON leads FOR UPDATE USING (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
 CREATE POLICY "Users can delete leads from own sites" ON leads FOR DELETE USING (EXISTS (SELECT 1 FROM sites WHERE sites.id = leads.site_id AND sites.user_id = auth.uid()));
 CREATE POLICY "Users can view communications for own leads" ON communications FOR SELECT USING (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
-CREATE POLICY "Users can insert communications for own leads" ON communications FOR INSERT WITH CHECK (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
+CREATE POLICY "Users can insert communications for own leads" ON communications FOR INSERT USING (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
 CREATE POLICY "Users can update communications for own leads" ON communications FOR UPDATE USING (EXISTS (SELECT 1 FROM leads JOIN sites ON leads.site_id = sites.id WHERE leads.id = communications.lead_id AND sites.user_id = auth.uid()));
 CREATE POLICY "Users can view own jobs" ON jobs FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "Users can insert own jobs" ON jobs FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can insert own jobs" ON jobs FOR INSERT USING (auth.uid() = user_id);
 CREATE POLICY "Users can update own jobs" ON jobs FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can view own invoices" ON invoices FOR SELECT USING (auth.uid() = user_id);
 

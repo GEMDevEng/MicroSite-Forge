@@ -1,8 +1,7 @@
 -- Migration: MicroSite Database Schema
--- Generated on: 2025-09-26T12:15:54.481Z
+-- Generated on: 2025-09-26T11:35:05.051Z
 
 -- Enable UUID extension
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create tables
 
@@ -27,7 +26,7 @@ CREATE INDEX idx_users_stripe_id ON users(stripe_id);
 
 -- Create sites table
 CREATE TABLE IF NOT EXISTS sites (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   name text NOT NULL,
   domain text,
@@ -48,7 +47,7 @@ CREATE INDEX idx_sites_status ON sites(status);
 
 -- Create leads table
 CREATE TABLE IF NOT EXISTS leads (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   site_id uuid NOT NULL,
   name text NOT NULL,
   email text NOT NULL,
@@ -79,7 +78,7 @@ CREATE INDEX idx_leads_created_at ON leads(created_at);
 
 -- Create communications table
 CREATE TABLE IF NOT EXISTS communications (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   lead_id uuid NOT NULL,
   type text NOT NULL,
   direction text NOT NULL,
@@ -99,7 +98,7 @@ CREATE INDEX idx_communications_created_at ON communications(created_at);
 
 -- Create jobs table
 CREATE TABLE IF NOT EXISTS jobs (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   type text NOT NULL,
   status text,
@@ -120,7 +119,7 @@ CREATE INDEX idx_jobs_created_at ON jobs(created_at);
 
 -- Create invoices table
 CREATE TABLE IF NOT EXISTS invoices (
-  id uuid NOT NULL DEFAULT uuid_generate_v4(),
+  id uuid NOT NULL DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL,
   stripe_invoice_id text NOT NULL,
   amount numeric NOT NULL,
