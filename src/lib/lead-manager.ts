@@ -7,7 +7,7 @@ import type { IncomingLead, EnrichedLeadData, LeadStatus } from '../types/leads'
 export type Lead = Database['public']['Tables']['leads']['Row']
 
 // Temporary mapper functions until mappers.ts is created
-export const mapDbLeadToLead = (dbLead: any): Lead => dbLead
+export const mapDbLeadToLead = (dbLead: unknown): Lead => dbLead as Lead
 export const mapLeadToContactInfo = (lead: Lead): ContactInfo => {
   try {
     const contactInfoStr = typeof lead.contact_info === 'string' ? lead.contact_info : '{}'

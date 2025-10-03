@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-api'
 
 // Automated alerting and incident response endpoint
+type AlertRecord = Record<string, unknown>
+
 export async function POST(request: NextRequest) {
   try {
     const supabase = createServiceClient()
@@ -38,10 +40,11 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ alert, triggered: true })
 
-  } catch (error: any) {
-    console.error('Alert creation error:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Alert creation error:', message)
     return NextResponse.json(
-      { error: 'Failed to create alert', details: error.message },
+      { error: 'Failed to create alert', details: message },
       { status: 500 }
     )
   }
@@ -72,10 +75,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({ alerts })
 
-  } catch (error: any) {
-    console.error('Alerts fetch error:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Alerts fetch error:', message)
     return NextResponse.json(
-      { error: 'Failed to fetch alerts', details: error.message },
+      { error: 'Failed to fetch alerts', details: message },
       { status: 500 }
     )
   }
@@ -114,16 +118,17 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ alert })
 
-  } catch (error: any) {
-    console.error('Alert update error:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Alert update error:', message)
     return NextResponse.json(
-      { error: 'Failed to update alert', details: error.message },
+      { error: 'Failed to update alert', details: message },
       { status: 500 }
     )
   }
 }
 
-async function triggerAlertResponse(alert: any) {
+async function triggerAlertResponse(alert: AlertRecord) {
   const supabase = createServiceClient()
 
   // Log alert response
@@ -164,7 +169,7 @@ async function triggerAlertResponse(alert: any) {
   }
 }
 
-async function createIncident(alert: any) {
+async function createIncident(alert: AlertRecord) {
   const supabase = createServiceClient()
 
   const { data: incident, error } = await supabase
@@ -189,7 +194,7 @@ async function createIncident(alert: any) {
   await triggerIncidentResponse(incident)
 }
 
-async function triggerIncidentResponse(incident: any) {
+async function triggerIncidentResponse(incident: AlertRecord) {
   const supabase = createServiceClient()
 
   // Log incident creation
@@ -214,27 +219,27 @@ async function triggerIncidentResponse(incident: any) {
 }
 
 // Specific alert handlers
-async function handleDatabaseAlert(alert: any) {
+async function handleDatabaseAlert(alert: AlertRecord) {
   console.log('Database performance alert triggered:', alert)
   // Implement database-specific response logic
 }
 
-async function handleAPIAlert(alert: any) {
+async function handleAPIAlert(alert: AlertRecord) {
   console.log('API error rate alert triggered:', alert)
   // Implement API-specific response logic
 }
 
-async function handleMemoryAlert(alert: any) {
+async function handleMemoryAlert(alert: AlertRecord) {
   console.log('Memory usage alert triggered:', alert)
   // Implement memory-specific response logic
 }
 
-async function handlePerformanceAlert(alert: any) {
+async function handlePerformanceAlert(alert: AlertRecord) {
   console.log('Performance alert triggered:', alert)
   // Implement performance-specific response logic
 }
 
-async function handleGenericAlert(alert: any) {
+async function handleGenericAlert(alert: AlertRecord) {
   console.log('Generic alert triggered:', alert)
   // Implement generic response logic
 }

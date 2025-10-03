@@ -136,11 +136,12 @@ export async function GET(request: NextRequest) {
         totalVisits: micrositeStats?.reduce((sum, m) => sum + (m.visits_count || 0), 0) || 0,
         totalLeads: micrositeStats?.reduce((sum, m) => sum + (m.leads_generated || 0), 0) || 0
       },
-      api: apiMetrics,
+  api: apiMetrics,
       errors: {
         total: errorLogs?.length || 0,
-        byType: errorLogs?.reduce((acc: any, log) => {
-          acc[log.error_type] = (acc[log.error_type] || 0) + 1
+        byType: errorLogs?.reduce((acc: Record<string, number>, log) => {
+          const key = String(log.error_type || 'unknown')
+          acc[key] = (acc[key] || 0) + 1
           return acc
         }, {}) || {},
         recent: errorLogs?.slice(0, 10) || []
@@ -153,8 +154,9 @@ export async function GET(request: NextRequest) {
       billing: {
         totalSubscriptions: billingStats?.length || 0,
         activeSubscriptions: billingStats?.filter(s => s.status === 'active').length || 0,
-        planDistribution: billingStats?.reduce((acc: any, sub) => {
-          acc[sub.plan_type] = (acc[sub.plan_type] || 0) + 1
+        planDistribution: billingStats?.reduce((acc: Record<string, number>, sub) => {
+          const key = String(sub.plan_type || 'unknown')
+          acc[key] = (acc[key] || 0) + 1
           return acc
         }, {}) || {}
       }
@@ -162,10 +164,11 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(dashboard)
 
-  } catch (error: any) {
-    console.error('Monitoring dashboard error:', error)
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    console.error('Monitoring dashboard error:', message)
     return NextResponse.json(
-      { error: 'Failed to fetch monitoring data', details: error.message },
+      { error: 'Failed to fetch monitoring data', details: message },
       { status: 500 }
     )
   }
