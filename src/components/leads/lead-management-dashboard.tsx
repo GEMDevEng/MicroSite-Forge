@@ -364,7 +364,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         const validStatuses = ['new', 'qualified', 'contacted', 'converted'] as const
         type StatusType = (typeof validStatuses)[number]
         let safeStatus: StatusType
-        if (validStatuses.includes(leadObj.status as string)) {
+        if (typeof leadObj.status === 'string' && validStatuses.includes(leadObj.status as StatusType)) {
           safeStatus = leadObj.status as StatusType
         } else {
           safeStatus = 'new'
@@ -380,8 +380,8 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
           follow_up_date: leadObj.follow_up_date as string | undefined,
           marketing_campaign: leadObj.marketing_campaign as string | undefined,
           enriched_at: leadObj.enriched_at as string | undefined,
-          created_at: leadObj.created_at as string | undefined,
-          updated_at: leadObj.updated_at as string | undefined,
+          created_at: (leadObj.created_at as string) || new Date().toISOString(),
+          updated_at: (leadObj.updated_at as string) || new Date().toISOString(),
         }
       })
 

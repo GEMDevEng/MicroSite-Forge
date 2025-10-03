@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 // Health check endpoint for monitoring system status
+type HealthChecks = { [key: string]: unknown }
+
 export async function GET(_request: NextRequest) {
   const startTime = Date.now()
-  const status = { status: 'healthy', timestamp: new Date().toISOString(), checks: {} as ay
+  const status: { status: string; timestamp: string; checks: HealthChecks } = {
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    checks: {},
+  }
 
   try {
     // 1. Database connectivity check

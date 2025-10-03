@@ -6,11 +6,7 @@ import { useAuthStore } from '@/stores/auth'
 import { KeywordSuggestion } from '@/lib/grok'
 
 // Define interfaces for the dashboard data
-interface DomainCheckResult {
-  domain: string
-  price?: number
-  available: boolean
-}
+import type { DomainCheckResult } from '@/lib/porkbun'
 
 interface ResearchData {
   niche: string

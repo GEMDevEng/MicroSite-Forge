@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Search, TrendingUp, Lightbulb, AlertCircle, DollarSign } from 'lucide-react'
+import type { DomainCheckResult } from '@/lib/porkbun'
 
 // Types
 interface KeywordSuggestion {
@@ -24,7 +25,7 @@ interface ResearchResponse {
   trendingTopics: string[]
   contentOpportunities: string[]
   competitorInsights?: string[]
-  availableDomains: string[]
+  availableDomains: DomainCheckResult[]
   recommendedDomain?: string
   estimatedCost?: number
 }
