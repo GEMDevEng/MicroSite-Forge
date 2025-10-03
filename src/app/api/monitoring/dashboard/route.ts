@@ -119,8 +119,7 @@ export async function GET(request: NextRequest) {
         memoryMB: {
           rss: Math.round(systemMetrics.memory.rss / 1024 / 1024),
           heapTotal: Math.round(systemMetrics.memory.heapTotal / 1024 / 1024),
-          heapUsed: Math.round(systemMetrics.memory.heapUsed / 1024 / 1024),
-          external: Math.round(systemMetrics.external / 1024 / 1024)
+          heapUsed: Math.round(systemMetrics.memory.heapUsed / 1024 / 1024)
         }
       },
       database: {
