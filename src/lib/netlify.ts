@@ -98,7 +98,7 @@ export async function createHugoSite(
 export async function addCustomDomain(
   siteId: string,
   domain: string
-): Promise<any> {
+): Promise<unknown> {
   if (!NETLIFY_AUTH_TOKEN) {
     throw new Error("NETLIFY_AUTH_TOKEN is not configured");
   }
@@ -138,7 +138,7 @@ export async function addCustomDomain(
 export async function triggerDeployment(
   siteId: string,
   branch?: string
-): Promise<any> {
+): Promise<unknown> {
   if (!NETLIFY_AUTH_TOKEN) {
     throw new Error("NETLIFY_AUTH_TOKEN is not configured");
   }
@@ -173,7 +173,7 @@ export async function triggerDeployment(
  * @param siteId Netlify site ID
  * @returns Site deployment information
  */
-export async function getSiteDeployment(siteId: string): Promise<any> {
+export async function getSiteDeployment(siteId: string): Promise<unknown> {
   if (!NETLIFY_AUTH_TOKEN) {
     throw new Error("NETLIFY_AUTH_TOKEN is not configured");
   }

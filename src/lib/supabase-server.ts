@@ -41,10 +41,11 @@ export const createClient = async (): Promise<SupabaseClient> => {
     url,
     key,
     {
-      // Next.js' cookieStore shape differs from the CookieMethodsServer type expected
-      // by `createSupabaseServerClient`. Cast to `any` to satisfy the type system while
-      // maintaining runtime behavior.
-      cookies: ({
+  // Next.js' cookieStore shape differs from the CookieMethodsServer type expected
+  // by `createSupabaseServerClient`. Cast to `any` to satisfy the type system while
+  // maintaining runtime behavior.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cookies: ({
         get(name: string) {
           return cookieStore.get(name)?.value
         },
