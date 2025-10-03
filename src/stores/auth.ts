@@ -7,7 +7,6 @@ interface AuthState {
   user: User | null
   session: Session | null
   mfaEnabled: boolean
-  mfaFactors: any[]
   mfaFactors: unknown[]
   mfaChallenge: unknown | null
   loading: boolean
