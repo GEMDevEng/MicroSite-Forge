@@ -41,8 +41,8 @@ export function Form<T extends FieldValues = FieldValues>({
   onSubmit,
   className,
 }: FormProps<T>) {
+  // Cast to the generic FormContext value expected by consumers
   return (
-    {/* Cast to the generic FormContext value expected by consumers */}
     <FormContext.Provider value={{ form: form as unknown as UseFormReturn<FieldValues> }}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-6', className)}>
         {children}
