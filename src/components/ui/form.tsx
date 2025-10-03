@@ -14,7 +14,7 @@ import { Button } from './button'
 
 // Form context
 interface FormContextValue {
-  form: UseFormReturn<any>
+  form: UseFormReturn<FieldValues>
 }
 
 const FormContext = React.createContext<FormContextValue | null>(null)
@@ -54,8 +54,8 @@ export function Form<T extends FieldValues = FieldValues>({
 interface FormFieldProps<T extends FieldValues = FieldValues> {
   name: FieldPath<T>
   children: (field: {
-    value: any
-    onChange: (value: any) => void
+    value: unknown
+    onChange: (value: unknown) => void
     onBlur: () => void
     error?: string
     disabled?: boolean
@@ -146,13 +146,13 @@ export function FormMessage({ children, className }: FormMessageProps) {
 }
 
 // Convenience hook for creating forms with validation
-export function useZodForm<T extends z.ZodType<any, any>>(
+export function useZodForm<T extends z.ZodTypeAny>(
   schema: T,
   defaultValues?: z.infer<T>
 ) {
   return useForm<z.infer<T>>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as z.infer<T> | undefined,
     mode: 'onChange',
   })
 }
