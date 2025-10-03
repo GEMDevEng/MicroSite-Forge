@@ -44,7 +44,7 @@ export const createClient = async (): Promise<SupabaseClient> => {
   // Next.js' cookieStore shape differs from the CookieMethodsServer type expected
   // by `createSupabaseServerClient`. Cast to `any` to satisfy the type system while
   // maintaining runtime behavior.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  /* eslint-disable @typescript-eslint/no-explicit-any */
   cookies: ({
         get(name: string) {
           return cookieStore.get(name)?.value
@@ -55,7 +55,8 @@ export const createClient = async (): Promise<SupabaseClient> => {
         remove(name: string, options?: CookieOptions) {
           cookieStore.set({ name, value: '', ...(options || {}) })
         },
-      } as unknown) as any,
+    } as unknown) as any,
+  /* eslint-enable @typescript-eslint/no-explicit-any */
     }
   )
 }
