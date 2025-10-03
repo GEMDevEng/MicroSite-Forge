@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
+import { createServiceClient } from '@/lib/supabase-api'
 
 // Automated alerting and incident response endpoint
 export async function POST(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createServiceClient()
 
     const body = await request.json()
     const { type, severity, message, details, metric, threshold, currentValue } = body
@@ -53,10 +50,7 @@ export async function POST(request: NextRequest) {
 // Get active alerts
 export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createServiceClient()
 
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status') || 'active'
@@ -90,10 +84,7 @@ export async function GET(request: NextRequest) {
 // Update alert status (acknowledge/resolve)
 export async function PUT(request: NextRequest) {
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
+    const supabase = createServiceClient()
 
     const body = await request.json()
     const { id, status, acknowledged_by, resolved_at } = body
@@ -133,10 +124,7 @@ export async function PUT(request: NextRequest) {
 }
 
 async function triggerAlertResponse(alert: any) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = createServiceClient()
 
   // Log alert response
   await supabase
@@ -177,10 +165,7 @@ async function triggerAlertResponse(alert: any) {
 }
 
 async function createIncident(alert: any) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = createServiceClient()
 
   const { data: incident, error } = await supabase
     .from('incidents')
@@ -205,10 +190,7 @@ async function createIncident(alert: any) {
 }
 
 async function triggerIncidentResponse(incident: any) {
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  )
+  const supabase = createServiceClient()
 
   // Log incident creation
   await supabase

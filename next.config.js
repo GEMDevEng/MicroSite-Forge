@@ -1,5 +1,14 @@
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Fix workspace root warning
+  outputFileTracingRoot: path.join(__dirname, '.'),
+
   serverExternalPackages: ['@supabase/supabase-js'],
   images: {
     domains: ['localhost'],
@@ -17,6 +26,18 @@ const nextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+
+  // Suppress non-critical webpack warnings
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.ignoreWarnings = [
+        { module: /node_modules\/@prisma\/instrumentation/ },
+        { module: /node_modules\/@opentelemetry/ },
+        { module: /node_modules\/@sentry/ },
+      ]
+    }
+    return config
   },
   async headers() {
     return [
