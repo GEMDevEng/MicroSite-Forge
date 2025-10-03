@@ -8,7 +8,8 @@ interface AuthState {
   session: Session | null
   mfaEnabled: boolean
   mfaFactors: any[]
-  mfaChallenge: any | null
+  mfaFactors: unknown[]
+  mfaChallenge: unknown | null
   loading: boolean
   initialized: boolean
   signIn: (email: string, password: string) => Promise<void>
@@ -28,8 +29,8 @@ interface AuthState {
   setUser: (user: User | null) => void
   setSession: (session: Session | null) => void
   setMFAEnabled: (enabled: boolean) => void
-  setMFATickets: (tickets: any[]) => void
-  setMFAChallenge: (challenge: any | null) => void
+  setMFATickets: (tickets: unknown[]) => void
+  setMFAChallenge: (challenge: unknown | null) => void
   setLoading: (loading: boolean) => void
 }
 
