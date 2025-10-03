@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest) {
     const body = await request.json()
     const { id, status, acknowledged_by, resolved_at } = body
 
-    const updateData: any = {
+    const updateData: Record<string, unknown> = {
       status,
       updated_at: new Date().toISOString()
     }
@@ -135,9 +135,9 @@ async function triggerAlertResponse(alert: AlertRecord) {
   await supabase
     .from('alert_responses')
     .insert({
-      alert_id: alert.id,
+      alert_id: String(alert.id ?? ''),
       response_type: 'automated',
-      action_taken: `Alert triggered: ${alert.type} - ${alert.severity}`,
+      action_taken: `Alert triggered: ${String(alert.type ?? '')} - ${String(alert.severity ?? '')}`,
       timestamp: new Date().toISOString()
     })
 
