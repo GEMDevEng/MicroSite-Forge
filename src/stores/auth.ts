@@ -405,8 +405,8 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user: User | null) => set({ user }),
       setSession: (session: Session | null) => set({ session }),
       setMFAEnabled: (mfaEnabled: boolean) => set({ mfaEnabled }),
-      setMFATickets: (mfaFactors: any[]) => set({ mfaFactors }),
-      setMFAChallenge: (mfaChallenge: any | null) => set({ mfaChallenge }),
+  setMFATickets: (mfaFactors: unknown[]) => set({ mfaFactors }),
+  setMFAChallenge: (mfaChallenge: unknown | null) => set({ mfaChallenge }),
       setLoading: (loading: boolean) => set({ loading }),
     }),
     {
