@@ -75,10 +75,11 @@ export async function GET(request: NextRequest) {
       totalRequests: apiLogs?.length || 0,
       avgResponseTime: apiLogs?.length ? apiLogs.reduce((sum, log) => sum + (log.response_time || 0), 0) / apiLogs.length : 0,
       errorRate: apiLogs?.length ? (apiLogs.filter(log => log.status_code >= 400).length / apiLogs.length) * 100 : 0,
-      topEndpoints: apiLogs?.reduce((acc: any, log) => {
-        acc[log.endpoint] = (acc[log.endpoint] || 0) + 1
-        return acc
-      }, {}) || {}
+        topEndpoints: apiLogs?.reduce((acc: Record<string, number>, log) => {
+          const key = String(log.endpoint || 'unknown')
+          acc[key] = (acc[key] || 0) + 1
+          return acc
+        }, {}) || {}
     }
 
     // 6. Error Tracking

@@ -36,6 +36,7 @@ export async function middleware(req: NextRequest) {
     // The Next.js Request/Response cookie helpers differ slightly; cast to `any` to
     // bridge the shape while preserving runtime behavior.
     {
+      /* eslint-disable @typescript-eslint/no-explicit-any */
       cookies: ({
         get(name: string) {
           return req.cookies.get(name)?.value
@@ -47,6 +48,7 @@ export async function middleware(req: NextRequest) {
           res.cookies.set({ name, value: '', ...options })
         },
       } as unknown) as any,
+      /* eslint-enable @typescript-eslint/no-explicit-any */
     }
   )
 
