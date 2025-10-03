@@ -32,8 +32,11 @@ export async function middleware(req: NextRequest) {
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    // `createServerClient` expects a cookies API matching Supabase's CookieMethodsServer.
+    // The Next.js Request/Response cookie helpers differ slightly; cast to `any` to
+    // bridge the shape while preserving runtime behavior.
     {
-      cookies: {
+      cookies: ({
         get(name: string) {
           return req.cookies.get(name)?.value
         },
@@ -43,7 +46,7 @@ export async function middleware(req: NextRequest) {
         remove(name: string, options: CookieOptions) {
           res.cookies.set({ name, value: '', ...options })
         },
-      },
+      } as unknown) as any,
     }
   )
 

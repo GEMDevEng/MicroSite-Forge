@@ -42,7 +42,8 @@ export function Form<T extends FieldValues = FieldValues>({
   className,
 }: FormProps<T>) {
   return (
-    <FormContext.Provider value={{ form }}>
+    {/* Cast to the generic FormContext value expected by consumers */}
+    <FormContext.Provider value={{ form: form as unknown as UseFormReturn<FieldValues> }}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-6', className)}>
         {children}
       </form>
@@ -186,7 +187,7 @@ export function TextField<T extends FieldValues = FieldValues>({
             <Input
               type={type}
               placeholder={placeholder}
-              value={value || ''}
+              value={(typeof value === 'string' || typeof value === 'number') ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               onBlur={onBlur}
               disabled={disabled}
@@ -228,7 +229,7 @@ export function TextareaField<T extends FieldValues = FieldValues>({
           <FormControl>
             <Textarea
               placeholder={placeholder}
-              value={value || ''}
+              value={(typeof value === 'string' || typeof value === 'number') ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               onBlur={onBlur}
               disabled={disabled}
@@ -270,7 +271,7 @@ export function SelectField<T extends FieldValues = FieldValues>({
           <FormLabel required={required}>{label}</FormLabel>
           <FormControl>
             <select
-              value={value || ''}
+              value={(typeof value === 'string' || typeof value === 'number') ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               onBlur={onBlur}
               disabled={disabled}
