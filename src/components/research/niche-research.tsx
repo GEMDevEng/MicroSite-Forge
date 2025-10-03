@@ -24,7 +24,7 @@ interface ResearchResponse {
   trendingTopics: string[]
   contentOpportunities: string[]
   competitorInsights?: string[]
-  availableDomains: any[]
+  availableDomains: string[]
   recommendedDomain?: string
   estimatedCost?: number
 }
@@ -46,7 +46,8 @@ export default function NicheResearch({ onResearchComplete }: NicheResearchProps
     domainSearch: true,
   })
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  type FormDataType = typeof formData
+  const handleInputChange = <K extends keyof FormDataType>(field: K, value: FormDataType[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 

@@ -416,7 +416,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
 
       const { error } = await supabase
         .from('leads')
-        .update({ status: status as any, updated_at: new Date().toISOString() })
+        .update({ status: status as (Status), updated_at: new Date().toISOString() })
         .eq('id', leadId)
 
       if (error) {
