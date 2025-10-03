@@ -1,7 +1,23 @@
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 
-export default function HomePage() {
+function HomePageContent() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Handle OAuth callback if code is present in URL
+    const code = searchParams.get('code')
+    if (code) {
+      // Redirect to the proper callback handler
+      router.push(`/auth/callback?code=${code}`)
+    }
+  }, [searchParams, router])
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <div className="container mx-auto px-4 py-16">
@@ -82,4 +98,8 @@ export default function HomePage() {
       </div>
     </div>
   )
+}
+
+export default function HomePage() {
+  return <HomePageContent />
 }

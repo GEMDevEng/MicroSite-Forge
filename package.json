@@ -29,6 +29,7 @@
     "deploy:staging": "vercel --scope your-org",
     "deploy:production": "vercel --prod --scope your-org",
     "format": "prettier --write .",
+    "verify:auth": "node scripts/verify-auth-setup.js",
     "format:check": "prettier --check .",
     "prepare": "husky",
     "fix:imports": "npx replace-in-file '../../types/supabase' '../../types/database.types' \"src/**/*.ts\" \"src/**/*.tsx\"",

@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useState, useEffect } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -38,6 +38,7 @@ interface AuthFormProps {
 
 export function AuthForm({ mode, className }: AuthFormProps) {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const { signIn, signUp, loading } = useAuthStore()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -46,6 +47,22 @@ export function AuthForm({ mode, className }: AuthFormProps) {
 
   const isSignUp = mode === 'signup'
   const schema = isSignUp ? signUpSchema : signInSchema
+
+  // Check for error messages from OAuth callback
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      const errorMessages: Record<string, string> = {
+        no_code: 'Authentication failed: No authorization code received. Please try again.',
+        code_exchange_failed: 'Authentication failed: Could not exchange authorization code. Please try again.',
+        no_session: 'Authentication failed: Could not create session. Please try again.',
+        unexpected_error: 'An unexpected error occurred during sign-in. Please try again.',
+        callback_error: 'Authentication callback failed. Please try again.',
+        session_error: 'Could not establish session. Please try again.',
+      }
+      setError(errorMessages[errorParam] || 'An error occurred during authentication. Please try again.')
+    }
+  }, [searchParams])
 
   const {
     register,
