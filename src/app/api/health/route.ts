@@ -4,7 +4,7 @@ import { createClient } from '@supabase/supabase-js'
 // Health check endpoint for monitoring system status
 export async function GET(_request: NextRequest) {
   const startTime = Date.now()
-  const status = { status: 'healthy', timestamp: new Date().toISOString(), checks: {} as any }
+  const status = { status: 'healthy', timestamp: new Date().toISOString(), checks: {} as ay
 
   try {
     // 1. Database connectivity check
@@ -70,11 +70,11 @@ export async function GET(_request: NextRequest) {
       message: 'Service is running'
     }
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     status.status = 'unhealthy'
     status.checks.database = {
       status: 'unhealthy',
-      error: error.message,
+      error: error instanceof Error ? error.message : 'Unknown error',
       response_time: Date.now() - startTime
     }
   }

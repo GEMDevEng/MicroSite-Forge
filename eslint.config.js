@@ -27,6 +27,17 @@ export default [
       'playwright-report/**',
     ],
   },
+  {
+    files: ['newrelic.js'],
+    languageOptions: {
+      globals: {
+        process: 'readonly',
+        exports: 'readonly',
+      },
+      ecmaVersion: 2020,
+      sourceType: 'module',
+    },
+  },
   js.configs.recommended,
   ...typescriptEslint.configs.recommended,
   {
