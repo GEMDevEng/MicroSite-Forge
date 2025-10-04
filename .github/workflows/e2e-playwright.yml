@@ -1,0 +1,43 @@
+name: E2E Playwright
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  e2e:
+    name: Playwright E2E (matrix)
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Build and start app
+        run: |
+          npm run build
+          npm run start &
+          sleep 5
+
+      - name: Run Playwright tests (${{ matrix.browser }})
+        run: npx playwright test --project=${{ matrix.browser }} --reporter=list
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.browser }}
+          path: playwright-report
