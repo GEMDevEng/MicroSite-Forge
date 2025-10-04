@@ -67,5 +67,6 @@ export default defineConfig({
     command: process.env.CI ? 'npm run start' : 'npm run dev',
     port: 3000,
     reuseExistingServer: !process.env.CI,
+    url: 'http://localhost:3000/api/health',
   },
 })

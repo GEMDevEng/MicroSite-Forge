@@ -31,7 +31,9 @@ class Logger {
     }
 
     // Disable console logging in production (use proper logging service)
-    if (process.env.NODE_ENV === 'production') {
+    // For tests, keep console logging enabled unless SILENT_LOGGER is explicitly set.
+    const forceSilent = process.env.SILENT_LOGGER === '1' || process.env.SILENT_LOGGER === 'true'
+    if (process.env.NODE_ENV === 'production' || forceSilent) {
       this.enableConsole = false;
     }
   }

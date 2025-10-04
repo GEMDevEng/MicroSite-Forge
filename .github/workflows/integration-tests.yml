@@ -1,0 +1,26 @@
+name: Integration tests (Jest)
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  integration:
+    name: Run integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          CI: true
