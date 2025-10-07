@@ -262,7 +262,7 @@ function detectSuspiciousRequest(request: NextRequest, path: string): {
       rawPath = parsed.pathname
       rawQuery = parsed.search
     }
-  } catch (e) {
+  } catch {
     // Fallback to request.url if URL parsing fails
     rawPath = request.url || rawPath
   }
