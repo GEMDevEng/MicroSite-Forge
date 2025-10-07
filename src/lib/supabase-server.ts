@@ -2,16 +2,6 @@ import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-interface CookieOptions {
-  domain?: string
-  path?: string
-  maxAge?: number
-  httpOnly?: boolean
-  secure?: boolean
-  sameSite?: 'strict' | 'lax' | 'none'
-  expirationDate?: number
-}
-
 /**
  * Validate required Supabase environment variables
  */
@@ -41,22 +31,22 @@ export const createClient = async (): Promise<SupabaseClient> => {
     url,
     key,
     {
-  // Next.js' cookieStore shape differs from the CookieMethodsServer type expected
-  // by `createSupabaseServerClient`. Cast to `any` to satisfy the type system while
-  // maintaining runtime behavior.
-  /* eslint-disable @typescript-eslint/no-explicit-any */
-  cookies: ({
-        get(name: string) {
-          return cookieStore.get(name)?.value
+      cookies: {
+        getAll() {
+          return cookieStore.getAll()
         },
-        set(name: string, value: string, options?: CookieOptions) {
-          cookieStore.set({ name, value, ...(options || {}) })
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
-        remove(name: string, options?: CookieOptions) {
-          cookieStore.set({ name, value: '', ...(options || {}) })
-        },
-    } as unknown) as any,
-  /* eslint-enable @typescript-eslint/no-explicit-any */
+      },
     }
   )
 }
