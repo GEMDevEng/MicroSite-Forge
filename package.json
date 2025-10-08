@@ -28,6 +28,7 @@
   "test:e2e:ci": "next build && playwright test",
   "test:e2e:local": "playwright test --config=playwright.local.config.ts",
   "check:playwright-dom": "node scripts/scan-dom-access.js",
+  "get-coverage": "node scripts/get-coverage.js",
     "deploy:staging": "vercel --scope your-org",
     "deploy:production": "vercel --prod --scope your-org",
     "format": "prettier --write .",

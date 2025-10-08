@@ -49,6 +49,12 @@ jobs:
       - name: Run linting
         run: npm ci && npm run lint
 
+      - name: Run ShellCheck for scripts
+        if: always()
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck || true
+          find . -type f -name "*.sh" -o -name "*.yml" | xargs -r shellcheck || true
+
       - name: Run type checking
         run: npm run type-check
 
