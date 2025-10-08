@@ -17,7 +17,6 @@ async function run() {
       plugins: { 'local-rules': plugin },
       rules: { 'local-rules/no-untyped-dom-access': 'error' },
     },
-    useEslintrc: false,
   });
 
   const validSamples = [
