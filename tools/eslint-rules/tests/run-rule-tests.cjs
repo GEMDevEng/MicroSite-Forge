@@ -1,8 +1,3 @@
-const { RuleTester } = require('eslint');
-const rule = require('../no-untyped-dom-access.cjs');
-
-
-
 const { ESLint } = require('eslint');
 const path = require('path');
 
@@ -11,19 +6,18 @@ async function run() {
   const eslint = new ESLint({
     overrideConfig: {
       languageOptions: {
-        parser: require.resolve('@typescript-eslint/parser'),
+        parser: require('@typescript-eslint/parser'),
         parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
       },
       plugins: { 'local-rules': plugin },
       rules: { 'local-rules/no-untyped-dom-access': 'error' },
     },
-    useEslintrc: false,
   });
 
   const validSamples = [
-  'const v = (el as HTMLInputElement).value; console.log(v);',
-  'const v = e.target.value; console.log(v);',
-  'const v = input.value; console.log(v); // already typed',
+    'const v = (el as HTMLInputElement).value; console.log(v);',
+    'const v = e.target.value; console.log(v);',
+  'const v = (input as HTMLInputElement).value; console.log(v); // already typed',
   ];
   const invalidSamples = [
     'const v = node.value;'

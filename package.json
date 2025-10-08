@@ -54,6 +54,8 @@
     "check:dom-scanner": "node scripts/scan-dom-access.cjs"
     ,
     "check:dom-lint": "node tools/eslint-runner.js"
+    ,
+    "test:eslint-rules": "node tools/eslint-rules/tests/run-rule-tests.cjs"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
