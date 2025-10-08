@@ -9,7 +9,7 @@ const path = require('path');
 async function run() {
   const plugin = require('../index.cjs');
   const eslint = new ESLint({
-    baseConfig: {
+    overrideConfig: {
       languageOptions: {
         parser: require.resolve('@typescript-eslint/parser'),
         parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
@@ -17,12 +17,13 @@ async function run() {
       plugins: { 'local-rules': plugin },
       rules: { 'local-rules/no-untyped-dom-access': 'error' },
     },
+    useEslintrc: false,
   });
 
   const validSamples = [
-    'const _ = (el as HTMLInputElement).value;',
-    'const _ = e.target.value;',
-    'const _ = input.value; // already typed',
+  'const v = (el as HTMLInputElement).value; console.log(v);',
+  'const v = e.target.value; console.log(v);',
+  'const v = input.value; console.log(v); // already typed',
   ];
   const invalidSamples = [
     'const v = node.value;'

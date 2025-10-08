@@ -18,8 +18,8 @@ module.exports = {
         var prop = node.property && node.property.name ? node.property.name : null;
         if (!prop) return;
         var objText = context.getSourceCode().getText(node.object);
-        // Skip obvious safe patterns
-        if (/\(.*as\s+HTMLInputElement\)|\.target|\bevent\b|\be\b/.test(objText)) return;
+  // Skip obvious safe patterns (explicit cast or event targets)
+  if (/as\s+HTMLInputElement|as\s+HTMLTextAreaElement|\.target|\bevent\b|\be\b/.test(objText)) return;
 
         // If parserServices available, try to use TypeScript type information
         var parserServices = context.parserServices;
