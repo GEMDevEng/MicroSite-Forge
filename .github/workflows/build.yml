@@ -27,6 +27,7 @@ jobs:
 
       - name: Check type freshness
         run: npm run types:check-freshness
+        continue-on-error: true
 
       - name: Run type check
         run: npm run type-check

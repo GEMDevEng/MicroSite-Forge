@@ -291,7 +291,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         query = query.eq('site_id', siteId)
       }
 
-      if (statusFilter !== 'all' && validStatuses.includes(statusFilter as any)) {
+      if (statusFilter !== 'all' && (validStatuses as readonly string[]).includes(statusFilter)) {
         query = query.eq('status', statusFilter as (typeof validStatuses)[number])
       }
 
@@ -303,9 +303,9 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
       }
 
       // Transform the data to match LeadData interface
-      const transformedLeads: LeadData[] = data.map((lead: any) => {
+  const transformedLeads: LeadData[] = (data as unknown[]).map((lead: unknown) => {
         // Type guard functions
-        function isContactInfo(obj: any): obj is ContactInfo {
+        function isContactInfo(obj: unknown): obj is ContactInfo {
           return (
             typeof obj === 'object' &&
             obj !== null &&
@@ -316,7 +316,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
           )
         }
 
-        function isLeadScore(obj: any): obj is LeadScore {
+        function isLeadScore(obj: unknown): obj is LeadScore {
           return (
             typeof obj === 'object' &&
             obj !== null &&
@@ -336,19 +336,20 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         }
 
         let contactInfo: ContactInfo
-        if (isContactInfo(lead.contact_info)) {
-          contactInfo = lead.contact_info
+        const leadObj = lead as Record<string, unknown>
+        if (isContactInfo(leadObj.contact_info)) {
+          contactInfo = leadObj.contact_info as ContactInfo
         } else {
           contactInfo = {
-            name: lead.name || 'Unknown',
-            email: lead.email,
-            phone: lead.phone || undefined,
+            name: (leadObj.name as string) || 'Unknown',
+            email: leadObj.email as string,
+            phone: (leadObj.phone as string) || undefined,
           }
         }
 
         let leadScore: LeadScore
-        if (isLeadScore(lead.score_data)) {
-          leadScore = lead.score_data
+        if (isLeadScore(leadObj.score_data)) {
+          leadScore = leadObj.score_data as LeadScore
         } else {
           leadScore = {
             source: 'organic' as const,
@@ -363,24 +364,24 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
         const validStatuses = ['new', 'qualified', 'contacted', 'converted'] as const
         type StatusType = (typeof validStatuses)[number]
         let safeStatus: StatusType
-        if (validStatuses.includes(lead.status as any)) {
-          safeStatus = lead.status as StatusType
+        if (typeof leadObj.status === 'string' && validStatuses.includes(leadObj.status as StatusType)) {
+          safeStatus = leadObj.status as StatusType
         } else {
           safeStatus = 'new'
         }
 
         return {
-          id: lead.id,
+          id: leadObj.id as string,
           contact: contactInfo,
           score: leadScore,
-          tags: Array.isArray(lead.tags) ? (lead.tags as string[]) : [],
+          tags: Array.isArray(leadObj.tags) ? (leadObj.tags as string[]) : [],
           status: safeStatus,
-          assigned_to: lead.assigned_to,
-          follow_up_date: lead.follow_up_date,
-          marketing_campaign: lead.marketing_campaign,
-          enriched_at: lead.enriched_at,
-          created_at: lead.created_at,
-          updated_at: lead.updated_at,
+          assigned_to: leadObj.assigned_to as string | undefined,
+          follow_up_date: leadObj.follow_up_date as string | undefined,
+          marketing_campaign: leadObj.marketing_campaign as string | undefined,
+          enriched_at: leadObj.enriched_at as string | undefined,
+          created_at: (leadObj.created_at as string) || new Date().toISOString(),
+          updated_at: (leadObj.updated_at as string) || new Date().toISOString(),
         }
       })
 
@@ -415,7 +416,7 @@ export const LeadManagementDashboard: React.FC<LeadManagementDashboardProps> = (
 
       const { error } = await supabase
         .from('leads')
-        .update({ status: status as any, updated_at: new Date().toISOString() })
+        .update({ status: status as (Status), updated_at: new Date().toISOString() })
         .eq('id', leadId)
 
       if (error) {

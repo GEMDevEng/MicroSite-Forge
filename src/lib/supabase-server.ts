@@ -2,16 +2,6 @@ import { createServerClient as createSupabaseServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-interface CookieOptions {
-  domain?: string
-  path?: string
-  maxAge?: number
-  httpOnly?: boolean
-  secure?: boolean
-  sameSite?: 'strict' | 'lax' | 'none'
-  expirationDate?: number
-}
-
 /**
  * Validate required Supabase environment variables
  */
@@ -42,14 +32,19 @@ export const createClient = async (): Promise<SupabaseClient> => {
     key,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
+        getAll() {
+          return cookieStore.getAll()
         },
-        set(name: string, value: string, options: unknown) {
-          cookieStore.set({ name, value, ...(options as CookieOptions) })
-        },
-        remove(name: string, options: unknown) {
-          cookieStore.set({ name, value: '', ...(options as CookieOptions) })
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
         },
       },
     }

@@ -8,6 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Search, TrendingUp, Lightbulb, AlertCircle, DollarSign } from 'lucide-react'
+import type { DomainCheckResult } from '@/lib/porkbun'
 
 // Types
 interface KeywordSuggestion {
@@ -24,7 +25,7 @@ interface ResearchResponse {
   trendingTopics: string[]
   contentOpportunities: string[]
   competitorInsights?: string[]
-  availableDomains: any[]
+  availableDomains: DomainCheckResult[]
   recommendedDomain?: string
   estimatedCost?: number
 }
@@ -46,7 +47,8 @@ export default function NicheResearch({ onResearchComplete }: NicheResearchProps
     domainSearch: true,
   })
 
-  const handleInputChange = (field: string, value: string | boolean) => {
+  type FormDataType = typeof formData
+  const handleInputChange = <K extends keyof FormDataType>(field: K, value: FormDataType[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 

@@ -59,7 +59,13 @@ export function MFASetup({ onSetupComplete }: MFASetupProps) {
         return
       }
 
-      await verifyMFA(mfaChallenge.totp.id, data.code)
+      const challengeId = mfaChallenge.id ?? mfaChallenge.totp?.id
+      if (!challengeId) {
+        setError('No MFA challenge id available. Please restart setup.')
+        return
+      }
+
+      await verifyMFA(challengeId, data.code)
       reset()
       onSetupComplete?.()
     } catch (err: unknown) {

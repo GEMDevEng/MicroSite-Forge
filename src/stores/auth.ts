@@ -3,12 +3,29 @@ import { persist } from 'zustand/middleware'
 import { createClient } from '@/lib/supabase/client'
 import type { User, Session } from '@supabase/supabase-js'
 
+// MFA-related types (simplified to the fields used by the UI)
+export interface MFAFactor {
+  id: string
+  status: 'verified' | 'unverified' | string
+  friendly_name?: string
+}
+
+export interface MFAChallenge {
+  id?: string
+  totp: {
+    id?: string
+    qr_code: string
+    secret: string
+    uri: string
+  }
+}
+
 interface AuthState {
   user: User | null
   session: Session | null
   mfaEnabled: boolean
-  mfaFactors: any[]
-  mfaChallenge: any | null
+  mfaFactors: MFAFactor[]
+  mfaChallenge: MFAChallenge | null
   loading: boolean
   initialized: boolean
   signIn: (email: string, password: string) => Promise<void>
@@ -28,8 +45,8 @@ interface AuthState {
   setUser: (user: User | null) => void
   setSession: (session: Session | null) => void
   setMFAEnabled: (enabled: boolean) => void
-  setMFATickets: (tickets: any[]) => void
-  setMFAChallenge: (challenge: any | null) => void
+  setMFATickets: (tickets: MFAFactor[]) => void
+  setMFAChallenge: (challenge: MFAChallenge | null) => void
   setLoading: (loading: boolean) => void
 }
 
@@ -318,14 +335,34 @@ export const useAuthStore = create<AuthState>()(
             throw error
           }
 
+          // Narrow the enrollment response to a local shape
+          const enrollment = data as unknown as {
+            id?: string
+            totp?: {
+              id?: string
+              qr_code?: string
+              secret?: string
+              uri?: string
+            }
+          }
+
+          // Normalize challenge shape: supabase may return challenge.id or enrollment.totp.id
           set({
-            mfaChallenge: data
+            mfaChallenge: {
+              id: enrollment.id ?? enrollment.totp?.id,
+              totp: {
+                id: enrollment.totp?.id,
+                qr_code: enrollment.totp?.qr_code ?? '',
+                secret: enrollment.totp?.secret ?? '',
+                uri: enrollment.totp?.uri ?? '',
+              },
+            },
           })
 
           return {
-            qr_code_url: data.totp.qr_code,
-            secret: data.totp.secret,
-            uri: data.totp.uri
+            qr_code_url: enrollment.totp?.qr_code ?? '',
+            secret: enrollment.totp?.secret ?? '',
+            uri: enrollment.totp?.uri ?? '',
           }
         } catch (error) {
           console.error('MFA enrollment error:', error)
@@ -337,14 +374,16 @@ export const useAuthStore = create<AuthState>()(
         try {
           const supabase = createClient()
           const challenge = _get().mfaChallenge
-          if (!challenge) {
+          if (!challenge || (!challenge.id && !challenge.totp?.id)) {
             throw new Error('No MFA challenge found. Please enroll first.')
           }
+
+          const challengeId = challenge.id ?? challenge.totp?.id
 
           const { error } = await supabase.auth.mfa.verify({
             factorId,
             code,
-            challengeId: challenge.id,
+            challengeId: challengeId as string,
           })
 
           if (error) {
@@ -404,8 +443,8 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user: User | null) => set({ user }),
       setSession: (session: Session | null) => set({ session }),
       setMFAEnabled: (mfaEnabled: boolean) => set({ mfaEnabled }),
-      setMFATickets: (mfaFactors: any[]) => set({ mfaFactors }),
-      setMFAChallenge: (mfaChallenge: any | null) => set({ mfaChallenge }),
+    setMFATickets: (mfaFactors: MFAFactor[]) => set({ mfaFactors }),
+    setMFAChallenge: (mfaChallenge: MFAChallenge | null) => set({ mfaChallenge }),
       setLoading: (loading: boolean) => set({ loading }),
     }),
     {

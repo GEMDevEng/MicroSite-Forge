@@ -78,3 +78,13 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key'
 // Set API keys to empty to prevent real API calls during tests
 process.env.OPENAI_API_KEY = ''
 process.env.GROK_API_KEY = ''
+
+// Polyfill Response.json for Node test environment.
+// Next.js's NextResponse.json may call a static Response.json in some builds.
+// Ensure it exists so API routes can return JSON responses in Jest (node env).
+if (typeof globalThis.Response !== 'undefined' && typeof globalThis.Response.json !== 'function') {
+  // eslint-disable-next-line func-names
+  globalThis.Response.json = function (body, init) {
+    return new globalThis.Response(JSON.stringify(body), init)
+  }
+}

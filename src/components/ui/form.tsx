@@ -14,7 +14,7 @@ import { Button } from './button'
 
 // Form context
 interface FormContextValue {
-  form: UseFormReturn<any>
+  form: UseFormReturn<FieldValues>
 }
 
 const FormContext = React.createContext<FormContextValue | null>(null)
@@ -41,8 +41,9 @@ export function Form<T extends FieldValues = FieldValues>({
   onSubmit,
   className,
 }: FormProps<T>) {
+  // Cast to the generic FormContext value expected by consumers
   return (
-    <FormContext.Provider value={{ form }}>
+    <FormContext.Provider value={{ form: form as unknown as UseFormReturn<FieldValues> }}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={cn('space-y-6', className)}>
         {children}
       </form>
@@ -54,8 +55,8 @@ export function Form<T extends FieldValues = FieldValues>({
 interface FormFieldProps<T extends FieldValues = FieldValues> {
   name: FieldPath<T>
   children: (field: {
-    value: any
-    onChange: (value: any) => void
+    value: unknown
+    onChange: (value: unknown) => void
     onBlur: () => void
     error?: string
     disabled?: boolean
@@ -146,13 +147,13 @@ export function FormMessage({ children, className }: FormMessageProps) {
 }
 
 // Convenience hook for creating forms with validation
-export function useZodForm<T extends z.ZodType<any, any>>(
+export function useZodForm<T extends z.ZodTypeAny>(
   schema: T,
   defaultValues?: z.infer<T>
 ) {
   return useForm<z.infer<T>>({
     resolver: zodResolver(schema),
-    defaultValues: defaultValues as any,
+    defaultValues: defaultValues as z.infer<T> | undefined,
     mode: 'onChange',
   })
 }
@@ -186,7 +187,7 @@ export function TextField<T extends FieldValues = FieldValues>({
             <Input
               type={type}
               placeholder={placeholder}
-              value={value || ''}
+              value={(typeof value === 'string' || typeof value === 'number') ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               onBlur={onBlur}
               disabled={disabled}
@@ -228,7 +229,7 @@ export function TextareaField<T extends FieldValues = FieldValues>({
           <FormControl>
             <Textarea
               placeholder={placeholder}
-              value={value || ''}
+              value={(typeof value === 'string' || typeof value === 'number') ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               onBlur={onBlur}
               disabled={disabled}
@@ -270,7 +271,7 @@ export function SelectField<T extends FieldValues = FieldValues>({
           <FormLabel required={required}>{label}</FormLabel>
           <FormControl>
             <select
-              value={value || ''}
+              value={(typeof value === 'string' || typeof value === 'number') ? value : ''}
               onChange={(e) => onChange(e.target.value)}
               onBlur={onBlur}
               disabled={disabled}

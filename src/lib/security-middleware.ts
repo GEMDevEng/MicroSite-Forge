@@ -226,8 +226,8 @@ function validateHeaders(request: NextRequest): { valid: boolean; reason?: strin
     return { valid: false, reason: 'Missing user agent' }
   }
 
-  // Check for suspiciously short user agents
-  if (userAgent.length < 10 && !userAgent.includes('curl')) {
+  // Check for suspiciously short user agents (treat short agents as suspicious)
+  if (userAgent.length < 10) {
     return { valid: false, reason: 'Suspiciously short user agent' }
   }
 
@@ -250,12 +250,45 @@ function detectSuspiciousRequest(request: NextRequest, path: string): {
   reason?: string;
 } {
   const userAgent = request.headers.get('user-agent') || ''
-  const query = request.nextUrl.search
+  // Try to inspect both decoded and raw forms of the path and query to catch encoded attacks
+  let rawPath = path
+  let rawQuery = ''
+  try {
+    if (request.nextUrl) {
+      rawPath = request.nextUrl.pathname || rawPath
+      rawQuery = request.nextUrl.search || ''
+    } else {
+      const parsed = new URL(request.url)
+      rawPath = parsed.pathname
+      rawQuery = parsed.search
+    }
+  } catch {
+    // Fallback to request.url if URL parsing fails
+    rawPath = request.url || rawPath
+  }
 
-  // Check path for suspicious patterns
+  const decodedPath = safeDecodeURIComponent(rawPath)
+  const decodedQuery = safeDecodeURIComponent(rawQuery)
+  const fullUrl = request.url || `${rawPath}${rawQuery}`
+
+  // Check path and query for suspicious patterns (both raw and decoded)
   for (const pattern of SUSPICIOUS_PATTERNS.paths) {
-    if (pattern.test(path) || pattern.test(query)) {
+    if (
+      pattern.test(rawPath) ||
+      pattern.test(rawQuery) ||
+      pattern.test(decodedPath) ||
+      pattern.test(decodedQuery) ||
+      pattern.test(fullUrl)
+    ) {
       return { isSuspicious: true, reason: 'Suspicious path pattern detected' }
+    }
+  }
+
+  // Additional heuristic: if decoded path targets typical sensitive system locations
+  const sensitivePaths = ['/etc/', '/etc', '/passwd', '/proc/', '/proc', '/windows/', '/winnt/']
+  for (const sp of sensitivePaths) {
+    if (decodedPath.includes(sp) || rawPath.includes(sp) || fullUrl.includes(sp)) {
+      return { isSuspicious: true, reason: 'Access to sensitive system path detected' }
     }
   }
 
@@ -271,6 +304,15 @@ function detectSuspiciousRequest(request: NextRequest, path: string): {
 
 
   return { isSuspicious: false }
+}
+
+// Safe decodeURIComponent wrapper
+function safeDecodeURIComponent(input: string): string {
+  try {
+    return decodeURIComponent(input)
+  } catch {
+    return input
+  }
 }
 
 /**
