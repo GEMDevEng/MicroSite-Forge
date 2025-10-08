@@ -6,39 +6,44 @@ async function run() {
   const eslint = new ESLint({
     overrideConfig: {
       languageOptions: {
-        parser: require('@typescript-eslint/parser'),
-        parserOptions: { ecmaVersion: 2020, sourceType: 'module' },
-      },
+          parser: require('@typescript-eslint/parser'),
+          parserOptions: {
+            ecmaVersion: 2020,
+            sourceType: 'module',
+            project: path.resolve(__dirname, 'tsconfig.json'),
+            tsconfigRootDir: path.resolve(__dirname),
+          },
+        },
       plugins: { 'local-rules': plugin },
-      rules: { 'local-rules/no-untyped-dom-access': 'error' },
+      rules: {
+        'local-rules/no-untyped-dom-access': 'error',
+        '@typescript-eslint/no-unused-vars': 'off',
+        '@next/next/no-html-link-for-pages': 'off',
+      },
     },
+    cwd: path.resolve(__dirname),
+    ignore: false,
   });
 
-  const validSamples = [
-    'const v = (el as HTMLInputElement).value; console.log(v);',
-    'const v = e.target.value; console.log(v);',
-  'const v = (input as HTMLInputElement).value; console.log(v); // already typed',
-  ];
-  const invalidSamples = [
-    'const v = node.value;'
-  ];
+  // Lint on-disk fixtures so parserServices are available
+  const testDir = path.resolve(__dirname, 'fixtures');
+  const validFile = path.join(testDir, 'valid.ts');
+  const invalidFile = path.join(testDir, 'invalid.ts');
 
-  for (const code of validSamples) {
-    const results = await eslint.lintText(code, { filePath: path.resolve('test.ts') });
-    const errCount = results.reduce((s, r) => s + r.errorCount, 0);
-    if (errCount > 0) {
-      console.error('Valid sample unexpectedly produced errors:', code, results[0].messages);
-      process.exit(2);
-    }
+  // Run lint on valid file
+  const resValid = await eslint.lintFiles([validFile]);
+  const validErrCount = resValid.reduce((s, r) => s + r.errorCount, 0);
+  if (validErrCount > 0) {
+    console.error('Valid fixture produced errors', resValid.map(r => r.messages));
+    process.exit(2);
   }
 
-  for (const code of invalidSamples) {
-    const results = await eslint.lintText(code, { filePath: path.resolve('test.ts') });
-    const errCount = results.reduce((s, r) => s + r.errorCount, 0);
-    if (errCount === 0) {
-      console.error('Invalid sample did not produce errors as expected:', code, results[0].messages);
-      process.exit(2);
-    }
+  // Run lint on invalid file
+  const resInvalid = await eslint.lintFiles([invalidFile]);
+  const invalidErrCount = resInvalid.reduce((s, r) => s + r.errorCount, 0);
+  if (invalidErrCount === 0) {
+    console.error('Invalid fixture did not produce errors as expected', resInvalid.map(r => r.messages));
+    process.exit(2);
   }
 
   console.log('ESLint rule smoke tests passed');

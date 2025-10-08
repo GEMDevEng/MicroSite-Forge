@@ -45,6 +45,32 @@ module.exports = {
           // On any parser service error, fall back to heuristic
         }
 
+        // If parserServices didn't yield a TS node, try to find a declaration in scope
+        if (node.object && node.object.type === 'Identifier') {
+          try {
+            var name = node.object.name;
+            var scope = context.getScope();
+            while (scope) {
+              var v = scope.variables && scope.variables.find(function (vv) { return vv.name === name; });
+              if (v && v.defs && v.defs.length) {
+                var def = v.defs[0];
+                if (def.node && def.node.id && def.node.id.typeAnnotation) {
+                  var ta = context.getSourceCode().getText(def.node.id.typeAnnotation);
+                  if (/HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement/.test(ta)) return;
+                }
+                // Check initializer text for explicit cast or createElement
+                if (def.node && def.node.init) {
+                  var initText = context.getSourceCode().getText(def.node.init);
+                  if (/as\s+HTMLInputElement|createElement\(\s*['"]input['"]\s*\)/.test(initText)) return;
+                }
+              }
+              scope = scope.upper;
+            }
+          } catch (e) {
+            // ignore scope lookup errors
+          }
+        }
+
         // Fallback heuristic
         context.report({ node: node, message: "Possible untyped DOM access: '" + objText + "." + prop + "'" });
       }
