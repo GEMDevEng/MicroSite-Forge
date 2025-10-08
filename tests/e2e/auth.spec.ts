@@ -29,7 +29,8 @@ test.describe('Authentication', () => {
 
     // Some UIs rely on native browser validation instead of showing text.
     // Check the input's validity directly so the test is robust across implementations.
-    const emailValid = await page.$eval('#email', (el) => (el as HTMLInputElement).checkValidity())
+    const emailInput = page.locator('#email')
+    const emailValid = await emailInput.evaluate((el) => (el as HTMLInputElement).checkValidity())
     await expect(emailValid).toBe(false)
   })
 
@@ -42,7 +43,9 @@ test.describe('Authentication', () => {
 
     // Some apps show client-side messages; others enforce on the server. Be resilient:
     // verify the password length is short and that we're still on the login page (no successful navigation).
-    const pwdLen = await page.$eval('#password', (el) => (el as HTMLInputElement).value.length)
+    const passwordInput = page.locator('#password')
+    const pwdValue = await passwordInput.inputValue()
+    const pwdLen = pwdValue.length
     await expect(pwdLen).toBeLessThan(6)
     await expect(page).toHaveURL(/\/auth\/login/)
   })
