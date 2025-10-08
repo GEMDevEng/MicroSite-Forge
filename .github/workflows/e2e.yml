@@ -35,7 +35,17 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
 
-      # 5. Run E2E tests
+      # 5. Build, start app and run type-check
+      - name: Build and start app
+        run: |
+          npm run build
+          npm run start &
+          npx wait-on http://localhost:3000/api/health
+
+      - name: Type-check
+        run: npm run type-check
+
+      # 6. Run E2E tests
       - name: Run Playwright tests
         run: npm run test:e2e:ci
 
