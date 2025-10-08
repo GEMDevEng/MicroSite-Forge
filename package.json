@@ -50,6 +50,8 @@
     "types:validate": "npm run type-check",
     "types:strict-validate": "node scripts/generate-types.js check-freshness strict && npm run type-check",
     "prebuild": "npm run types:generate"
+    ,
+    "check:dom-scanner": "node scripts/scan-dom-access.cjs"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
