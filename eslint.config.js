@@ -28,6 +28,7 @@ export default [
       'scripts/**',
       'test-results/**',
       'playwright-report/**',
+      'tools/**',
     ],
   },
   {
