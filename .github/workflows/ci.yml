@@ -49,6 +49,9 @@ jobs:
       - name: Run linting
         run: npm ci && npm run lint
 
+      - name: Run DOM untyped-access linter
+        run: npm run check:dom-lint
+
       - name: Run type checking
         run: npm run type-check
 
