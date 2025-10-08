@@ -2,6 +2,9 @@ import js from '@eslint/js'
 import typescriptEslint from 'typescript-eslint'
 import react from 'eslint-plugin-react'
 import nextPlugin from '@next/eslint-plugin-next'
+import { createRequire } from 'module'
+const require = createRequire(import.meta.url)
+const localRules = require('./tools/eslint-rules/index.cjs')
 
 export default [
   {
@@ -45,6 +48,7 @@ export default [
     plugins: {
       react,
       '@next/next': nextPlugin,
+      'local-rules': localRules,
     },
     rules: {
       // Next.js recommended rules
@@ -60,6 +64,8 @@ export default [
       '@typescript-eslint/no-require-imports': 'off',
       // Allow empty interfaces (common in React components)
       '@typescript-eslint/no-empty-object-type': 'off',
+      // Local rule to catch untyped DOM access patterns
+      'local-rules/no-untyped-dom-access': 'error',
     },
     settings: {
       react: {
