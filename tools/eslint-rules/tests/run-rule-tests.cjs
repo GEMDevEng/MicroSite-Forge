@@ -20,9 +20,9 @@ async function run() {
   });
 
   const validSamples = [
-    '(el as HTMLInputElement).value',
-    'e.target.value',
-    'input.value // already typed',
+    'const _ = (el as HTMLInputElement).value;',
+    'const _ = e.target.value;',
+    'const _ = input.value; // already typed',
   ];
   const invalidSamples = [
     'const v = node.value;'
