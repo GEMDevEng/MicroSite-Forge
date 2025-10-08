@@ -53,7 +53,7 @@
     ,
     "check:dom-scanner": "node scripts/scan-dom-access.cjs"
     ,
-    "check:dom-lint": "node --input-type=module tools/eslint-runner.js"
+    "check:dom-lint": "node tools/eslint-runner.js"
   },
   "lint-staged": {
     "src/**/*.{ts,tsx}": [
