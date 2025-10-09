@@ -103,19 +103,7 @@ jobs:
 
       - name: Create local .env.local for local CI runs
         if: always()
-        run: |
-          # Create a .env.local with safe placeholders if required env vars are missing.
-          # This helps local CI runners (act) complete the Next.js build step for testing.
-          if [ -z "${NEXT_PUBLIC_SUPABASE_URL:-}" ] || [ -z "${NEXT_PUBLIC_SUPABASE_ANON_KEY:-}" ]; then
-            cat > .env.local <<'EOF'
-NEXT_PUBLIC_SUPABASE_URL=https://local-placeholder.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=local-anon-key
-SUPABASE_SERVICE_ROLE_KEY=local-service-role-key
-EOF
-            echo ".env.local created for local CI run"
-          else
-            echo "Required Supabase env vars present; skipping .env.local creation"
-          fi
+        run: node -e "const fs=require('fs'); if(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY){ fs.writeFileSync('.env.local', 'NEXT_PUBLIC_SUPABASE_URL=https://local-placeholder.supabase.co\\nNEXT_PUBLIC_SUPABASE_ANON_KEY=local-anon-key\\nSUPABASE_SERVICE_ROLE_KEY=local-service-role-key\\n'); console.log('.env.local created for local CI run'); } else { console.log('Required Supabase env vars present; skipping .env.local creation'); }"
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
