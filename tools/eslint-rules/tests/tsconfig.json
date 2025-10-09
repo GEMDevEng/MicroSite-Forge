@@ -10,6 +10,7 @@
   },
   "files": [
     "fixtures/valid.ts",
-    "fixtures/invalid.ts"
+    "fixtures/invalid.ts",
+    "fixtures/react-patterns.tsx"
   ]
 }
