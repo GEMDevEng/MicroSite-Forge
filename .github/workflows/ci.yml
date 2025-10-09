@@ -99,15 +99,15 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
+      - name: Create local .env.local for local CI runs
+        if: always()
+        run: node -e "const fs=require('fs'); if(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY){ fs.writeFileSync('.env.local', 'NEXT_PUBLIC_SUPABASE_URL=https://local-placeholder.supabase.co\\nNEXT_PUBLIC_SUPABASE_ANON_KEY=local-anon-key\\nSUPABASE_SERVICE_ROLE_KEY=local-service-role-key\\n'); console.log('.env.local created for local CI run'); } else { console.log('Required Supabase env vars present; skipping .env.local creation'); }"
+
       - name: Build application
         run: npm run build
         env:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-
-      - name: Create local .env.local for local CI runs
-        if: always()
-        run: node -e "const fs=require('fs'); if(!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY){ fs.writeFileSync('.env.local', 'NEXT_PUBLIC_SUPABASE_URL=https://local-placeholder.supabase.co\\nNEXT_PUBLIC_SUPABASE_ANON_KEY=local-anon-key\\nSUPABASE_SERVICE_ROLE_KEY=local-service-role-key\\n'); console.log('.env.local created for local CI run'); } else { console.log('Required Supabase env vars present; skipping .env.local creation'); }"
 
       - name: Install Playwright browsers
         run: npx playwright install --with-deps
