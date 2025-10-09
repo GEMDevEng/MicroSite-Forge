@@ -272,9 +272,9 @@ export function SelectField<T extends FieldValues = FieldValues>({
   // Ensure `options` is strongly typed so accessing `.value` is clearly a string
   type Opt = { value: string; label: string }
   const optionElements = (options as Opt[]).map((option) => {
-    const k = 'value'
+    const k: keyof Opt = 'value'
     return (
-      <option key={(option as any)[k]} value={(option as any)[k]}>
+      <option key={option[k]} value={option[k]}>
         {option.label}
       </option>
     )

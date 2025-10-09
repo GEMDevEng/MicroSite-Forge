@@ -67,14 +67,14 @@ export async function POST(request: NextRequest) {
     let nicheResearch: NicheResearchResponse | null = null
     if (results[0].status === 'fulfilled') {
       const maybeNiche = results[0] as PromiseFulfilledResult<NicheResearchResponse>
-      const key = 'value'
-      nicheResearch = (maybeNiche as any)[key] as NicheResearchResponse
+  const key: keyof typeof maybeNiche = 'value'
+  nicheResearch = maybeNiche[key] as NicheResearchResponse
     }
     const availableDomains: DomainCheckResult[] = []
     if (validated.domainSearch && results[1]?.status === 'fulfilled') {
       const maybeDomains = results[1] as PromiseFulfilledResult<DomainCheckResult[]>
-      const key = 'value'
-      const domVal = (maybeDomains as any)[key]
+      const key: keyof typeof maybeDomains = 'value'
+      const domVal = maybeDomains[key]
       if (Array.isArray(domVal)) {
         availableDomains.push(...(domVal as DomainCheckResult[]))
       }

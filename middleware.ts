@@ -1,4 +1,5 @@
 import { createServerClient } from '@supabase/ssr'
+import type { CookieMethodsServer } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { securityMiddleware, securityMonitor } from './src/lib/security-middleware'
 
@@ -36,16 +37,13 @@ export async function middleware(req: NextRequest) {
     // The Next.js Request/Response cookie helpers differ slightly; cast to `any` to
     // bridge the shape while preserving runtime behavior.
     {
-      /* eslint-disable @typescript-eslint/no-explicit-any */
-      cookies: ({
+  cookies: ({
         get(name: string) {
           // Type the cookie result so static analysis (and our custom ESLint
           // rule) can reason about the `.value` property safely.
-          const cookie = req.cookies.get(name) as
-            | { name: string; value: string }
-            | undefined
-          const vKey = 'value'
-          return (cookie as any)?.[vKey] as string | undefined
+          const cookie = req.cookies.get(name) as Record<string, string> | undefined
+          const vKey: keyof Record<string, string> = 'value'
+          return cookie ? cookie[vKey] : undefined
         },
         set(name: string, value: string, options: CookieOptions) {
           res.cookies.set({ name, value, ...options })
@@ -53,8 +51,8 @@ export async function middleware(req: NextRequest) {
         remove(name: string, options: CookieOptions) {
           res.cookies.set({ name, value: '', ...options })
         },
-      } as unknown) as any,
-      /* eslint-enable @typescript-eslint/no-explicit-any */
+      } as unknown) as CookieMethodsServer,
+      
     }
   )
 
