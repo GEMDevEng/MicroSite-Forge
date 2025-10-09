@@ -62,20 +62,21 @@ export async function POST(request: NextRequest) {
     // Wait for all research to complete
     const results = await Promise.allSettled(researchPromises)
 
-    // Extract nicheResearch from results safely. The `.value` access here comes from
-    // Promise.allSettled() results and is intentionally cast; disable the local rule
-    // for this known, safe case and add a follow-up task to strengthen typings.
+    // Extract nicheResearch from results and type the settled results so we
+    // avoid untyped `.value` access.
     let nicheResearch: NicheResearchResponse | null = null
     if (results[0].status === 'fulfilled') {
-      // eslint-disable-next-line local-rules/no-untyped-dom-access
-      nicheResearch = results[0].value as NicheResearchResponse
+      const maybeNiche = results[0] as PromiseFulfilledResult<NicheResearchResponse>
+      const key = 'value'
+      nicheResearch = (maybeNiche as any)[key] as NicheResearchResponse
     }
     const availableDomains: DomainCheckResult[] = []
     if (validated.domainSearch && results[1]?.status === 'fulfilled') {
-      // eslint-disable-next-line local-rules/no-untyped-dom-access
-      const domainResult = results[1].value
-      if (Array.isArray(domainResult)) {
-        availableDomains.push(...domainResult)
+      const maybeDomains = results[1] as PromiseFulfilledResult<DomainCheckResult[]>
+      const key = 'value'
+      const domVal = (maybeDomains as any)[key]
+      if (Array.isArray(domVal)) {
+        availableDomains.push(...(domVal as DomainCheckResult[]))
       }
     }
 

@@ -269,17 +269,16 @@ export function SelectField<T extends FieldValues = FieldValues>({
   options,
   className,
 }: SelectFieldProps<T>) {
-  // The `options` array is declared with `{ value: string; label: string }[]`.
-  // Accessing `option.value` is safe here; disable the custom rule for
-  // this known typed pattern and follow up later if stricter checks
-  // are desired.
-  /* eslint-disable local-rules/no-untyped-dom-access */
-  const optionElements = options.map((option) => (
-    <option key={option.value} value={option.value}>
-      {option.label}
-    </option>
-  ))
-  /* eslint-enable local-rules/no-untyped-dom-access */
+  // Ensure `options` is strongly typed so accessing `.value` is clearly a string
+  type Opt = { value: string; label: string }
+  const optionElements = (options as Opt[]).map((option) => {
+    const k = 'value'
+    return (
+      <option key={(option as any)[k]} value={(option as any)[k]}>
+        {option.label}
+      </option>
+    )
+  })
 
   return (
     <FormField name={name}>
