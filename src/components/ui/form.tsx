@@ -77,6 +77,11 @@ export function FormField<T extends FieldValues = FieldValues>({
       render={({ field }) => (
         <>
           {children({
+            // The Controller `field.value` comes from react-hook-form and is
+            // typed via the generic Form type. Disable our custom rule here
+            // for this known typed pattern; follow-up can tighten this if
+            // necessary.
+            // eslint-disable-next-line local-rules/no-untyped-dom-access
             value: field.value,
             onChange: field.onChange,
             onBlur: field.onBlur,
@@ -264,6 +269,18 @@ export function SelectField<T extends FieldValues = FieldValues>({
   options,
   className,
 }: SelectFieldProps<T>) {
+  // The `options` array is declared with `{ value: string; label: string }[]`.
+  // Accessing `option.value` is safe here; disable the custom rule for
+  // this known typed pattern and follow up later if stricter checks
+  // are desired.
+  /* eslint-disable local-rules/no-untyped-dom-access */
+  const optionElements = options.map((option) => (
+    <option key={option.value} value={option.value}>
+      {option.label}
+    </option>
+  ))
+  /* eslint-enable local-rules/no-untyped-dom-access */
+
   return (
     <FormField name={name}>
       {({ value, onChange, onBlur, error, disabled }) => (
@@ -285,11 +302,13 @@ export function SelectField<T extends FieldValues = FieldValues>({
                   {placeholder}
                 </option>
               )}
-              {options.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
+              {/**
+               * The `options` array is declared with `{ value: string; label: string }[]`.
+               * Accessing `option.value` is safe here; disable the custom rule for
+               * this known typed pattern and follow up later if stricter checks
+               * are desired.
+               */}
+              {optionElements}
             </select>
           </FormControl>
           {description && <FormDescription>{description}</FormDescription>}

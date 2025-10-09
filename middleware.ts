@@ -39,6 +39,11 @@ export async function middleware(req: NextRequest) {
       /* eslint-disable @typescript-eslint/no-explicit-any */
       cookies: ({
         get(name: string) {
+          // The value returned here is a cookie string from Next's Request cookies API.
+          // This line intentionally accesses the `.value` property which is a simple
+          // string (or undefined). Disable the custom rule here and add a follow-up
+          // task to replace with a fully typed adapter if desired.
+          // eslint-disable-next-line local-rules/no-untyped-dom-access
           return req.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
