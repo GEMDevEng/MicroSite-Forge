@@ -83,13 +83,13 @@ export class ApiClient {
 
         clearTimeout(timeoutId)
 
-        const responseData = await response.json()
+  const responseData = (await response.json()) as ApiResponse<T>
 
         if (!response.ok) {
           throw new ApiError(
             responseData.error || `HTTP ${response.status}`,
             response.status,
-            responseData
+            responseData as unknown as Record<string, unknown>
           )
         }
 
