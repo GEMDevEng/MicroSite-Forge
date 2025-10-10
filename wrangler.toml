@@ -1,0 +1,23 @@
+name = "microsite-research-rag"
+main = "src/workers/rag-research-worker.ts"
+compatibility_date = "2024-09-25"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
+
+[vectorize]
+binding = "VECTORIZE"
+index_name = "research-data"
+
+[kv_namespaces]
+binding = "RESEARCH_CACHE"
+id = "research_cache_namespace"  # Replace with actual KV namespace ID
+
+[vars]
+GROK_API_KEY = ""  # Will be set via environment
+SUPABASE_URL = ""  # Will be set via environment
+SUPABASE_ANON_KEY = ""  # Will be set via environment
+
+[build]
+command = "npm run build"

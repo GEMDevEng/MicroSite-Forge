@@ -25,11 +25,30 @@ export interface NicheResearchResponse {
 }
 
 /**
- * Perform niche research using Grok AI
+ * Perform niche research using Grok AI or RAG-enhanced research
  * @param request Niche research parameters
+ * @param useRAG Whether to use RAG-enhanced research (requires Cloudflare Worker setup)
  * @returns Comprehensive niche research data
  */
 export async function performNicheResearch(
+  request: NicheResearchRequest,
+  useRAG: boolean = false
+): Promise<NicheResearchResponse> {
+  // Use RAG-enhanced research if enabled and Cloudflare Worker URL is configured
+  if (useRAG && process.env.CLOUDFLARE_WORKER_URL) {
+    return await performRAGNicheResearch(request)
+  }
+
+  // Fall back to standard Grok research
+  return await performStandardNicheResearch(request)
+}
+
+/**
+ * Perform niche research using Grok AI (legacy implementation)
+ * @param request Niche research parameters
+ * @returns Comprehensive niche research data
+ */
+async function performStandardNicheResearch(
   request: NicheResearchRequest
 ): Promise<NicheResearchResponse> {
   const API_KEY = process.env.GROK_API_KEY
@@ -107,6 +126,50 @@ export async function performNicheResearch(
       contentOpportunities: [],
       competitorInsights: [],
     }
+  }
+}
+
+/**
+ * Perform RAG-enhanced niche research using Cloudflare Worker
+ * @param request Niche research parameters
+ * @returns RAG-enhanced niche research data
+ */
+async function performRAGNicheResearch(
+  request: NicheResearchRequest
+): Promise<NicheResearchResponse> {
+  const workerUrl = process.env.CLOUDFLARE_WORKER_URL
+  if (!workerUrl) {
+    throw new Error('CLOUDFLARE_WORKER_URL is not configured')
+  }
+
+  try {
+    const response = await fetch(`${workerUrl}/research`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(request),
+    })
+
+    if (!response.ok) {
+      throw new Error(`Cloudflare Worker error: ${response.status} ${response.statusText}`)
+    }
+
+    const data = await response.json()
+
+    // Transform RAG response to standard format
+    return {
+      niche: data.niche,
+      keywords: data.keywords,
+      trendingTopics: data.trendingTopics,
+      contentOpportunities: data.contentOpportunities,
+      competitorInsights: data.competitorInsights,
+    }
+  } catch (error) {
+    console.error('RAG research error:', error)
+    // Fall back to standard research on RAG failure
+    console.warn('Falling back to standard research due to RAG error')
+    return await performStandardNicheResearch(request)
   }
 }
 

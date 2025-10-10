@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    const url = new URL(request.url)
     const body = await request.json()
 
     // Validate request body
@@ -43,13 +44,17 @@ export async function POST(request: NextRequest) {
 
     const researchPromises: (Promise<NicheResearchResponse> | Promise<DomainCheckResult[]>)[] = []
 
-    // Perform niche research with Grok
+    // Check if RAG is enabled (via environment or query param)
+    const useRAG = process.env.ENABLE_RAG_RESEARCH === 'true' ||
+                   url.searchParams.get('useRAG') === 'true'
+
+    // Perform niche research with Grok or RAG
     const nicheResearchPromise = performNicheResearch({
       niche: validated.niche,
       targetAudience: validated.targetAudience,
       geography: validated.geography,
       competitorAnalysis: validated.competitorAnalysis,
-    })
+    }, useRAG)
     researchPromises.push(nicheResearchPromise)
 
     // Check domains if requested

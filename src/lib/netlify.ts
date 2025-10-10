@@ -1,6 +1,15 @@
 const NETLIFY_API_BASE = "https://api.netlify.com/api/v1";
 const NETLIFY_AUTH_TOKEN = process.env.NETLIFY_AUTH_TOKEN;
 
+interface BuildSettings {
+  repo_type: string;
+  repo_url: string;
+  repo_branch: string;
+  base: string;
+  dir: string;
+  cmd: string;
+}
+
 interface NetlifySite {
   id: string;
   name: string;
@@ -9,27 +18,22 @@ interface NetlifySite {
   admin_url: string;
   custom_domain?: string;
   state: 'current' | 'pending_redeploy' | 'processing' | 'error';
-  build_settings: {
-    repo_type: string;
-    repo_url: string;
-    repo_branch: string;
-    base: string;
-    dir: string;
-    cmd: string;
-  };
+  build_settings: BuildSettings;
 }
 
 /**
- * Create a new Hugo site on Netlify connected to a GitHub repository
+ * Create a new site on Netlify connected to a GitHub repository with custom build settings
  * @param siteName Unique site name (used for subdomain)
  * @param repoUrl GitHub repository clone URL
+ * @param buildSettings Build configuration for the site
  * @param branch Branch to deploy from (default: 'main')
  * @param customDomain Optional custom domain for the site
  * @returns Created Netlify site information
  */
-export async function createHugoSite(
+export async function createSite(
   siteName: string,
   repoUrl: string,
+  buildSettings: BuildSettings,
   branch: string = "main",
   customDomain?: string
 ): Promise<NetlifySite> {
@@ -53,9 +57,8 @@ export async function createHugoSite(
           repo_branch: branch,
         },
         build_settings: {
-          base: '/',
-          dir: 'public',
-          cmd: 'hugo --minify',
+          ...buildSettings,
+          base: buildSettings.base || '/',
         },
         deploy_hook: null,
       }),
@@ -87,6 +90,102 @@ export async function createHugoSite(
     console.error("Netlify create site error:", error);
     throw new Error(`Failed to create Netlify site: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
+}
+
+/**
+ * Create a new Hugo site on Netlify connected to a GitHub repository
+ * @param siteName Unique site name (used for subdomain)
+ * @param repoUrl GitHub repository clone URL
+ * @param branch Branch to deploy from (default: 'main')
+ * @param customDomain Optional custom domain for the site
+ * @returns Created Netlify site information
+ */
+export async function createHugoSite(
+  siteName: string,
+  repoUrl: string,
+  branch: string = "main",
+  customDomain?: string
+): Promise<NetlifySite> {
+  return createSite(siteName, repoUrl, {
+    repo_type: 'git',
+    repo_url: repoUrl,
+    repo_branch: branch,
+    base: '/',
+    dir: 'public',
+    cmd: 'hugo --minify',
+  }, branch, customDomain);
+}
+
+/**
+ * Create a new Next.js site on Netlify connected to a GitHub repository
+ * @param siteName Unique site name (used for subdomain)
+ * @param repoUrl GitHub repository clone URL
+ * @param branch Branch to deploy from (default: 'main')
+ * @param customDomain Optional custom domain for the site
+ * @returns Created Netlify site information
+ */
+export async function createNextJsSite(
+  siteName: string,
+  repoUrl: string,
+  branch: string = "main",
+  customDomain?: string
+): Promise<NetlifySite> {
+  return createSite(siteName, repoUrl, {
+    repo_type: 'git',
+    repo_url: repoUrl,
+    repo_branch: branch,
+    base: '/',
+    dir: 'out',
+    cmd: 'npm run build',
+  }, branch, customDomain);
+}
+
+/**
+ * Create a new Astro site on Netlify connected to a GitHub repository
+ * @param siteName Unique site name (used for subdomain)
+ * @param repoUrl GitHub repository clone URL
+ * @param branch Branch to deploy from (default: 'main')
+ * @param customDomain Optional custom domain for the site
+ * @returns Created Netlify site information
+ */
+export async function createAstroSite(
+  siteName: string,
+  repoUrl: string,
+  branch: string = "main",
+  customDomain?: string
+): Promise<NetlifySite> {
+  return createSite(siteName, repoUrl, {
+    repo_type: 'git',
+    repo_url: repoUrl,
+    repo_branch: branch,
+    base: '/',
+    dir: 'dist',
+    cmd: 'npm run build',
+  }, branch, customDomain);
+}
+
+/**
+ * Create a new static site on Netlify connected to a GitHub repository
+ * @param siteName Unique site name (used for subdomain)
+ * @param repoUrl GitHub repository clone URL
+ * @param branch Branch to deploy from (default: 'main')
+ * @param customDomain Optional custom domain for the site
+ * @returns Created Netlify site information
+ */
+export async function createStaticSite(
+  siteName: string,
+  repoUrl: string,
+  branch: string = "main",
+  customDomain?: string
+): Promise<NetlifySite> {
+  return createSite(siteName, repoUrl, {
+    repo_type: 'git',
+    repo_url: repoUrl,
+    repo_branch: branch,
+    base: '/',
+    dir: 'dist',
+    cmd: 'npm run build',
+  }, branch, customDomain);
 }
 
 /**

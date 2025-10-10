@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase-api'
+import * as Sentry from '@sentry/nextjs'
 
 // Automated alerting and incident response endpoint
 type AlertRecord = Record<string, unknown>
@@ -41,6 +42,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ alert, triggered: true })
 
   } catch (error: unknown) {
+    Sentry.captureException(error)
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Alert creation error:', message)
     return NextResponse.json(
@@ -76,6 +78,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ alerts })
 
   } catch (error: unknown) {
+    Sentry.captureException(error)
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Alerts fetch error:', message)
     return NextResponse.json(
@@ -119,6 +122,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ alert })
 
   } catch (error: unknown) {
+    Sentry.captureException(error)
     const message = error instanceof Error ? error.message : 'Unknown error'
     console.error('Alert update error:', message)
     return NextResponse.json(
