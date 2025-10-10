@@ -3,8 +3,16 @@ name: E2E Tests
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'tests/**'
+      - '.github/workflows/**'
+      - 'playwright.config.ts'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'tests/**'
+      - '.github/workflows/**'
+      - 'playwright.config.ts'
 
 jobs:
   e2e:
@@ -44,6 +52,9 @@ jobs:
 
       - name: Type-check
         run: npm run type-check
+
+      - name: Scan for untyped DOM access
+        run: npm run check:playwright-dom
 
       # 6. Run E2E tests
       - name: Run Playwright tests
