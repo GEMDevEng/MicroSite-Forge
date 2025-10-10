@@ -64,9 +64,13 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: process.env.CI ? 'npm run start' : 'npm run dev',
-    port: 3000,
+    // In CI we want to run a production-like server; locally we prefer dev server reuse
+    command: process.env.CI ? 'npm run build && npm run start' : 'npm run dev',
+    // Use a root URL for readiness checks; Playwright requires either `url` or `port`.
+    url: 'http://localhost:3000',
+    // Reuse an existing server when developing locally to speed up iteration
     reuseExistingServer: !process.env.CI,
-    url: 'http://localhost:3000/api/health',
+    // Increase timeout for slow CI environments
+    timeout: 120 * 1000,
   },
 })

@@ -53,6 +53,11 @@ jobs:
 
       - name: Run ESLint rule smoke tests
         run: npm run test:eslint-rules
+      - name: Run ShellCheck for scripts
+        if: always()
+        run: |
+          sudo apt-get update && sudo apt-get install -y shellcheck || true
+          find . -type f -name "*.sh" -o -name "*.yml" | xargs -r shellcheck || true
 
       - name: Run type checking
         run: npm run type-check
@@ -86,6 +91,15 @@ jobs:
           # Minimum 60% for integration tests, allow CI to continue but warn.
           # Use Node for numeric comparison so lightweight runner images (used by act) don't need 'bc'.
           node -e "const c=Number(process.argv[1]||0); if (isNaN(c)) { console.warn('Warning: coverage not a number:', process.argv[1]); } if (c<60) { console.warn('Warning: Code coverage is below 60% ('+c+'%)'); } else { console.log('Code coverage meets minimum requirement: '+c+'%'); }" "$COVERAGE"
+          # Use node to safely read and print the coverage percentage
+          COVERAGE=$(node -e "try{ const p=require('./coverage/coverage-summary.json'); console.log((p && p.total && p.total.lines && p.total.lines.pct) || 0); }catch(e){ console.error('Failed to read coverage-summary.json:', e.message); process.exit(0); }")
+          echo "Code coverage is ${COVERAGE}%"
+          # Minimum 60% for integration tests, allow CI to continue but warn
+          if [ $(echo "${COVERAGE} < 60" | bc -l) -eq 1 ]; then
+            echo "Warning: Code coverage is below 60% (${COVERAGE}%)"
+          else
+            echo "Code coverage meets minimum requirement: ${COVERAGE}%"
+          fi
 
       - name: Upload coverage reports
         uses: codecov/codecov-action@v4

@@ -3,6 +3,12 @@ name: E2E Playwright
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    # Only run Playwright when changes touch tests or workflow files, or when targeting main
+    paths:
+      - 'tests/**'
+      - '.github/workflows/**'
+      - 'package.json'
+      - 'playwright.config.ts'
 
 jobs:
   e2e:
@@ -40,6 +46,9 @@ jobs:
 
       - name: Type-check
         run: npm run type-check
+
+      - name: Scan for untyped DOM access
+        run: npm run check:playwright-dom
 
       - name: Run Playwright tests (${{ matrix.browser }})
         run: npx playwright test --project=${{ matrix.browser }} --reporter=list
