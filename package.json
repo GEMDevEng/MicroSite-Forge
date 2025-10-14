@@ -25,10 +25,10 @@
     "test:coverage": "jest --coverage",
     "test:integration": "jest --config jest.integration.config.cjs",
     "test:e2e": "playwright test",
-  "test:e2e:ci": "next build && playwright test",
-  "test:e2e:local": "playwright test --config=playwright.local.config.ts",
-  "check:playwright-dom": "node scripts/scan-dom-access.js",
-  "get-coverage": "node scripts/get-coverage.js",
+    "test:e2e:ci": "next build && playwright test",
+    "test:e2e:local": "playwright test --config=playwright.local.config.ts",
+    "check:playwright-dom": "node scripts/scan-dom-access.js",
+    "get-coverage": "node scripts/get-coverage.js",
     "deploy:staging": "vercel --scope your-org",
     "deploy:production": "vercel --prod --scope your-org",
     "format": "prettier --write .",
@@ -52,12 +52,9 @@
     "types:sync:status": "node scripts/sync-types.js status",
     "types:validate": "npm run type-check",
     "types:strict-validate": "node scripts/generate-types.js check-freshness strict && npm run type-check",
-    "prebuild": "npm run types:generate"
-    ,
-    "check:dom-scanner": "node scripts/scan-dom-access.cjs"
-    ,
-    "check:dom-lint": "node tools/eslint-runner.js"
-    ,
+    "prebuild": "npm run types:generate",
+    "check:dom-scanner": "node scripts/scan-dom-access.cjs",
+    "check:dom-lint": "node tools/eslint-runner.js",
     "test:eslint-rules": "node tools/eslint-rules/tests/run-rule-tests.cjs"
   },
   "lint-staged": {
@@ -133,7 +130,8 @@
     "ts-jest": "^29.2.5",
     "typescript": "^5.6.3",
     "typescript-eslint": "^8.14.0",
-    "whatwg-fetch": "^3.6.20"
+    "whatwg-fetch": "^3.6.20",
+    "wrangler": "^4.42.2"
   },
   "engines": {
     "node": ">=20.6.0",
