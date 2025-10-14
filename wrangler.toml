@@ -7,12 +7,16 @@ compatibility_flags = ["nodejs_compat"]
 binding = "AI"
 
 [vectorize]
-binding = "VECTORIZE"
-index_name = "research-data"
+# Wrangler expects `vectorize` to be an array of table entries.
+vectorize = [
+	{ binding = "VECTORIZE", index_name = "research-data" }
+]
 
 [kv_namespaces]
-binding = "RESEARCH_CACHE"
-id = "research_cache_namespace"  # Replace with actual KV namespace ID
+# Convert single kv namespace into an array of namespace objects.
+kv_namespaces = [
+	{ binding = "RESEARCH_CACHE", id = "research_cache_namespace" } # Replace with actual KV namespace ID
+]
 
 [vars]
 GROK_API_KEY = ""  # Will be set via environment
