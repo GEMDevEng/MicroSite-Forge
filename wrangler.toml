@@ -6,7 +6,6 @@ compatibility_flags = ["nodejs_compat"]
 [ai]
 binding = "AI"
 
-[vectorize]
 # Wrangler expects `vectorize` to be an array of table entries.
 [[vectorize]]
 binding = "VECTORIZE"
